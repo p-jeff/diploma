@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install three @react-three/fiber @react-three/xr)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)"
+    ]
+  }
+}
