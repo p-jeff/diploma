@@ -69,7 +69,8 @@ export default function IsoSnapshotHandler() {
 
       const a   = document.createElement('a')
       a.href     = out.toDataURL('image/png')
-      a.download = `gaze-iso-${Date.now()}.png`
+      const t = new Date(); const id = `${String(t.getHours()).padStart(2,'0')}${String(t.getMinutes()).padStart(2,'0')}`
+      a.download = `iso-${id}.png`
       a.click()
     }
 

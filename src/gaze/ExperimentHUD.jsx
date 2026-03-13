@@ -10,24 +10,25 @@ function downloadJSON(data) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `gaze-data-${Date.now()}.json`
+  const t = new Date(); const id = `${String(t.getHours()).padStart(2,'0')}${String(t.getMinutes()).padStart(2,'0')}`
+  a.download = `data-${id}.json`
   a.click()
   URL.revokeObjectURL(url)
 }
 
-const hudStyle = {
+const smallBarStyle = {
   position: 'fixed',
-  top: 16,
+  bottom: 24,
   left: '50%',
   transform: 'translateX(-50%)',
   background: 'rgba(0,0,0,0.65)',
   color: '#fff',
-  padding: '10px 20px',
+  padding: '8px 16px',
   borderRadius: 10,
   fontFamily: 'monospace',
-  fontSize: 15,
+  fontSize: 14,
   display: 'flex',
-  gap: 12,
+  gap: 10,
   alignItems: 'center',
   zIndex: 100,
   pointerEvents: 'auto',
@@ -58,42 +59,52 @@ export default function ExperimentHUD() {
   if (phase === 'idle') return null
 
   return (
-    <div style={hudStyle}>
-      {phase === 'active' && (
-        <>
-          <span style={{ color: '#2ecc71' }}>● Recording</span>
-          <button style={{ ...btnStyle, background: '#e74c3c', color: '#fff' }} onClick={end}>
-            End early
-          </button>
-        </>
+    <>
+      {/* Big Reset — center of screen */}
+      {phase === 'ended' && (
+        <button
+          onClick={reset}
+          style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: 48, padding: '40px 100px', borderRadius: 16, fontWeight: 'bold', cursor: 'pointer', zIndex: 100 }}
+        >
+          Reset
+        </button>
       )}
 
-      {phase === 'ended' && (
-        <>
-          <span>Session complete — heat map visible</span>
-          <button
-            style={{ ...btnStyle, background: '#3498db', color: '#fff' }}
-            onClick={() => downloadJSON(gazeStore.exportJSON())}
-          >
-            Download JSON
-          </button>
-          <button
-            style={{ ...btnStyle, background: '#8e44ad', color: '#fff' }}
-            onClick={triggerIsoSnapshot}
-          >
-            Download Isometric View
-          </button>
-          <button
-            style={{ ...btnStyle, background: '#27ae60', color: '#fff' }}
-            onClick={downloadPositionHeatmap}
-          >
-            Download Floor Heatmap
-          </button>
-          <button style={{ ...btnStyle, background: '#888', color: '#fff' }} onClick={reset}>
-            Reset
-          </button>
-        </>
-      )}
-    </div>
+      {/* Small bar — bottom */}
+      <div style={smallBarStyle}>
+        {phase === 'active' && (
+          <>
+            <span style={{ color: '#2ecc71' }}>● Recording</span>
+            <button style={{ ...btnStyle, background: '#e74c3c', color: '#fff' }} onClick={end}>
+              End early
+            </button>
+          </>
+        )}
+
+        {phase === 'ended' && (
+          <>
+            <span>Session complete</span>
+            <button
+              style={{ ...btnStyle, background: '#3498db', color: '#fff' }}
+              onClick={() => downloadJSON(gazeStore.exportJSON())}
+            >
+              Download JSON
+            </button>
+            <button
+              style={{ ...btnStyle, background: '#8e44ad', color: '#fff' }}
+              onClick={triggerIsoSnapshot}
+            >
+              Download Iso
+            </button>
+            <button
+              style={{ ...btnStyle, background: '#27ae60', color: '#fff' }}
+              onClick={downloadPositionHeatmap}
+            >
+              Download Heatmap
+            </button>
+          </>
+        )}
+      </div>
+    </>
   )
 }

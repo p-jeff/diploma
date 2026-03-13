@@ -34,9 +34,17 @@ export default function App() {
 
   return (
     <ExperimentProvider>
-      <div style={{ position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 20, zIndex: 10 }}>
-        <button onClick={() => store.enterAR()} style={{ fontSize: 36, padding: '32px 80px', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>Enter AR</button>
-        <button onClick={() => store.enterVR()} style={{ fontSize: 36, padding: '32px 80px', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>Enter VR</button>
+      {/* Big Enter VR — center of screen */}
+      <button
+        onClick={() => store.enterVR()}
+        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontSize: 48, padding: '40px 100px', borderRadius: 16, fontWeight: 'bold', cursor: 'pointer', zIndex: 10 }}
+      >
+        Enter VR
+      </button>
+
+      {/* Small secondary buttons — bottom */}
+      <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 12, zIndex: 10 }}>
+        <button onClick={() => store.enterAR()} style={{ fontSize: 16, padding: '10px 24px', borderRadius: 8, fontWeight: 'bold', cursor: 'pointer' }}>Enter AR</button>
       </div>
 
       <GamepadStatus />
