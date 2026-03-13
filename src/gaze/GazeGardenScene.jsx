@@ -1,6 +1,7 @@
 // AIA EAI Hin Nr Claude Opus 4.6 v1.0
 import { useRef, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { PositionalAudio } from '@react-three/drei'
 import { useXR } from '@react-three/xr'
 import * as THREE from 'three'
 import { useExperiment } from './ExperimentContext'
@@ -44,7 +45,7 @@ function TrackableGroup({ id, position, rotation, scale, children }) {
     groupRef.current.worldToLocal(center)
 
     const geom = new THREE.BoxGeometry(size.x, size.y, size.z)
-    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15, depthWrite: false, wireframe: true })
+    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0, depthWrite: false, wireframe: true })
     const proxy = new THREE.Mesh(geom, mat)
     proxy.position.copy(center)
     proxy.userData.trackableId = id
@@ -122,18 +123,18 @@ function Sun() {
   )
 }
 
-// Cross-shaped path radiating from the player's center
+// Cross-shaped path radiating from the player's center (positions scaled ×0.60)
 function CrossPath() {
-  const nsStones = [-4.5, -3.6, -2.7, -1.8, -0.9, 0, 0.9, 1.8, 2.7, 3.6, 4.5]
-  const ewStones = [-4.5, -3.6, -2.7, -1.8, -0.9, 0.9, 1.8, 2.7, 3.6, 4.5]
+  const nsStones = [-2.7, -2.16, -1.62, -1.08, -0.54, 0, 0.54, 1.08, 1.62, 2.16, 2.7]
+  const ewStones = [-2.7, -2.16, -1.62, -1.08, -0.54, 0.54, 1.08, 1.62, 2.16, 2.7]
   return (
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
-        <planeGeometry args={[0.85, 10]} />
+        <planeGeometry args={[0.85, 6]} />
         <meshStandardMaterial color="#b0a898" roughness={1} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
-        <planeGeometry args={[10, 0.85]} />
+        <planeGeometry args={[6, 0.85]} />
         <meshStandardMaterial color="#b0a898" roughness={1} />
       </mesh>
       {nsStones.map((z, i) => (
@@ -275,6 +276,7 @@ function BenchGeometry() {
 function MushroomGeometry() {
   const [pressed, setPressed] = useState(false)
   const groupRef = useRef()
+  const audioRef = useRef()
   const scaleY = useRef(1)
 
   useFrame(() => {
@@ -283,13 +285,22 @@ function MushroomGeometry() {
     if (groupRef.current) groupRef.current.scale.y = scaleY.current
   })
 
+  function handlePointerDown() {
+    setPressed(true)
+    if (audioRef.current) {
+      if (audioRef.current.isPlaying) audioRef.current.stop()
+      audioRef.current.play()
+    }
+  }
+
   return (
     <group
       ref={groupRef}
-      onPointerDown={() => setPressed(true)}
+      onPointerDown={handlePointerDown}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
     >
+      <PositionalAudio ref={audioRef} url="/diploma/thudPing.wav" distance={1} loop={false} />
       <mesh position={[0, 0.14, 0]} castShadow>
         <cylinderGeometry args={[0.07, 0.09, 0.28, 12]} />
         <meshStandardMaterial color="#ede0c4" roughness={0.9} />
@@ -379,22 +390,20 @@ export default function GazeGardenScene() {
     <>
       {!isAR && <color attach="background" args={[isEnded ? '#ffffff' : '#87ceeb']} />}
 
-      <ambientLight intensity={isEnded ? 2.0 : 0.6} />
+      <ambientLight intensity={isEnded ? 0.8 : 0.6} />
 
-      {!isEnded && (
-        <directionalLight
-          position={[10, 20, -15]}
-          intensity={2.5}
-          castShadow
-          shadow-mapSize={[2048, 2048]}
-          shadow-camera-near={0.5}
-          shadow-camera-far={60}
-          shadow-camera-left={-15}
-          shadow-camera-right={15}
-          shadow-camera-top={15}
-          shadow-camera-bottom={-15}
-        />
-      )}
+      <directionalLight
+        position={[10, 20, -15]}
+        intensity={isEnded ? 1.5 : 2.5}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-near={0.5}
+        shadow-camera-far={60}
+        shadow-camera-left={-15}
+        shadow-camera-right={15}
+        shadow-camera-top={15}
+        shadow-camera-bottom={-15}
+      />
 
       <GazeTimerBoard />
       <GazeStartButton />
@@ -402,188 +411,189 @@ export default function GazeGardenScene() {
       {!isEnded && !isAR && <fogExp2 attach="fog" color="#87ceeb" density={0.2} />}
       {!isEnded && !isAR && <Sky />}
       {!isEnded && <Sun />}
-      {!isEnded && <CrossPath />}
 
       {!isAR && <Ground />}
       {isEnded && <PositionHeatmapFloor />}
 
-      {/* ── Tree border ring — surrounds the entire garden ── */}
+      {!isEnded && <CrossPath />}
 
-      <TrackableGroup id="tree-1"  position={[0.3,  0,  7.3]} >
+      {/* ── Tree border ring — positions ×0.60 from original ── */}
+
+      <TrackableGroup id="tree-1"  position={[ 0.18, 0,  4.38]} >
         <TreeGeometry scale={1.2} />
       </TrackableGroup>
-      <TrackableGroup id="tree-2"  position={[3.9,  0,  6.1]} >
+      <TrackableGroup id="tree-2"  position={[ 2.34, 0,  3.66]} >
         <TreeGeometry scale={1.0} />
       </TrackableGroup>
-      <TrackableGroup id="tree-3"  position={[6.4,  0,  3.3]} >
+      <TrackableGroup id="tree-3"  position={[ 3.84, 0,  1.98]} >
         <TreeGeometry scale={1.15} />
       </TrackableGroup>
-      <TrackableGroup id="tree-4"  position={[7.2,  0, -0.4]} >
+      <TrackableGroup id="tree-4"  position={[ 4.32, 0, -0.24]} >
         <TreeGeometry scale={0.9} />
       </TrackableGroup>
-      <TrackableGroup id="tree-5"  position={[6.0,  0, -3.9]} >
+      <TrackableGroup id="tree-5"  position={[ 3.60, 0, -2.34]} >
         <TreeGeometry scale={1.1} />
       </TrackableGroup>
-      <TrackableGroup id="tree-6"  position={[3.4,  0, -6.5]} >
+      <TrackableGroup id="tree-6"  position={[ 2.04, 0, -3.90]} >
         <TreeGeometry scale={1.0} />
       </TrackableGroup>
-      <TrackableGroup id="tree-7"  position={[-0.4, 0, -7.4]} >
+      <TrackableGroup id="tree-7"  position={[-0.24, 0, -4.44]} >
         <TreeGeometry scale={1.25} />
       </TrackableGroup>
-      <TrackableGroup id="tree-8"  position={[-3.7, 0, -6.2]} >
+      <TrackableGroup id="tree-8"  position={[-2.22, 0, -3.72]} >
         <TreeGeometry scale={0.95} />
       </TrackableGroup>
-      <TrackableGroup id="tree-9"  position={[-6.3, 0, -3.6]} >
+      <TrackableGroup id="tree-9"  position={[-3.78, 0, -2.16]} >
         <TreeGeometry scale={1.1} />
       </TrackableGroup>
-      <TrackableGroup id="tree-10" position={[-7.3, 0,  0.3]} >
+      <TrackableGroup id="tree-10" position={[-4.38, 0,  0.18]} >
         <TreeGeometry scale={1.05} />
       </TrackableGroup>
-      <TrackableGroup id="tree-11" position={[-6.1, 0,  3.7]} >
+      <TrackableGroup id="tree-11" position={[-3.66, 0,  2.22]} >
         <TreeGeometry scale={1.15} />
       </TrackableGroup>
-      <TrackableGroup id="tree-12" position={[-3.4, 0,  6.3]} >
+      <TrackableGroup id="tree-12" position={[-2.04, 0,  3.78]} >
         <TreeGeometry scale={0.9} />
       </TrackableGroup>
 
-      {/* Outer corner trees for denser border */}
-      <TrackableGroup id="tree-13" position={[ 6.8, 0,  6.8]} >
+      {/* Outer corner trees */}
+      <TrackableGroup id="tree-13" position={[ 4.08, 0,  4.08]} >
         <TreeGeometry scale={1.3} />
       </TrackableGroup>
-      <TrackableGroup id="tree-14" position={[ 6.8, 0, -6.8]} >
+      <TrackableGroup id="tree-14" position={[ 4.08, 0, -4.08]} >
         <TreeGeometry scale={1.1} />
       </TrackableGroup>
-      <TrackableGroup id="tree-15" position={[-6.8, 0, -6.8]} >
+      <TrackableGroup id="tree-15" position={[-4.08, 0, -4.08]} >
         <TreeGeometry scale={1.2} />
       </TrackableGroup>
-      <TrackableGroup id="tree-16" position={[-6.8, 0,  6.8]} >
+      <TrackableGroup id="tree-16" position={[-4.08, 0,  4.08]} >
         <TreeGeometry scale={1.05} />
       </TrackableGroup>
 
-      {/* ── Bushes — scattered through the garden interior ── */}
+      {/* ── Bushes — placed between trees along the treeline ── */}
 
-      <TrackableGroup id="bush-1"  position={[ 3.2, 0,  1.3]} scale={1.0}>
+      <TrackableGroup id="bush-1"  position={[ 1.08, 0,  3.43]} scale={1.0}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-2"  position={[-3.2, 0,  1.3]} scale={1.1}>
+      <TrackableGroup id="bush-2"  position={[ 2.73, 0,  2.50]} scale={1.1}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-3"  position={[ 3.2, 0, -1.3]} scale={0.9}>
+      <TrackableGroup id="bush-3"  position={[ 3.42, 0,  0.75]} scale={0.9}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-4"  position={[-3.2, 0, -1.3]} scale={1.0}>
+      <TrackableGroup id="bush-4"  position={[ 3.72, 0, -0.77]} scale={1.0}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-5"  position={[ 1.3, 0,  3.8]} scale={1.1}>
+      <TrackableGroup id="bush-5"  position={[ 2.41, 0, -2.67]} scale={1.1}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-6"  position={[-1.3, 0,  3.8]} scale={0.85}>
+      <TrackableGroup id="bush-6"  position={[ 0.76, 0, -3.42]} scale={0.85}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-7"  position={[ 1.3, 0, -3.8]} scale={1.05}>
+      <TrackableGroup id="bush-7"  position={[-0.77, 0, -3.62]} scale={1.05}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-8"  position={[-1.3, 0, -3.8]} scale={0.95}>
+      <TrackableGroup id="bush-8"  position={[-2.59, 0, -2.50]} scale={0.95}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-9"  position={[ 5.2, 0,  0.0]} scale={1.0}>
+      <TrackableGroup id="bush-9"  position={[-3.67, 0, -0.98]} scale={1.0}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-10" position={[-5.2, 0,  0.0]} scale={1.1}>
+      <TrackableGroup id="bush-10" position={[-3.34, 0,  1.05]} scale={1.1}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-11" position={[ 0.0, 0,  5.5]} scale={0.9}>
+      <TrackableGroup id="bush-11" position={[-2.56, 0,  2.67]} scale={0.9}>
         <BushGeometry />
       </TrackableGroup>
-      <TrackableGroup id="bush-12" position={[ 0.0, 0, -5.5]} scale={1.0}>
+      <TrackableGroup id="bush-12" position={[-0.83, 0,  3.50]} scale={1.0}>
         <BushGeometry />
       </TrackableGroup>
 
-      {/* ── Flower beds — blanket the garden floor ── */}
+      {/* ── Flower beds ── */}
 
-      <TrackableGroup id="flowerbed-1"  position={[ 1.8, 0,  1.6]}>
+      <TrackableGroup id="flowerbed-1"  position={[ 1.08, 0,  0.96]}>
         <FlowerBedGeometry rotation={[0, 0.0, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-2"  position={[-1.8, 0,  1.6]}>
+      <TrackableGroup id="flowerbed-2"  position={[-1.08, 0,  0.96]}>
         <FlowerBedGeometry rotation={[0, 0.5, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-3"  position={[ 1.8, 0, -1.6]}>
+      <TrackableGroup id="flowerbed-3"  position={[ 1.08, 0, -0.96]}>
         <FlowerBedGeometry rotation={[0, 0.9, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-4"  position={[-1.8, 0, -1.6]}>
+      <TrackableGroup id="flowerbed-4"  position={[-1.08, 0, -0.96]}>
         <FlowerBedGeometry rotation={[0, 1.3, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-5"  position={[ 4.2, 0,  2.6]}>
+      <TrackableGroup id="flowerbed-5"  position={[ 2.52, 0,  1.56]}>
         <FlowerBedGeometry rotation={[0, 0.3, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-6"  position={[-4.2, 0,  2.6]}>
+      <TrackableGroup id="flowerbed-6"  position={[-2.52, 0,  1.56]}>
         <FlowerBedGeometry rotation={[0, -0.3, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-7"  position={[ 3.8, 0, -4.2]}>
+      <TrackableGroup id="flowerbed-7"  position={[ 2.28, 0, -2.52]}>
         <FlowerBedGeometry rotation={[0, 0.7, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-8"  position={[-3.8, 0, -4.2]}>
+      <TrackableGroup id="flowerbed-8"  position={[-2.28, 0, -2.52]}>
         <FlowerBedGeometry rotation={[0, -0.7, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-9"  position={[ 2.2, 0,  5.0]}>
+      <TrackableGroup id="flowerbed-9"  position={[ 1.32, 0,  3.0]}>
         <FlowerBedGeometry rotation={[0, 0.4, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-10" position={[-2.2, 0,  5.0]}>
+      <TrackableGroup id="flowerbed-10" position={[-1.32, 0,  3.0]}>
         <FlowerBedGeometry rotation={[0, -0.4, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-11" position={[ 5.2, 0, -2.2]}>
+      <TrackableGroup id="flowerbed-11" position={[ 3.12, 0, -1.32]}>
         <FlowerBedGeometry rotation={[0, 1.1, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-12" position={[-5.2, 0, -2.2]}>
+      <TrackableGroup id="flowerbed-12" position={[-3.12, 0, -1.32]}>
         <FlowerBedGeometry rotation={[0, -1.1, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-13" position={[ 5.0, 0,  4.5]}>
+      <TrackableGroup id="flowerbed-13" position={[ 3.0,  0,  2.7]}>
         <FlowerBedGeometry rotation={[0, 0.6, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-14" position={[-5.0, 0,  4.5]}>
+      <TrackableGroup id="flowerbed-14" position={[-3.0,  0,  2.7]}>
         <FlowerBedGeometry rotation={[0, -0.6, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-15" position={[ 5.0, 0, -4.5]}>
+      <TrackableGroup id="flowerbed-15" position={[ 3.0,  0, -2.7]}>
         <FlowerBedGeometry rotation={[0, 1.4, 0]} />
       </TrackableGroup>
-      <TrackableGroup id="flowerbed-16" position={[-5.0, 0, -4.5]}>
+      <TrackableGroup id="flowerbed-16" position={[-3.0,  0, -2.7]}>
         <FlowerBedGeometry rotation={[0, -1.4, 0]} />
       </TrackableGroup>
 
       {/* ── Feature elements ── */}
 
-      <TrackableGroup id="bench" position={[3.5, 0, -2.0]} rotation={[0, 0.6, 0]}>
+      <TrackableGroup id="bench" position={[2.1, 0, -1.2]} rotation={[0, 0.6, 0]}>
         <BenchGeometry />
       </TrackableGroup>
 
-      <TrackableGroup id="pond" position={[-3.2, 0, 2.5]}>
+      <TrackableGroup id="pond" position={[-1.92, 0, 1.5]}>
         <PondGeometry />
       </TrackableGroup>
 
-      <TrackableGroup id="birdbath" position={[2.5, 0, 3.2]}>
+      <TrackableGroup id="birdbath" position={[1.5, 0, 1.92]}>
         <BirdBath />
       </TrackableGroup>
 
-      <TrackableGroup id="lantern-1" position={[ 1.4, 0,  1.4]}>
+      <TrackableGroup id="lantern-1" position={[ 0.84, 0,  0.84]}>
         <LanternPost />
       </TrackableGroup>
-      <TrackableGroup id="lantern-2" position={[-1.4, 0,  1.4]}>
+      <TrackableGroup id="lantern-2" position={[-0.84, 0,  0.84]}>
         <LanternPost />
       </TrackableGroup>
-      <TrackableGroup id="lantern-3" position={[ 1.4, 0, -1.4]}>
+      <TrackableGroup id="lantern-3" position={[ 0.84, 0, -0.84]}>
         <LanternPost />
       </TrackableGroup>
-      <TrackableGroup id="lantern-4" position={[-1.4, 0, -1.4]}>
+      <TrackableGroup id="lantern-4" position={[-0.84, 0, -0.84]}>
         <LanternPost />
       </TrackableGroup>
 
-      <TrackableGroup id="mushroom-1" position={[ 2.3, 0, -3.6]}>
+      <TrackableGroup id="mushroom-1" position={[ 1.38, 0, -2.16]}>
         <MushroomGeometry />
       </TrackableGroup>
-      <TrackableGroup id="mushroom-2" position={[-2.8, 0, -0.9]}>
+      <TrackableGroup id="mushroom-2" position={[-1.68, 0, -0.54]}>
         <MushroomGeometry />
       </TrackableGroup>
-      <TrackableGroup id="mushroom-3" position={[ 4.5, 0,  3.8]}>
+      <TrackableGroup id="mushroom-3" position={[ 2,  0,  2.28]}>
         <MushroomGeometry />
       </TrackableGroup>
     </>

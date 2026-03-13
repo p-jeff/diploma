@@ -7,7 +7,7 @@ import { registerIsoHandler, unregisterIsoHandler } from './isoExport'
 import { timerBoardRef } from './GazeTimerBoard'
 
 const W = 1920
-const H = 1080
+const H = 1920
 
 export default function IsoSnapshotHandler() {
   const { gl, scene } = useThree()
@@ -17,16 +17,15 @@ export default function IsoSnapshotHandler() {
       console.log('[IsoSnapshot] rendering…')
       // ── Isometric orthographic camera ──────────────────────────────────
       const aspect = W / H
-      const frustum = 8
+      const frustum = 7
       const cam = new THREE.OrthographicCamera(
         -frustum * aspect, frustum * aspect,
          frustum,          -frustum,
          0.1, 200
       )
-      // Classic isometric: 45° azimuth, ~35.26° elevation
-      // Point at centre of garden (x≈0, y≈1, z≈-3)
-      cam.position.set(14, 12, 11)
-      cam.lookAt(0, 1, -3)
+      // Steeper isometric: ~60° elevation, zoomed in on the compact garden
+      cam.position.set(8, 16, 6)
+      cam.lookAt(-1, 0, -1)
       cam.updateProjectionMatrix()
 
       // ── Render to off-screen target ────────────────────────────────────

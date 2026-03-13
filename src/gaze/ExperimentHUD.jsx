@@ -52,7 +52,6 @@ export default function ExperimentHUD() {
   useEffect(() => {
     if (phase !== 'ended') return
     downloadJSON(gazeStore.exportJSON())
-    downloadPositionHeatmap()
     setTimeout(() => triggerIsoSnapshot(), 300)
   }, [phase])
 
