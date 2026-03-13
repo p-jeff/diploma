@@ -39,10 +39,14 @@ export default function IsoSnapshotHandler() {
 
       if (timerBoardRef.current) timerBoardRef.current.visible = false
 
+      // Disable XR so gl.render() uses our isometric camera instead of the headset cameras
+      const prevXR = gl.xr.enabled
+      gl.xr.enabled = false
       const prevRT = gl.getRenderTarget()
       gl.setRenderTarget(rt)
       gl.render(scene, cam)
       gl.setRenderTarget(prevRT)
+      gl.xr.enabled = prevXR
 
       if (timerBoardRef.current) timerBoardRef.current.visible = true
 

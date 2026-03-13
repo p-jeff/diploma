@@ -64,7 +64,7 @@ export default function GazeTimerBoard() {
     if (boardRef.current) boardRef.current.lookAt(camera.position)
   })
 
-  if (phase === 'idle') return null
+  if (phase === 'idle' || phase === 'active') return null
 
   return (
     <mesh ref={el => { boardRef.current = el; timerBoardRef.current = el }} position={[0, 2.0, -1.5]}>

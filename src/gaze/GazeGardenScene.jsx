@@ -1,11 +1,14 @@
 // AIA EAI Hin Nr Claude Opus 4.6 v1.0
 import { useRef, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
+import { useXR } from '@react-three/xr'
 import * as THREE from 'three'
 import { useExperiment } from './ExperimentContext'
 import gazeStore from './gazeStore'
 import { getHeatColor } from './colorRamp'
 import GazeTimerBoard from './GazeTimerBoard'
+import GazeStartButton from './GazeStartButton'
+import PositionHeatmapFloor from './PositionHeatmapFloor'
 
 // ─── TrackableGroup ────────────────────────────────────────────────────────────
 function TrackableGroup({ id, position, rotation, scale, children }) {
@@ -370,10 +373,11 @@ function BirdBath() {
 export default function GazeGardenScene() {
   const { phase } = useExperiment()
   const isEnded = phase === 'ended'
+  const isAR = useXR(s => s.session != null && s.session.environmentBlendMode !== 'opaque')
 
   return (
     <>
-      <color attach="background" args={[isEnded ? '#ffffff' : '#87ceeb']} />
+      {!isAR && <color attach="background" args={[isEnded ? '#ffffff' : '#87ceeb']} />}
 
       <ambientLight intensity={isEnded ? 2.0 : 0.6} />
 
@@ -393,13 +397,15 @@ export default function GazeGardenScene() {
       )}
 
       <GazeTimerBoard />
+      <GazeStartButton />
 
-      {!isEnded && <fogExp2 attach="fog" color="#87ceeb" density={0.2} />}
-      {!isEnded && <Sky />}
+      {!isEnded && !isAR && <fogExp2 attach="fog" color="#87ceeb" density={0.2} />}
+      {!isEnded && !isAR && <Sky />}
       {!isEnded && <Sun />}
       {!isEnded && <CrossPath />}
 
-      <Ground />
+      {!isAR && <Ground />}
+      {isEnded && <PositionHeatmapFloor />}
 
       {/* ── Tree border ring — surrounds the entire garden ── */}
 

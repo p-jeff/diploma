@@ -1,10 +1,10 @@
 // AIA EAI Hin Nr Claude Opus 4.6 v1.0
 
-import { useRef, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { XR, createXRStore, XROrigin } from '@react-three/xr'
+import { XR, createXRStore, XROrigin, useXR } from '@react-three/xr'
 import { GamepadCamera, GamepadStatus } from './GamepadCamera'
-import GardenScene from './GardenScene'
+import { useExperiment } from './gaze/ExperimentContext'
 import GazeGardenScene from './gaze/GazeGardenScene'
 import GazeTracker from './gaze/GazeTracker'
 import { ExperimentProvider } from './gaze/ExperimentContext'
@@ -18,27 +18,30 @@ const store = createXRStore({
   },
 })
 
+function XRSessionWatcher() {
+  const session = useXR(s => s.session)
+  const { phase, start } = useExperiment()
+
+  useEffect(() => {
+    if (session && phase === 'idle') start()
+  }, [session])
+
+  return null
+}
+
 export default function App() {
   const playerRef = useRef(null)
-  const [mode, setMode] = useState('garden') // 'garden' | 'gaze'
 
   return (
     <ExperimentProvider>
-      <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 12, zIndex: 10 }}>
-        <button onClick={() => store.enterAR()}>Enter AR</button>
-        <button onClick={() => store.enterVR()}>Enter VR</button>
-        <button
-          onClick={() => setMode(m => m === 'garden' ? 'gaze' : 'garden')}
-          style={{ background: mode === 'gaze' ? '#e74c3c' : '#2ecc71', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: 6, cursor: 'pointer' }}
-        >
-          {mode === 'gaze' ? 'Exit Gaze Demo' : 'Gaze Demo'}
-        </button>
+      <div style={{ position: 'fixed', bottom: 40, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 20, zIndex: 10 }}>
+        <button onClick={() => store.enterAR()} style={{ fontSize: 22, padding: '16px 40px', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>Enter AR</button>
+        <button onClick={() => store.enterVR()} style={{ fontSize: 22, padding: '16px 40px', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>Enter VR</button>
       </div>
 
       <GamepadStatus />
-
-      {mode === 'gaze' && <ExperimentHUD />}
-      {mode === 'gaze' && <Crosshair />}
+      <ExperimentHUD />
+      <Crosshair />
 
       <Canvas
         style={{ width: '100vw', height: '100vh' }}
@@ -48,17 +51,12 @@ export default function App() {
         <XR store={store}>
           <XROrigin ref={playerRef} />
 
-          {mode === 'garden' && <GardenScene />}
+          <GazeGardenScene />
+          <GazeTracker />
+          <GazeReticle />
+          <IsoSnapshotHandler />
 
-          {mode === 'gaze' && (
-            <>
-              <GazeGardenScene />
-              <GazeTracker />
-              <GazeReticle />
-              <IsoSnapshotHandler />
-            </>
-          )}
-
+          <XRSessionWatcher />
           <GamepadCamera playerRef={playerRef} />
         </XR>
       </Canvas>

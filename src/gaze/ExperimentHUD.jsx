@@ -1,13 +1,9 @@
 // AIA EAI Hin Nr Claude Opus 4.6 v1.0
-import { useExperiment, DURATION_S } from './ExperimentContext'
+import { useEffect } from 'react'
+import { useExperiment } from './ExperimentContext'
 import gazeStore from './gazeStore'
 import { triggerIsoSnapshot } from './isoExport'
-
-function fmt(s) {
-  const m = Math.floor(s / 60)
-  const sec = s % 60
-  return `${m}:${String(sec).padStart(2, '0')}`
-}
+import { downloadPositionHeatmap } from './PositionHeatmapFloor'
 
 function downloadJSON(data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -48,23 +44,25 @@ const btnStyle = {
 }
 
 export default function ExperimentHUD() {
-  const { phase, remaining, start, end, reset } = useExperiment()
+  const { phase, end, reset } = useExperiment()
+
+  // Auto-download when session ends.
+  // Snapshot is deferred by 300ms so R3F has time to render the heat-colored
+  // scene (TrackableGroup material effects + background change) before we read pixels.
+  useEffect(() => {
+    if (phase !== 'ended') return
+    downloadJSON(gazeStore.exportJSON())
+    downloadPositionHeatmap()
+    setTimeout(() => triggerIsoSnapshot(), 300)
+  }, [phase])
+
+  if (phase === 'idle') return null
 
   return (
     <div style={hudStyle}>
-      {phase === 'idle' && (
-        <>
-          <span>Gaze tracking demo — look at garden objects</span>
-          <button style={{ ...btnStyle, background: '#2ecc71', color: '#000' }} onClick={start}>
-            Start ({DURATION_S}s)
-          </button>
-        </>
-      )}
-
       {phase === 'active' && (
         <>
           <span style={{ color: '#2ecc71' }}>● Recording</span>
-          <span style={{ fontSize: 18 }}>{fmt(remaining)}</span>
           <button style={{ ...btnStyle, background: '#e74c3c', color: '#fff' }} onClick={end}>
             End early
           </button>
@@ -85,6 +83,12 @@ export default function ExperimentHUD() {
             onClick={triggerIsoSnapshot}
           >
             Download Isometric View
+          </button>
+          <button
+            style={{ ...btnStyle, background: '#27ae60', color: '#fff' }}
+            onClick={downloadPositionHeatmap}
+          >
+            Download Floor Heatmap
           </button>
           <button style={{ ...btnStyle, background: '#888', color: '#fff' }} onClick={reset}>
             Reset
