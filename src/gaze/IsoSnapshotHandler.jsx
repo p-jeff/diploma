@@ -38,6 +38,21 @@ export default function IsoSnapshotHandler() {
 
       if (timerBoardRef.current) timerBoardRef.current.visible = false
 
+      // ── Hide bounding boxes, make tree meshes 30% opacity ────────────
+      const bboxOverrides = []
+      const treeOverrides = []
+      scene.traverse(obj => {
+        if (!obj.isMesh) return
+        if (obj.userData.isBoundingBox) {
+          bboxOverrides.push({ mesh: obj, prev: obj.visible })
+          obj.visible = false
+        } else if (obj.userData.trackableId?.startsWith('tree-')) {
+          treeOverrides.push({ mat: obj.material, prevTransparent: obj.material.transparent, prevOpacity: obj.material.opacity })
+          obj.material.transparent = true
+          obj.material.opacity = 0.5
+        }
+      })
+
       // Disable XR so gl.render() uses our isometric camera instead of the headset cameras
       const prevXR = gl.xr.enabled
       gl.xr.enabled = false
@@ -46,6 +61,13 @@ export default function IsoSnapshotHandler() {
       gl.render(scene, cam)
       gl.setRenderTarget(prevRT)
       gl.xr.enabled = prevXR
+
+      // ── Restore bounding boxes and tree materials ─────────────────────
+      for (const { mesh, prev } of bboxOverrides) { mesh.visible = prev }
+      for (const { mat, prevTransparent, prevOpacity } of treeOverrides) {
+        mat.transparent = prevTransparent
+        mat.opacity = prevOpacity
+      }
 
       if (timerBoardRef.current) timerBoardRef.current.visible = true
 
