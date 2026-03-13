@@ -8,24 +8,19 @@ import { getHeatColor } from './colorRamp'
 import GazeTimerBoard from './GazeTimerBoard'
 
 // ─── TrackableGroup ────────────────────────────────────────────────────────────
-// Tags all child meshes so GazeTracker can identify them.
-// Stores original materials on mount so they can be fully restored on reset.
-// On experiment end: clones current materials (which may already carry the paint
-// emissiveMap) and tints them with the heat color.
 function TrackableGroup({ id, position, rotation, scale, children }) {
   const groupRef = useRef()
   const { phase } = useExperiment()
-  const originalMaterials = useRef(new Map()) // mesh.uuid → original material (pre-paint)
+  const originalMaterials = useRef(new Map())
 
   useEffect(() => {
     gazeStore.register(id)
   }, [id])
 
-  // Tag meshes + snapshot originals once on mount
   useEffect(() => {
     if (!groupRef.current) return
     groupRef.current.traverse(obj => {
-      if (!obj.isMesh) return
+      if (!obj.isMesh || obj.userData.isBoundingBox) return
       obj.userData.trackableId = id
       if (obj.material && !originalMaterials.current.has(obj.uuid)) {
         originalMaterials.current.set(obj.uuid, obj.material)
@@ -35,31 +30,53 @@ function TrackableGroup({ id, position, rotation, scale, children }) {
 
   useEffect(() => {
     if (!groupRef.current) return
+    groupRef.current.updateWorldMatrix(true, true)
+    const box = new THREE.Box3().setFromObject(groupRef.current)
+    if (box.isEmpty()) return
+
+    const size = new THREE.Vector3()
+    const center = new THREE.Vector3()
+    box.getSize(size)
+    box.getCenter(center)
+    groupRef.current.worldToLocal(center)
+
+    const geom = new THREE.BoxGeometry(size.x, size.y, size.z)
+    const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.15, depthWrite: false, wireframe: true })
+    const proxy = new THREE.Mesh(geom, mat)
+    proxy.position.copy(center)
+    proxy.userData.trackableId = id
+    proxy.userData.isBoundingBox = true
+    groupRef.current.add(proxy)
+
+    return () => {
+      if (groupRef.current) groupRef.current.remove(proxy)
+      geom.dispose()
+      mat.dispose()
+    }
+  }, [id])
+
+  useEffect(() => {
+    if (!groupRef.current) return
 
     if (phase === 'ended') {
       const tc = new THREE.Color(getHeatColor(gazeStore.getNormalized(id)))
       groupRef.current.traverse(obj => {
-        if (!obj.isMesh || !obj.material) return
-        // Clone whatever material is currently on the mesh — this preserves the
-        // paint emissiveMap if gazePainter already patched it.
+        if (!obj.isMesh || !obj.material || obj.userData.isBoundingBox) return
         const mat = obj.material.clone()
         mat.color.copy(tc)
         mat.transparent = false
         mat.opacity = 1
         if (mat.emissiveMap) {
-          // Painted mesh: crank up intensity so glow punches through the heat tint
           mat.emissiveIntensity = 4.0
         } else {
-          // Unpainted mesh: subtle emissive tint so it still reads in the white scene
           mat.emissive?.copy(tc)
           mat.emissiveIntensity = 0.5
         }
         obj.material = mat
       })
     } else if (phase === 'idle' && originalMaterials.current.size > 0) {
-      // Restore pristine originals — paint canvas is cleared separately
       groupRef.current.traverse(obj => {
-        if (obj.isMesh && originalMaterials.current.has(obj.uuid)) {
+        if (obj.isMesh && !obj.userData.isBoundingBox && originalMaterials.current.has(obj.uuid)) {
           obj.material = originalMaterials.current.get(obj.uuid)
         }
       })
@@ -78,7 +95,7 @@ function TrackableGroup({ id, position, rotation, scale, children }) {
 function Ground() {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-      <planeGeometry args={[40, 40]} />
+      <planeGeometry args={[50, 50]} />
       <meshStandardMaterial color="#4a7c3f" roughness={1} />
     </mesh>
   )
@@ -87,7 +104,7 @@ function Ground() {
 function Sky() {
   return (
     <mesh>
-      <sphereGeometry args={[30, 32, 16]} />
+      <sphereGeometry args={[40, 32, 16]} />
       <meshBasicMaterial color="#87ceeb" side={1} />
     </mesh>
   )
@@ -99,6 +116,36 @@ function Sun() {
       <sphereGeometry args={[1.2, 16, 16]} />
       <meshBasicMaterial color="#fff8c0" />
     </mesh>
+  )
+}
+
+// Cross-shaped path radiating from the player's center
+function CrossPath() {
+  const nsStones = [-4.5, -3.6, -2.7, -1.8, -0.9, 0, 0.9, 1.8, 2.7, 3.6, 4.5]
+  const ewStones = [-4.5, -3.6, -2.7, -1.8, -0.9, 0.9, 1.8, 2.7, 3.6, 4.5]
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
+        <planeGeometry args={[0.85, 10]} />
+        <meshStandardMaterial color="#b0a898" roughness={1} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0]}>
+        <planeGeometry args={[10, 0.85]} />
+        <meshStandardMaterial color="#b0a898" roughness={1} />
+      </mesh>
+      {nsStones.map((z, i) => (
+        <mesh key={`ns-${i}`} rotation={[-Math.PI / 2, (i * 0.22) - 0.1, 0]} position={[0, 0.012, z]}>
+          <circleGeometry args={[0.27, 7]} />
+          <meshStandardMaterial color="#8a8070" roughness={0.9} />
+        </mesh>
+      ))}
+      {ewStones.map((x, i) => (
+        <mesh key={`ew-${i}`} rotation={[-Math.PI / 2, (i * 0.18) - 0.1, 0]} position={[x, 0.012, 0]}>
+          <circleGeometry args={[0.27, 7]} />
+          <meshStandardMaterial color="#8a8070" roughness={0.9} />
+        </mesh>
+      ))}
+    </group>
   )
 }
 
@@ -165,37 +212,23 @@ function Flower({ position, color }) {
 
 function FlowerBedGeometry({ rotation = [0, 0, 0] }) {
   const flowers = [
-    { offset: [0, 0, 0],        color: '#e74c3c' },
-    { offset: [0.18, 0, 0.1],   color: '#9b59b6' },
-    { offset: [-0.15, 0, 0.12], color: '#e67e22' },
-    { offset: [0.08, 0, -0.16], color: '#e74c3c' },
-    { offset: [-0.2, 0, -0.08], color: '#f1c40f' },
-    { offset: [0.3, 0, -0.05],  color: '#9b59b6' },
-    { offset: [-0.05, 0, 0.28], color: '#e67e22' },
-    { offset: [0.22, 0, 0.22],  color: '#e74c3c' },
+    { offset: [0, 0, 0],         color: '#e74c3c' },
+    { offset: [0.18, 0, 0.1],    color: '#9b59b6' },
+    { offset: [-0.15, 0, 0.12],  color: '#e67e22' },
+    { offset: [0.08, 0, -0.16],  color: '#e74c3c' },
+    { offset: [-0.2, 0, -0.08],  color: '#f1c40f' },
+    { offset: [0.3, 0, -0.05],   color: '#9b59b6' },
+    { offset: [-0.05, 0, 0.28],  color: '#e67e22' },
+    { offset: [0.22, 0, 0.22],   color: '#e74c3c' },
+    { offset: [-0.28, 0, 0.25],  color: '#f1c40f' },
+    { offset: [0.35, 0, 0.18],   color: '#3498db' },
+    { offset: [-0.1, 0, -0.3],   color: '#e74c3c' },
+    { offset: [0.12, 0, 0.35],   color: '#9b59b6' },
   ]
   return (
     <group rotation={rotation}>
       {flowers.map((f, i) => (
         <Flower key={i} position={f.offset} color={f.color} />
-      ))}
-    </group>
-  )
-}
-
-function Path() {
-  const stones = [-0.5, 0.3, 1.1, 1.9, 2.7]
-  return (
-    <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.002, 0.5]}>
-        <planeGeometry args={[0.9, 5]} />
-        <meshStandardMaterial color="#b0a898" roughness={1} />
-      </mesh>
-      {stones.map((z, i) => (
-        <mesh key={i} rotation={[-Math.PI / 2, (i % 3) * 0.15 - 0.1, 0]} position={[0, 0.012, z]}>
-          <circleGeometry args={[0.28, 7]} />
-          <meshStandardMaterial color="#8a8070" roughness={0.9} />
-        </mesh>
       ))}
     </group>
   )
@@ -276,36 +309,59 @@ function PondGeometry() {
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
-        <ringGeometry args={[0.7, 0.85, 32]} />
+        <ringGeometry args={[0.8, 1.0, 32]} />
         <meshStandardMaterial color="#8a8070" roughness={0.8} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.025, 0]}>
-        <circleGeometry args={[0.7, 32]} />
+        <circleGeometry args={[0.8, 32]} />
         <meshStandardMaterial color="#4a90c4" transparent opacity={0.75} roughness={0} metalness={0.3} />
       </mesh>
     </>
   )
 }
 
-function Fence() {
-  const posts = Array.from({ length: 9 }, (_, i) => (i - 4) * 1.2)
+function LanternPost() {
   return (
-    <group position={[0, 0, -7]}>
-      {posts.map((x, i) => (
-        <mesh key={i} position={[x, 0.55, 0]} castShadow>
-          <boxGeometry args={[0.1, 1.1, 0.1]} />
-          <meshStandardMaterial color="#c4a068" roughness={0.9} />
-        </mesh>
-      ))}
-      <mesh position={[0, 0.8, 0]}>
-        <boxGeometry args={[9.6, 0.07, 0.07]} />
-        <meshStandardMaterial color="#b89050" roughness={0.9} />
+    <>
+      <mesh position={[0, 1.1, 0]} castShadow>
+        <cylinderGeometry args={[0.035, 0.05, 2.2, 8]} />
+        <meshStandardMaterial color="#4a3728" roughness={0.9} />
       </mesh>
-      <mesh position={[0, 0.45, 0]}>
-        <boxGeometry args={[9.6, 0.07, 0.07]} />
-        <meshStandardMaterial color="#b89050" roughness={0.9} />
+      {/* Lantern housing */}
+      <mesh position={[0, 2.35, 0]} castShadow>
+        <boxGeometry args={[0.22, 0.28, 0.22]} />
+        <meshStandardMaterial color="#3a2a1a" roughness={0.7} transparent opacity={0.55} />
       </mesh>
-    </group>
+      {/* Glow orb */}
+      <mesh position={[0, 2.35, 0]}>
+        <sphereGeometry args={[0.09, 10, 8]} />
+        <meshStandardMaterial color="#fff8c0" emissive="#ffe880" emissiveIntensity={3} />
+      </mesh>
+      {/* Cap */}
+      <mesh position={[0, 2.52, 0]} castShadow>
+        <coneGeometry args={[0.15, 0.14, 8]} />
+        <meshStandardMaterial color="#3a2a1a" roughness={0.8} />
+      </mesh>
+    </>
+  )
+}
+
+function BirdBath() {
+  return (
+    <>
+      <mesh position={[0, 0.45, 0]} castShadow>
+        <cylinderGeometry args={[0.06, 0.13, 0.9, 12]} />
+        <meshStandardMaterial color="#b8a898" roughness={0.9} />
+      </mesh>
+      <mesh position={[0, 0.92, 0]} castShadow>
+        <cylinderGeometry args={[0.38, 0.3, 0.09, 16]} />
+        <meshStandardMaterial color="#b8a898" roughness={0.9} />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.96, 0]}>
+        <circleGeometry args={[0.3, 16]} />
+        <meshStandardMaterial color="#5a9fd4" transparent opacity={0.85} roughness={0} metalness={0.2} />
+      </mesh>
+    </>
   )
 }
 
@@ -317,7 +373,6 @@ export default function GazeGardenScene() {
 
   return (
     <>
-      {/* White studio background when ended, sky blue during recording */}
       <color attach="background" args={[isEnded ? '#ffffff' : '#87ceeb']} />
 
       <ambientLight intensity={isEnded ? 2.0 : 0.6} />
@@ -339,79 +394,191 @@ export default function GazeGardenScene() {
 
       <GazeTimerBoard />
 
-      {/* Background elements — hidden on reveal */}
-      {!isEnded && <fogExp2 attach="fog" color="#87ceeb" density={0.02} />}
+      {!isEnded && <fogExp2 attach="fog" color="#87ceeb" density={0.2} />}
       {!isEnded && <Sky />}
       {!isEnded && <Sun />}
-      {!isEnded && <Path />}
-      {!isEnded && <Fence />}
+      {!isEnded && <CrossPath />}
 
       <Ground />
 
-      {/* ── Trackable objects — always present ── */}
+      {/* ── Tree border ring — surrounds the entire garden ── */}
 
-      <TrackableGroup id="tree-1" position={[-3, 0, -4]}>
+      <TrackableGroup id="tree-1"  position={[0.3,  0,  7.3]} >
+        <TreeGeometry scale={1.2} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-2"  position={[3.9,  0,  6.1]} >
+        <TreeGeometry scale={1.0} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-3"  position={[6.4,  0,  3.3]} >
+        <TreeGeometry scale={1.15} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-4"  position={[7.2,  0, -0.4]} >
+        <TreeGeometry scale={0.9} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-5"  position={[6.0,  0, -3.9]} >
         <TreeGeometry scale={1.1} />
       </TrackableGroup>
-
-      <TrackableGroup id="tree-2" position={[3.5, 0, -5]}>
+      <TrackableGroup id="tree-6"  position={[3.4,  0, -6.5]} >
+        <TreeGeometry scale={1.0} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-7"  position={[-0.4, 0, -7.4]} >
+        <TreeGeometry scale={1.25} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-8"  position={[-3.7, 0, -6.2]} >
+        <TreeGeometry scale={0.95} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-9"  position={[-6.3, 0, -3.6]} >
+        <TreeGeometry scale={1.1} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-10" position={[-7.3, 0,  0.3]} >
+        <TreeGeometry scale={1.05} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-11" position={[-6.1, 0,  3.7]} >
+        <TreeGeometry scale={1.15} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-12" position={[-3.4, 0,  6.3]} >
         <TreeGeometry scale={0.9} />
       </TrackableGroup>
 
-      <TrackableGroup id="tree-3" position={[-4.5, 0, -1]}>
+      {/* Outer corner trees for denser border */}
+      <TrackableGroup id="tree-13" position={[ 6.8, 0,  6.8]} >
         <TreeGeometry scale={1.3} />
       </TrackableGroup>
-
-      <TrackableGroup id="tree-4" position={[4, 0, -2]}>
-        <TreeGeometry scale={0.85} />
+      <TrackableGroup id="tree-14" position={[ 6.8, 0, -6.8]} >
+        <TreeGeometry scale={1.1} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-15" position={[-6.8, 0, -6.8]} >
+        <TreeGeometry scale={1.2} />
+      </TrackableGroup>
+      <TrackableGroup id="tree-16" position={[-6.8, 0,  6.8]} >
+        <TreeGeometry scale={1.05} />
       </TrackableGroup>
 
-      <TrackableGroup id="tree-5" position={[-2.5, 0, -6.5]}>
-        <TreeGeometry scale={1.0} />
-      </TrackableGroup>
+      {/* ── Bushes — scattered through the garden interior ── */}
 
-      <TrackableGroup id="bush-1" position={[-1.5, 0, -3.5]}>
+      <TrackableGroup id="bush-1"  position={[ 3.2, 0,  1.3]} scale={1.0}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-2"  position={[-3.2, 0,  1.3]} scale={1.1}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-3"  position={[ 3.2, 0, -1.3]} scale={0.9}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-4"  position={[-3.2, 0, -1.3]} scale={1.0}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-5"  position={[ 1.3, 0,  3.8]} scale={1.1}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-6"  position={[-1.3, 0,  3.8]} scale={0.85}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-7"  position={[ 1.3, 0, -3.8]} scale={1.05}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-8"  position={[-1.3, 0, -3.8]} scale={0.95}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-9"  position={[ 5.2, 0,  0.0]} scale={1.0}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-10" position={[-5.2, 0,  0.0]} scale={1.1}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-11" position={[ 0.0, 0,  5.5]} scale={0.9}>
+        <BushGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="bush-12" position={[ 0.0, 0, -5.5]} scale={1.0}>
         <BushGeometry />
       </TrackableGroup>
 
-      <TrackableGroup id="bush-2" position={[1.6, 0, -3.8]} scale={0.9}>
-        <BushGeometry />
-      </TrackableGroup>
+      {/* ── Flower beds — blanket the garden floor ── */}
 
-      <TrackableGroup id="bush-3" position={[-2, 0, -1]} scale={1.1}>
-        <BushGeometry />
+      <TrackableGroup id="flowerbed-1"  position={[ 1.8, 0,  1.6]}>
+        <FlowerBedGeometry rotation={[0, 0.0, 0]} />
       </TrackableGroup>
-
-      <TrackableGroup id="bush-4" position={[3, 0, -0.5]} scale={0.8}>
-        <BushGeometry />
+      <TrackableGroup id="flowerbed-2"  position={[-1.8, 0,  1.6]}>
+        <FlowerBedGeometry rotation={[0, 0.5, 0]} />
       </TrackableGroup>
-
-      <TrackableGroup id="flowerbed-1" position={[-1.1, 0, -1]}>
-        <FlowerBedGeometry />
+      <TrackableGroup id="flowerbed-3"  position={[ 1.8, 0, -1.6]}>
+        <FlowerBedGeometry rotation={[0, 0.9, 0]} />
       </TrackableGroup>
-
-      <TrackableGroup id="flowerbed-2" position={[1.1, 0, -1]}>
+      <TrackableGroup id="flowerbed-4"  position={[-1.8, 0, -1.6]}>
+        <FlowerBedGeometry rotation={[0, 1.3, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-5"  position={[ 4.2, 0,  2.6]}>
         <FlowerBedGeometry rotation={[0, 0.3, 0]} />
       </TrackableGroup>
-
-      <TrackableGroup id="flowerbed-3" position={[-1.1, 0, -4]}>
-        <FlowerBedGeometry />
+      <TrackableGroup id="flowerbed-6"  position={[-4.2, 0,  2.6]}>
+        <FlowerBedGeometry rotation={[0, -0.3, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-7"  position={[ 3.8, 0, -4.2]}>
+        <FlowerBedGeometry rotation={[0, 0.7, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-8"  position={[-3.8, 0, -4.2]}>
+        <FlowerBedGeometry rotation={[0, -0.7, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-9"  position={[ 2.2, 0,  5.0]}>
+        <FlowerBedGeometry rotation={[0, 0.4, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-10" position={[-2.2, 0,  5.0]}>
+        <FlowerBedGeometry rotation={[0, -0.4, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-11" position={[ 5.2, 0, -2.2]}>
+        <FlowerBedGeometry rotation={[0, 1.1, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-12" position={[-5.2, 0, -2.2]}>
+        <FlowerBedGeometry rotation={[0, -1.1, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-13" position={[ 5.0, 0,  4.5]}>
+        <FlowerBedGeometry rotation={[0, 0.6, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-14" position={[-5.0, 0,  4.5]}>
+        <FlowerBedGeometry rotation={[0, -0.6, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-15" position={[ 5.0, 0, -4.5]}>
+        <FlowerBedGeometry rotation={[0, 1.4, 0]} />
+      </TrackableGroup>
+      <TrackableGroup id="flowerbed-16" position={[-5.0, 0, -4.5]}>
+        <FlowerBedGeometry rotation={[0, -1.4, 0]} />
       </TrackableGroup>
 
-      <TrackableGroup id="flowerbed-4" position={[1.1, 0, -4]}>
-        <FlowerBedGeometry />
-      </TrackableGroup>
+      {/* ── Feature elements ── */}
 
-      <TrackableGroup id="bench" position={[-1.8, 0, -2.5]} rotation={[0, 0.4, 0]}>
+      <TrackableGroup id="bench" position={[3.5, 0, -2.0]} rotation={[0, 0.6, 0]}>
         <BenchGeometry />
       </TrackableGroup>
 
-      <TrackableGroup id="mushroom" position={[-1.2, 0, -1.8]}>
-        <MushroomGeometry />
+      <TrackableGroup id="pond" position={[-3.2, 0, 2.5]}>
+        <PondGeometry />
       </TrackableGroup>
 
-      <TrackableGroup id="pond" position={[2.5, 0, -2]}>
-        <PondGeometry />
+      <TrackableGroup id="birdbath" position={[2.5, 0, 3.2]}>
+        <BirdBath />
+      </TrackableGroup>
+
+      <TrackableGroup id="lantern-1" position={[ 1.4, 0,  1.4]}>
+        <LanternPost />
+      </TrackableGroup>
+      <TrackableGroup id="lantern-2" position={[-1.4, 0,  1.4]}>
+        <LanternPost />
+      </TrackableGroup>
+      <TrackableGroup id="lantern-3" position={[ 1.4, 0, -1.4]}>
+        <LanternPost />
+      </TrackableGroup>
+      <TrackableGroup id="lantern-4" position={[-1.4, 0, -1.4]}>
+        <LanternPost />
+      </TrackableGroup>
+
+      <TrackableGroup id="mushroom-1" position={[ 2.3, 0, -3.6]}>
+        <MushroomGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="mushroom-2" position={[-2.8, 0, -0.9]}>
+        <MushroomGeometry />
+      </TrackableGroup>
+      <TrackableGroup id="mushroom-3" position={[ 4.5, 0,  3.8]}>
+        <MushroomGeometry />
       </TrackableGroup>
     </>
   )

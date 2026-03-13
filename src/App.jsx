@@ -42,7 +42,7 @@ export default function App() {
 
       <Canvas
         style={{ width: '100vw', height: '100vh' }}
-        camera={{ position: [0, 1.6, 3], fov: 75 }}
+        camera={{ position: [0, 1.6, 0], fov: 75 }}
         shadows
       >
         <XR store={store}>

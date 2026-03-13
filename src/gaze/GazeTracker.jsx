@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useRef } from 'react'
 import * as THREE from 'three'
 import gazeStore from './gazeStore'
-import { paint } from './gazePainter'
+// import { paint } from './gazePainter'
 import { useExperiment } from './ExperimentContext'
 
 const _raycaster  = new THREE.Raycaster()
@@ -42,8 +42,6 @@ export default function GazeTracker() {
     for (const hit of hits) {
       hitId = findTrackableId(hit.object)
       if (hitId) {
-        // Paint onto the mesh surface at the UV hit point
-        paint(hit.object, hit.uv)
         break
       }
     }
