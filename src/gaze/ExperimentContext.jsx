@@ -3,7 +3,7 @@ import { createContext, useContext, useState, useRef, useCallback, useEffect } f
 import gazeStore from './gazeStore'
 import { clearAll as clearPaint } from './gazePainter'
 
-export const DURATION_S = 80
+export const DURATION_S = 40
 
 const ExperimentContext = createContext(null)
 
