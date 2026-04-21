@@ -404,9 +404,9 @@ Transform:
   m_GameObject: {fileID: 333163523}
   serializedVersion: 2
   m_LocalRotation: {x: 0.0019291432, y: -0.36021894, z: 0.013706563, w: 0.9327651}
-  m_LocalPosition: {x: -0.01, y: 0.45, z: 0.01}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -0.01, y: 2, z: 0.01}
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 557389789}
   - {fileID: 1784556642}
@@ -732,12 +732,12 @@ GameObject:
   - component: {fileID: 557389793}
   - component: {fileID: 557389794}
   m_Layer: 0
-  m_Name: GaussianHigh
+  m_Name: OliveTreeScene
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &557389788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -750,19 +750,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce0eaa90dbf24670a230447dc3ec09f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Gsplat::Gsplat.GsplatRenderer
-  GsplatAsset: {fileID: 4599839170941234424, guid: d5fb40bfc978c4112b6db7fc5cfb6a08, type: 3}
-  SHDegree: 1
+  GsplatAsset: {fileID: 4599839170941234424, guid: 2d937e51dc83bf243a0bbbdfb4657ed7, type: 3}
+  SHDegree: 3
   RenderOrder: 0
-  Brightness: 0.588605
+  Brightness: 0.93
   SplatDownscaleFactor: 0
   GammaToLinear: 1
   AsyncUpload: 0
   RenderBeforeUploadComplete: 1
-  CutoutsUpdateBounds: 1
+  CutoutsUpdateBounds: 0
   SortMode: 0
   SortRefreshRate: 30
   CutoutsRefreshRate: 3
-  m_assetGuid: d5fb40bfc978c4112b6db7fc5cfb6a08
+  m_assetGuid: 2d937e51dc83bf243a0bbbdfb4657ed7
 --- !u!4 &557389789
 Transform:
   m_ObjectHideFlags: 0
@@ -771,13 +771,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 557389787}
   serializedVersion: 2
-  m_LocalRotation: {x: 1, y: -0, z: -0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalRotation: {x: 0.935895, y: -0.3504971, z: 0.012269987, w: 0.033194363}
+  m_LocalPosition: {x: 0.011, y: 0.468, z: -0.006}
+  m_LocalScale: {x: 0.46, y: 0.46, z: 0.46}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 333163524}
-  m_LocalEulerAnglesHint: {x: 180, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 175.944, y: 0.016998291, z: 41.063004}
 --- !u!114 &557389790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -837,16 +837,16 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 557389787}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f1968cd307ea4aa39573515a527dc9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Gsplat.Animation.GsplatPerSplatProximity
   target: {fileID: 1080107289}
-  nearDistance: 0.5
-  farDistance: 1.88
-  nearDownscale: 0.044
-  farDownscale: 1
+  nearDistance: 1
+  farDistance: 8
+  nearDownscale: 0
+  farDownscale: 0.906
 --- !u!1 &616344350
 GameObject:
   m_ObjectHideFlags: 0
@@ -1516,6 +1516,119 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1750552580}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1235408823
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1235408827}
+  - component: {fileID: 1235408826}
+  - component: {fileID: 1235408825}
+  - component: {fileID: 1235408824}
+  m_Layer: 0
+  m_Name: Plane
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!64 &1235408824
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235408823}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &1235408825
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235408823}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1235408826
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235408823}
+  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1235408827
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235408823}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1447926677
 GameObject:
   m_ObjectHideFlags: 0
@@ -2034,13 +2147,15 @@ GameObject:
   - component: {fileID: 1784556640}
   - component: {fileID: 1784556639}
   - component: {fileID: 1784556638}
+  - component: {fileID: 1784556643}
+  - component: {fileID: 1784556644}
   m_Layer: 0
-  m_Name: GaussianLow
+  m_Name: TrimmedOliveTree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1784556638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2105,11 +2220,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce0eaa90dbf24670a230447dc3ec09f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Gsplat::Gsplat.GsplatRenderer
-  GsplatAsset: {fileID: 4599839170941234424, guid: d5fb40bfc978c4112b6db7fc5cfb6a08, type: 3}
+  GsplatAsset: {fileID: 4599839170941234424, guid: 5b94276f0434c4168aa186e233fa143b, type: 3}
   SHDegree: 1
   RenderOrder: 0
-  Brightness: 1.4769808
-  SplatDownscaleFactor: 0.87
+  Brightness: 0.7408182
+  SplatDownscaleFactor: 0.5
   GammaToLinear: 1
   AsyncUpload: 0
   RenderBeforeUploadComplete: 1
@@ -2117,7 +2232,7 @@ MonoBehaviour:
   SortMode: 0
   SortRefreshRate: 30
   CutoutsRefreshRate: 3
-  m_assetGuid: d5fb40bfc978c4112b6db7fc5cfb6a08
+  m_assetGuid: 5b94276f0434c4168aa186e233fa143b
 --- !u!4 &1784556642
 Transform:
   m_ObjectHideFlags: 0
@@ -2126,13 +2241,49 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1784556637}
   serializedVersion: 2
-  m_LocalRotation: {x: 1, y: -0, z: -0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_LocalRotation: {x: 0.99927306, y: -0.009089424, z: -0.0000989502, w: 0.03702521}
+  m_LocalPosition: {x: -0.023, y: -0.95, z: 0.012}
+  m_LocalScale: {x: 0.27, y: 0.27, z: 0.27}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 333163524}
-  m_LocalEulerAnglesHint: {x: 180, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 175.757, y: 0.05000305, z: 1.0440063}
+--- !u!114 &1784556643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784556637}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f1968cd307ea4aa39573515a527dc9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gsplat.Animation.GsplatPerSplatProximity
+  target: {fileID: 1750552580}
+  nearDistance: 0.5
+  farDistance: 2
+  nearDownscale: 0
+  farDownscale: 0.89
+--- !u!114 &1784556644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1784556637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f35912c8b6820941a54546b69529b25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gsplat.Animation.GsplatComputeRepulsion
+  computeShader: {fileID: 7200000, guid: 087f0f2431d7787498f5286c7326e0c9, type: 3}
+  target: {fileID: 853613516}
+  repulsionRadius: 0.69
+  repulsionStrength: 16.88
+  springStrength: 25
+  dampingPerSecond: 0.05
+  enableSimulation: 1
 --- !u!1 &1830569505
 GameObject:
   m_ObjectHideFlags: 0
@@ -9353,3 +9504,4 @@ SceneRoots:
   - {fileID: 336999915}
   - {fileID: 169282448}
   - {fileID: 333163524}
+  - {fileID: 1235408827}
