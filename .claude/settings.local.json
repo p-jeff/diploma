@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Read(/Volumes/EXTERNAL/Unity/Projects/diploma/**)",
+      "Edit(/Volumes/EXTERNAL/Unity/Projects/diploma/**)",
+      "Write(/Volumes/EXTERNAL/Unity/Projects/diploma/**)",
+      "Glob(/Volumes/EXTERNAL/Unity/Projects/diploma/**)",
+      "Grep(/Volumes/EXTERNAL/Unity/Projects/diploma/**)",
+      "WebFetch(domain:developers.meta.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api:*)",
+      "Bash(find:*)",
+      "Bash(grep -n \"--- !u!\\\\|m_Script:\" /Volumes/EXTERNAL/Unity/Projects/diploma/Assets/_Projects/HandPose/4.unity)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('dependencies',{}\\).get\\('wu.yize.gsplat',{}\\), indent=2\\)\\)\")",
+      "Bash(grep -E \"\\\\.\\(shader|compute|cs\\)$\")"
+    ]
+  }
+}
