@@ -1,0 +1,74 @@
+// Physics simulation compute shader for Gaussian splat hand repulsion.
+// Runs once per frame before CalcDepth/Sort/Render.
+// Writes displaced positions directly into _PositionBuffer so depth sorting
+// and rendering both see the correct displaced positions.
+
+#pragma kernel SimulateRepulsion
+
+#define GROUP_SIZE 1024
+
+// Original splat positions in object-local space — never modified.
+StructuredBuffer<float3>   _RestPositionBuffer;
+
+// Per-splat velocity in object-local space — integrated each frame.
+RWStructuredBuffer<float3> _VelocityBuffer;
+
+// Live splat positions in object-local space — read by CalcDepth, InitOrder, and the render shader.
+RWStructuredBuffer<float3> _PositionBuffer;
+
+// Hand position already transformed into object-local space (done on C# side each frame).
+float3 _HandLocalPos;
+
+// Radius of repulsion influence in object-local space units.
+float _RepulsionRadius;
+
+// Peak acceleration at the centre of the repulsion sphere (local units / s^2).
+float _RepulsionStrength;
+
+// Spring constant pulling splats back toward rest position (local units / s^2 per unit of displacement).
+float _SpringStrength;
+
+// Fraction of velocity remaining after exactly 1 second (e.g. 0.05 = 5% remaining = heavy damping).
+// Applied as pow(_DampingPerSecond, deltaTime) for frame-rate independence.
+float _DampingPerSecond;
+
+float _DeltaTime;
+uint  _SplatCount;
+
+[numthreads(GROUP_SIZE, 1, 1)]
+void SimulateRepulsion(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _SplatCount) return;
+
+    float3 restPos  = _RestPositionBuffer[i];
+    float3 curPos   = _PositionBuffer[i];
+    float3 velocity = _VelocityBuffer[i];
+
+    // --- Spring force: pull toward rest position ---
+    float3 springForce = (restPos - curPos) * _SpringStrength;
+
+    // --- Repulsion force: push away from hand ---
+    float3 toSplat = curPos - _HandLocalPos;
+    float  dist    = length(toSplat);
+    float3 repForce = float3(0.0, 0.0, 0.0);
+
+    if (_RepulsionRadius > 0.0001 && dist < _RepulsionRadius && dist > 0.0001)
+    {
+        // Cubic falloff: full strength at dist=0, zero at dist=radius
+        float t = 1.0 - saturate(dist / _RepulsionRadius);
+        t = t * t * t;
+        repForce = (toSplat / dist) * (t * _RepulsionStrength);
+    }
+
+    // --- Semi-implicit Euler integration ---
+    velocity += (springForce + repForce) * _DeltaTime;
+
+    // Frame-rate-independent exponential damping
+    velocity *= pow(_DampingPerSecond, _DeltaTime);
+
+    curPos += velocity * _DeltaTime;
+
+    _VelocityBuffer[i] = velocity;
+    _PositionBuffer[i] = curPos;
+}
