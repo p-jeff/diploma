@@ -215,8 +215,10 @@ Shader "Gsplat/Standard"
                     col = GsplatHSVtoRGB(hsv);
                 }
 
-                // Tint (default white = no effect)
-                col *= _GsplatTintColor.rgb;
+                // Tint. Treat unset / near-zero tint as identity (white) so unconfigured renderers don't go black.
+                float tintMag = _GsplatTintColor.r + _GsplatTintColor.g + _GsplatTintColor.b;
+                if (tintMag > 0.001)
+                    col *= _GsplatTintColor.rgb;
 
                 // Brightness
                 col *= _Brightness;
