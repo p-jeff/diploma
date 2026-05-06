@@ -21,6 +21,6 @@ MonoBehaviour:
   CameraRotationRefreshTreshold: 10
   ShowImportErrors: 1
   Materials:
-  - {fileID: 11400000, guid: d67dfafa30d6d4c6bb4aaa5717f36e8c, type: 2}
+  - {fileID: 11400000, guid: 52d6acd34c7b8c8458e1547991be8d7b, type: 2}
   - {fileID: 11400000, guid: 4c970957deb11c343ac0f56e028a96b6, type: 2}
   m_version: 1.2.1
