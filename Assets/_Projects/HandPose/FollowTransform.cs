@@ -7,6 +7,10 @@ namespace _Projects.HandPose
         [Header("Target")]
         [SerializeField] private Transform target;
 
+        [Header("Activation")]
+        [SerializeField] private bool runOnEnable = true;
+        [SerializeField] private bool runOnUpdate = true;
+
         [Header("Follow Options")]
         [SerializeField] private bool followPosition = true;
         [SerializeField] private bool followRotation = true;
@@ -17,9 +21,23 @@ namespace _Projects.HandPose
         [SerializeField] private Vector3 rotationOffset;
         [SerializeField] private Vector3 scaleOffset;
 
+        private void Start()
+        {
+            if (!runOnEnable || target == null) return;
+
+            if (followPosition)
+                transform.position = target.position + target.TransformDirection(positionOffset);
+
+            if (followRotation)
+                transform.rotation = target.rotation * Quaternion.Euler(rotationOffset);
+
+            if (followScale)
+                transform.localScale = target.localScale + scaleOffset;
+        }
+
         private void LateUpdate()
         {
-            if (target == null) return;
+            if (!runOnUpdate || target == null) return;
 
             if (followPosition)
                 transform.position = target.position + target.TransformDirection(positionOffset);
