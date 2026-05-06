@@ -14,6 +14,7 @@ namespace Gsplat
         public uint SplatCount { get; private set; }
 
         MaterialPropertyBlock m_propertyBlock;
+        public MaterialPropertyBlock PropertyBlock => m_propertyBlock;
         GsplatAsset m_gsplatAsset;
         public uint m_remainingCount = 0;
         public Bounds m_bounds;

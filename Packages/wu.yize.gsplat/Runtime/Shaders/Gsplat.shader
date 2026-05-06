@@ -1,5 +1,6 @@
 // Copyright (c) 2025 Yize Wu
 // SPDX-License-Identifier: MIT
+// Modified: hue/tint/opacity + saturation + shockwave uniforms for animation
 
 Shader "Gsplat/Standard"
 {
@@ -44,6 +45,50 @@ Shader "Gsplat/Standard"
             float _ScaleFactor;
             StructuredBuffer<uint> _OrderBuffer;
 
+            // Animation uniforms (set via Shader.SetGlobal*)
+            float  _GsplatHueShift;
+            float4 _GsplatTintColor;
+            float  _GsplatOpacityMul;
+            float  _GsplatDesat;            // 0 = identity (default), 1 = max desaturation envelope
+            float4 _GsplatShockCenter;      // xyz = world-space center
+            float4 _GsplatShockAxis;        // xyz = direction; if length<0.5 -> radial mode
+            float  _GsplatShockProgress;    // distance along axis (or radius) where wave front sits, in meters
+            float  _GsplatShockBandWidth;   // soft transition width in meters
+
+            float3 GsplatRGBtoHSV(float3 rgb)
+            {
+                float cmax = max(rgb.r, max(rgb.g, rgb.b));
+                float cmin = min(rgb.r, min(rgb.g, rgb.b));
+                float delta = cmax - cmin;
+
+                float h = 0;
+                if (delta > 0.0001)
+                {
+                    if (cmax == rgb.r)      h = fmod((rgb.g - rgb.b) / delta, 6.0);
+                    else if (cmax == rgb.g) h = (rgb.b - rgb.r) / delta + 2.0;
+                    else                    h = (rgb.r - rgb.g) / delta + 4.0;
+                    h /= 6.0;
+                    if (h < 0) h += 1.0;
+                }
+                float s = (cmax > 0.0001) ? delta / cmax : 0;
+                return float3(h, s, cmax);
+            }
+
+            float3 GsplatHSVtoRGB(float3 hsv)
+            {
+                float h = hsv.x * 6.0;
+                float c = hsv.z * hsv.y;
+                float x = c * (1.0 - abs(fmod(h, 2.0) - 1.0));
+                float3 rgb;
+                if      (h < 1) rgb = float3(c, x, 0);
+                else if (h < 2) rgb = float3(x, c, 0);
+                else if (h < 3) rgb = float3(0, c, x);
+                else if (h < 4) rgb = float3(0, x, c);
+                else if (h < 5) rgb = float3(x, 0, c);
+                else            rgb = float3(c, 0, x);
+                return rgb + (hsv.z - c);
+            }
+
             struct appdata
             {
                 float4 vertex : POSITION;
@@ -74,8 +119,27 @@ Shader "Gsplat/Standard"
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
                 float4 color: COLOR;
+                float  waveT : TEXCOORD1;   // 0 = ahead of wave (greyscale), 1 = behind (colored)
                 UNITY_VERTEX_OUTPUT_STEREO
             };
+
+            // Per-splat shockwave evaluation. modelPos = local-space center of this splat.
+            // Returns waveT in [0,1]: 0 = "ahead of wave" (not yet swept), 1 = "behind" (already swept).
+            // The fragment uses this to drive desaturation off; default-zero uniforms are harmless because
+            // the desat envelope (_GsplatDesat) defaults to 0 (no effect).
+            float EvalShockwave(float3 modelPos)
+            {
+                float3 worldPos = mul(_MATRIX_M, float4(modelPos, 1.0)).xyz;
+                float3 d3 = worldPos - _GsplatShockCenter.xyz;
+
+                float axisLen = length(_GsplatShockAxis.xyz);
+                float dist = (axisLen < 0.5)
+                    ? length(d3)
+                    : dot(d3, _GsplatShockAxis.xyz / axisLen);
+
+                float bw = max(_GsplatShockBandWidth, 0.0001);
+                return 1.0 - smoothstep(_GsplatShockProgress - bw, _GsplatShockProgress, dist);
+            }
 
             v2f vert(appdata v)
             {
@@ -84,6 +148,7 @@ Shader "Gsplat/Standard"
                 UNITY_INITIALIZE_OUTPUT(v2f, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.vertex = discardVec;
+                o.waveT = 1.0;
 
                 SplatSource source;
                 if (!InitSource(v, source))
@@ -96,7 +161,6 @@ Shader "Gsplat/Standard"
                     return o;
 
                 #ifndef SH_BANDS_0
-                // calculate the model-space view direction
                 float3 dir = normalize(mul(center.view, (float3x3)center.modelView));
                 float3 sh[SH_COEFFS];
                 InitSH(source.id, sh);
@@ -108,6 +172,23 @@ Shader "Gsplat/Standard"
                 o.vertex = center.proj + float4(corner.offset.x, _ProjectionParams.x * corner.offset.y, 0, 0);
                 o.color = color;
                 o.uv = corner.uv;
+
+                // Read object-space splat center for the wave evaluation.
+                // SplatCenter does not carry the local position directly, but the model-view
+                // origin can be recovered: worldPos = center.modelView * (0,0,0,1) is the splat origin in view space;
+                // simpler: re-load position from the buffer directly via source.id when available.
+                #ifdef UNCOMPRESSED
+                {
+                    float3 localPos = _PositionBuffer[source.id];
+                    o.waveT = EvalShockwave(localPos);
+                }
+                #else
+                {
+                    // Spark path: skip per-splat wave evaluation; use a homogeneous fallback (no shockwave).
+                    o.waveT = 1.0;
+                }
+                #endif
+
                 return o;
             }
 
@@ -123,9 +204,40 @@ Shader "Gsplat/Standard"
                 float alpha = (exp(-A * 4.0) + falloff) * i.color.a;
 
                 if (alpha < 1.0 / 255.0) discard;
+
+                float3 col = i.color.rgb;
+
+                // Hue shift
+                if (abs(_GsplatHueShift) > 0.001)
+                {
+                    float3 hsv = GsplatRGBtoHSV(saturate(col));
+                    hsv.x = frac(hsv.x + _GsplatHueShift);
+                    col = GsplatHSVtoRGB(hsv);
+                }
+
+                // Tint (default white = no effect)
+                col *= _GsplatTintColor.rgb;
+
+                // Brightness
+                col *= _Brightness;
+
+                // Desaturation envelope, modulated per-splat by the wave.
+                // Default _GsplatDesat = 0 (no effect). waveT defaults to 1 (no wave => "behind", colored).
+                // effectiveDesat = baseDesat * (1 - waveT)  -> ahead of wave = grey, behind = colored.
+                float effectiveDesat = saturate(_GsplatDesat * (1.0 - i.waveT));
+                if (effectiveDesat > 0.001)
+                {
+                    float lum = dot(col, float3(0.2126, 0.7152, 0.0722));
+                    col = lerp(col, float3(lum, lum, lum), effectiveDesat);
+                }
+
                 if (_GammaToLinear)
-                    return float4(GammaToLinearSpace(i.color.rgb) * alpha * _Brightness, alpha);
-                return float4(i.color.rgb * alpha * _Brightness, alpha);
+                    col = GammaToLinearSpace(col);
+
+                float opacityMul = (_GsplatOpacityMul > 0.0001) ? _GsplatOpacityMul : 1.0;
+                alpha *= opacityMul;
+
+                return float4(col * alpha, alpha);
             }
             ENDHLSL
 

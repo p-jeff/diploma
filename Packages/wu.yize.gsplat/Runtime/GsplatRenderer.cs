@@ -73,6 +73,7 @@ namespace Gsplat
         }
 
         public GsplatResource GsplatResource => m_renderer?.GsplatResource;
+        public MaterialPropertyBlock PropertyBlock => m_renderer?.PropertyBlock;
         public bool ComputeSortRequired => m_renderer.ComputeSortRequired;
         public bool ComputeCutoutsRequired => m_renderer.ComputeCutoutsRequired;
         public GsplatSortMode SortMode = GsplatSortMode.Always;
