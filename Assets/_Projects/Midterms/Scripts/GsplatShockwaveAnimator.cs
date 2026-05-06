@@ -105,8 +105,19 @@ namespace Midterms
             pb.SetFloat(s_shockBand, Mathf.Max(bandWidth, 0.0001f));
         }
 
+        [Header("Debug")]
+        public bool verboseLogging = true;
+
         public void Play()
         {
+            if (verboseLogging)
+                Debug.Log($"[Shockwave:{name}] Play() called. mode={mode} center={Center} maxDistance={maxDistance} duration={duration} enabled={isActiveAndEnabled} hasRenderer={m_renderer!=null}", this);
+
+            if (!isActiveAndEnabled)
+            {
+                Debug.LogWarning($"[Shockwave:{name}] Component or GameObject is disabled — coroutine cannot run.", this);
+                return;
+            }
             if (m_running != null) StopCoroutine(m_running);
             m_done = false;
             m_running = StartCoroutine(PlayCoroutine());
@@ -114,8 +125,17 @@ namespace Midterms
 
         IEnumerator PlayCoroutine()
         {
-            while (!TryGetBlock(out _)) yield return null;
+            int waitFrames = 0;
+            while (!TryGetBlock(out _))
+            {
+                waitFrames++;
+                if (waitFrames == 1 && verboseLogging)
+                    Debug.Log($"[Shockwave:{name}] PropertyBlock not ready yet, waiting…", this);
+                yield return null;
+            }
             var pb = m_renderer.PropertyBlock;
+            if (verboseLogging)
+                Debug.Log($"[Shockwave:{name}] PropertyBlock acquired after {waitFrames} frames. Starting wave from progress=0 to {maxDistance} over {duration}s.", this);
 
             pb.SetFloat(s_desat, 1f);
             pb.SetVector(s_shockCenter, Center);
@@ -123,10 +143,17 @@ namespace Midterms
             pb.SetFloat(s_shockBand, Mathf.Max(bandWidth, 0.0001f));
 
             float t = 0f;
+            float lastLog = -1f;
             while (t < duration)
             {
                 float u = progressCurve.Evaluate(t / duration);
-                pb.SetFloat(s_shockProgress, u * maxDistance);
+                float prog = u * maxDistance;
+                pb.SetFloat(s_shockProgress, prog);
+                if (verboseLogging && t - lastLog >= 0.25f)
+                {
+                    Debug.Log($"[Shockwave:{name}] t={t:F2}/{duration:F2} progress={prog:F3}", this);
+                    lastLog = t;
+                }
                 t += Time.deltaTime;
                 yield return null;
             }
@@ -136,6 +163,8 @@ namespace Midterms
             pb.SetFloat(s_desat, 0f);
             m_done = true;
             m_running = null;
+            if (verboseLogging)
+                Debug.Log($"[Shockwave:{name}] Wave complete. Desat=0 (locked colored).", this);
         }
 
         public void ForceColored()
@@ -145,6 +174,10 @@ namespace Midterms
             pb.SetFloat(s_shockProgress, maxDistance + 1e6f);
             m_done = true;
         }
+
+        [ContextMenu("Play")]                void DebugPlay()    => Play();
+        [ContextMenu("Reset to Greyscale")]  void DebugReset()   => ApplyInitialGreyscale();
+        [ContextMenu("Force Colored")]       void DebugColored() => ForceColored();
 
 #if UNITY_EDITOR
         void OnDrawGizmosSelected()
