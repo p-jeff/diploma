@@ -23,35 +23,30 @@ namespace Midterms
         [Tooltip("If null, uses transform.position as the puff/idle origin.")]
         public Transform anchorOverride;
 
-        [Header("Idle Breathing (after reveal)")]
-        [Tooltip("Size oscillation amplitude as a fraction (0.05 = 5%).")]
-        [Range(0f, 0.2f)] public float sizeAmplitude = 0.05f;
-        [Tooltip("Hue oscillation amplitude (0..1).")]
-        [Range(0f, 0.2f)] public float hueAmplitude = 0.03f;
-        [Tooltip("Idle outward-breath amplitude (meters). 0 = no positional sway.")]
-        [Range(0f, 0.1f)] public float idleDisplaceAmplitude = 0.015f;
-        [Tooltip("Cycles per second.")]
-        public float frequency = 0.25f;
+        [Header("Idle Sparkle (after reveal)")]
+        [Tooltip("Sparkle strength. 0 = off, ~0.5 = subtle twinkle, 1+ = strong.")]
+        [Range(0f, 2f)] public float sparkleIntensity = 0.6f;
+        [Tooltip("Twinkle speed (cycles per second). Higher = faster flickers.")]
+        [Range(0f, 10f)] public float sparkleSpeed = 2.5f;
 
         Gsplat.GsplatRenderer m_renderer;
         bool m_revealed;
-        float m_baseDownscale;
         Coroutine m_running;
 
         static readonly int s_opacity      = Shader.PropertyToID("_GsplatOpacityMul");
-        static readonly int s_hueShift     = Shader.PropertyToID("_GsplatHueShift");
         static readonly int s_shockCenter  = Shader.PropertyToID("_GsplatShockCenter");
         static readonly int s_shockAxis    = Shader.PropertyToID("_GsplatShockAxis");
         static readonly int s_shockProgress= Shader.PropertyToID("_GsplatShockProgress");
         static readonly int s_shockBand    = Shader.PropertyToID("_GsplatShockBandWidth");
         static readonly int s_shockDisp    = Shader.PropertyToID("_GsplatShockDisplace");
+        static readonly int s_sparkleI     = Shader.PropertyToID("_GsplatSparkleIntensity");
+        static readonly int s_sparkleS     = Shader.PropertyToID("_GsplatSparkleSpeed");
 
         Vector3 Anchor => anchorOverride ? anchorOverride.position : transform.position;
 
         void Awake()
         {
             m_renderer = GetComponent<Gsplat.GsplatRenderer>();
-            m_baseDownscale = m_renderer.SplatDownscaleFactor;
         }
 
         void Start()
@@ -65,9 +60,9 @@ namespace Midterms
             while (m_renderer.PropertyBlock == null) yield return null;
             var pb = m_renderer.PropertyBlock;
             pb.SetFloat(s_opacity, 0f);
-            // Configure radial puff with band wide enough that all leaves get a near-uniform push.
             ConfigurePuff(pb);
             pb.SetFloat(s_shockDisp, 0f);
+            pb.SetFloat(s_sparkleI, 0f);
         }
 
         // Sets up the wave uniforms so that _GsplatShockDisplace produces a near-uniform outward push.
@@ -114,13 +109,8 @@ namespace Midterms
             var pb = m_renderer.PropertyBlock;
             if (pb == null) return;
 
-            float phase = Mathf.Sin(Time.time * frequency * 2f * Mathf.PI);
-
-            m_renderer.SplatDownscaleFactor = Mathf.Clamp01(m_baseDownscale + phase * sizeAmplitude);
-            pb.SetFloat(s_hueShift, phase * hueAmplitude);
-            // Subtle outward breath. Anchor may have moved (if rooted on a moving transform).
-            pb.SetVector(s_shockCenter, Anchor);
-            pb.SetFloat(s_shockDisp, phase * idleDisplaceAmplitude);
+            pb.SetFloat(s_sparkleI, sparkleIntensity);
+            pb.SetFloat(s_sparkleS, sparkleSpeed);
         }
 
         public bool IsRevealed => m_revealed;
@@ -130,7 +120,6 @@ namespace Midterms
             m_revealed = false;
             if (m_running != null) StopCoroutine(m_running);
             m_running = null;
-            m_renderer.SplatDownscaleFactor = m_baseDownscale;
             StartCoroutine(DeferInitial());
         }
 

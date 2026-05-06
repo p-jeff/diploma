@@ -55,6 +55,8 @@ Shader "Gsplat/Standard"
             float  _GsplatShockProgress;    // distance along axis (or radius) where wave front sits, in meters
             float  _GsplatShockBandWidth;   // soft transition width in meters
             float  _GsplatShockDisplace;    // peak world-space displacement at the wave front, in meters
+            float  _GsplatSparkleIntensity; // 0 = off; ~1 = strong twinkle on color
+            float  _GsplatSparkleSpeed;     // cycles per second at the global rate
 
             float3 GsplatRGBtoHSV(float3 rgb)
             {
@@ -173,6 +175,19 @@ Shader "Gsplat/Standard"
                 o.vertex = center.proj + float4(corner.offset.x, _ProjectionParams.x * corner.offset.y, 0, 0);
                 o.color = color;
                 o.uv = corner.uv;
+
+                // Per-splat sparkle: occasional bright flashes driven by a hash of source.id.
+                #ifdef UNCOMPRESSED
+                if (_GsplatSparkleIntensity > 0.001)
+                {
+                    float h = frac(sin(float(source.id) * 12.9898) * 43758.5453);
+                    float t = _Time.y * max(_GsplatSparkleSpeed, 0.0001) + h * 6.2831853;
+                    // Narrow-peak twinkle: pow(sin^2, 12) gives sparse short flashes.
+                    float s = sin(t);
+                    float sparkle = pow(saturate(s * s), 12.0);
+                    o.color.rgb *= 1.0 + _GsplatSparkleIntensity * sparkle * 4.0;
+                }
+                #endif
 
                 // Per-splat wave + optional displacement (UNCOMPRESSED path only).
                 #ifdef UNCOMPRESSED
