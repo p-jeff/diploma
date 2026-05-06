@@ -30,6 +30,10 @@ namespace Midterms
         public float maxDistance = 3f;
         public AnimationCurve progressCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
+        [Header("Displacement (wavefront pulse)")]
+        [Tooltip("Peak world-space push at the wave front (meters). 0 = no displacement. Vertical mode pushes along axis; radial mode pushes outward.")]
+        public float displaceAmount = 0f;
+
         [Header("Initial State")]
         [Tooltip("If true, on Start the splat is set fully greyscale and the wave is parked beyond the splat.")]
         public bool startGreyscale = true;
@@ -43,6 +47,7 @@ namespace Midterms
         static readonly int s_shockAxis    = Shader.PropertyToID("_GsplatShockAxis");
         static readonly int s_shockProgress= Shader.PropertyToID("_GsplatShockProgress");
         static readonly int s_shockBand    = Shader.PropertyToID("_GsplatShockBandWidth");
+        static readonly int s_shockDisp    = Shader.PropertyToID("_GsplatShockDisplace");
 
         public bool IsDone => m_done;
 
@@ -141,6 +146,7 @@ namespace Midterms
             pb.SetVector(s_shockCenter, Center);
             pb.SetVector(s_shockAxis, AxisVec());
             pb.SetFloat(s_shockBand, Mathf.Max(bandWidth, 0.0001f));
+            pb.SetFloat(s_shockDisp, displaceAmount);
 
             float t = 0f;
             float lastLog = -1f;
@@ -158,8 +164,9 @@ namespace Midterms
                 yield return null;
             }
 
-            // Finalize: park the wave well past every splat, then drop the desat envelope to lock colored state.
+            // Finalize: park the wave well past every splat, drop displacement, lock colored state.
             pb.SetFloat(s_shockProgress, maxDistance + 1e6f);
+            pb.SetFloat(s_shockDisp, 0f);
             pb.SetFloat(s_desat, 0f);
             m_done = true;
             m_running = null;

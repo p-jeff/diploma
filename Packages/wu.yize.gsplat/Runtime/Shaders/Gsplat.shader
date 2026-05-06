@@ -54,6 +54,7 @@ Shader "Gsplat/Standard"
             float4 _GsplatShockAxis;        // xyz = direction; if length<0.5 -> radial mode
             float  _GsplatShockProgress;    // distance along axis (or radius) where wave front sits, in meters
             float  _GsplatShockBandWidth;   // soft transition width in meters
+            float  _GsplatShockDisplace;    // peak world-space displacement at the wave front, in meters
 
             float3 GsplatRGBtoHSV(float3 rgb)
             {
@@ -173,18 +174,36 @@ Shader "Gsplat/Standard"
                 o.color = color;
                 o.uv = corner.uv;
 
-                // Read object-space splat center for the wave evaluation.
-                // SplatCenter does not carry the local position directly, but the model-view
-                // origin can be recovered: worldPos = center.modelView * (0,0,0,1) is the splat origin in view space;
-                // simpler: re-load position from the buffer directly via source.id when available.
+                // Per-splat wave + optional displacement (UNCOMPRESSED path only).
                 #ifdef UNCOMPRESSED
                 {
                     float3 localPos = _PositionBuffer[source.id];
-                    o.waveT = EvalShockwave(localPos);
+                    float3 worldPos = mul(_MATRIX_M, float4(localPos, 1.0)).xyz;
+                    float3 d3 = worldPos - _GsplatShockCenter.xyz;
+
+                    float axisLen = length(_GsplatShockAxis.xyz);
+                    float3 axisN  = (axisLen < 0.5) ? float3(0, 1, 0) : _GsplatShockAxis.xyz / axisLen;
+                    float dist    = (axisLen < 0.5) ? length(d3) : dot(d3, axisN);
+                    float bw      = max(_GsplatShockBandWidth, 0.0001);
+
+                    o.waveT = 1.0 - smoothstep(_GsplatShockProgress - bw, _GsplatShockProgress, dist);
+
+                    // Wavefront pulse: gaussian centered on the wave front; peak = 1 at dist == progress.
+                    if (abs(_GsplatShockDisplace) > 0.0001)
+                    {
+                        float k = (dist - _GsplatShockProgress) / bw;
+                        float pulse = exp(-k * k);                       // ~0 outside ±2*bw
+                        float3 dir  = (axisLen < 0.5)                    // radial: outward; vertical: axis
+                                        ? ((length(d3) > 1e-4) ? d3 / length(d3) : float3(0, 1, 0))
+                                        : axisN;
+                        float3 worldDisp = dir * (pulse * _GsplatShockDisplace);
+                        // Convert world-space displacement to a clip-space delta and apply.
+                        float4 clipDisp = mul(UNITY_MATRIX_VP, float4(worldDisp, 0.0));
+                        o.vertex += clipDisp;
+                    }
                 }
                 #else
                 {
-                    // Spark path: skip per-splat wave evaluation; use a homogeneous fallback (no shockwave).
                     o.waveT = 1.0;
                 }
                 #endif
