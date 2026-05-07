@@ -17,6 +17,8 @@ namespace Midterms
         [Tooltip("VFX Graph float property set before Stop() to speed up particle decay. Leave empty to skip.")]
         public string vfxDecayPropertyName = "";
         public float vfxDecayPropertyValue = 3f;
+        [Tooltip("Exponential base for playRate ramp after Stop(). playRate = base^secondsElapsed. 2 = doubles every second.")]
+        public float vfxDecaySpeedBase = 2f;
 
         [Header("Animators")]
         public GsplatShockwaveAnimator treeWave;
@@ -66,7 +68,14 @@ namespace Midterms
                 if (!string.IsNullOrEmpty(vfxDecayPropertyName))
                     introVfx.SetFloat(vfxDecayPropertyName, vfxDecayPropertyValue);
                 introVfx.Stop();
-                while (introVfx.aliveParticleCount > 0) yield return null;
+                float vfxElapsed = 0f;
+                while (introVfx.aliveParticleCount > 0)
+                {
+                    vfxElapsed += Time.deltaTime;
+                    introVfx.playRate = Mathf.Pow(vfxDecaySpeedBase, vfxElapsed);
+                    yield return null;
+                }
+                introVfx.playRate = 1f;
             }
 
             // Tree wave — ground wave starts overlapTreeGround seconds before tree finishes.
