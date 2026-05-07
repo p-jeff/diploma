@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.VFX;
 
 namespace Midterms
 {
@@ -10,6 +11,10 @@ namespace Midterms
     /// </summary>
     public class MidtermSequenceController : MonoBehaviour
     {
+        [Header("Intro VFX")]
+        [Tooltip("VFX stopped at the start of Begin(). Sequence waits until all particles die.")]
+        public VisualEffect introVfx;
+
         [Header("Animators")]
         public GsplatShockwaveAnimator treeWave;
         public GsplatShockwaveAnimator groundWave;
@@ -44,6 +49,7 @@ namespace Midterms
             StopAllCoroutines();
             m_started = false;
             CurrentStage = Stage.Idle;
+            if (introVfx != null)   introVfx.Play();
             if (treeWave != null)   treeWave.ApplyInitialGreyscale();
             if (groundWave != null) groundWave.ApplyInitialGreyscale();
             if (leaves != null)     leaves.Hide();
@@ -51,6 +57,13 @@ namespace Midterms
 
         IEnumerator Run()
         {
+            // Stop intro VFX and wait for all particles to die before the sequence begins.
+            if (introVfx != null)
+            {
+                introVfx.Stop();
+                while (introVfx.aliveParticleCount > 0) yield return null;
+            }
+
             // Tree wave
             CurrentStage = Stage.TreeWave;
             if (treeWave != null)
