@@ -14,6 +14,9 @@ namespace Midterms
         [Header("Intro VFX")]
         [Tooltip("VFX stopped at the start of Begin(). Sequence waits until all particles die.")]
         public VisualEffect introVfx;
+        [Tooltip("VFX Graph float property set before Stop() to speed up particle decay. Leave empty to skip.")]
+        public string vfxDecayPropertyName = "";
+        public float vfxDecayPropertyValue = 3f;
 
         [Header("Animators")]
         public GsplatShockwaveAnimator treeWave;
@@ -21,10 +24,10 @@ namespace Midterms
         public LeavesRevealAnimator leaves;
 
         [Header("Pacing")]
-        [Tooltip("Pause between tree wave end and ground wave start.")]
-        public float gapBeforeGround = 0.1f;
-        [Tooltip("Pause between ground wave end and leaves reveal.")]
-        public float gapBeforeLeaves = 0.2f;
+        [Tooltip("Seconds of overlap: ground wave starts this many seconds before tree wave finishes.")]
+        public float overlapTreeGround = 0.3f;
+        [Tooltip("Seconds of overlap: leaves reveal starts this many seconds before ground wave finishes.")]
+        public float overlapGroundLeaves = 0.3f;
 
         public enum Stage { Idle, TreeWave, GroundWave, LeavesReveal, LivingIdle }
         public Stage CurrentStage { get; private set; } = Stage.Idle;
@@ -60,29 +63,21 @@ namespace Midterms
             // Stop intro VFX and wait for all particles to die before the sequence begins.
             if (introVfx != null)
             {
+                if (!string.IsNullOrEmpty(vfxDecayPropertyName))
+                    introVfx.SetFloat(vfxDecayPropertyName, vfxDecayPropertyValue);
                 introVfx.Stop();
                 while (introVfx.aliveParticleCount > 0) yield return null;
             }
 
-            // Tree wave
+            // Tree wave — ground wave starts overlapTreeGround seconds before tree finishes.
             CurrentStage = Stage.TreeWave;
-            if (treeWave != null)
-            {
-                treeWave.Play();
-                while (!treeWave.IsDone) yield return null;
-            }
+            if (treeWave != null) treeWave.Play();
+            yield return new WaitForSeconds(Mathf.Max(0f, (treeWave != null ? treeWave.duration : 0f) - overlapTreeGround));
 
-            yield return new WaitForSeconds(gapBeforeGround);
-
-            // Ground wave
+            // Ground wave — leaves reveal starts overlapGroundLeaves seconds before ground finishes.
             CurrentStage = Stage.GroundWave;
-            if (groundWave != null)
-            {
-                groundWave.Play();
-                while (!groundWave.IsDone) yield return null;
-            }
-
-            yield return new WaitForSeconds(gapBeforeLeaves);
+            if (groundWave != null) groundWave.Play();
+            yield return new WaitForSeconds(Mathf.Max(0f, (groundWave != null ? groundWave.duration : 0f) - overlapGroundLeaves));
 
             // Leaves reveal -> living idle
             CurrentStage = Stage.LeavesReveal;

@@ -32,6 +32,7 @@ namespace Midterms
         Gsplat.GsplatRenderer m_renderer;
         bool m_revealed;
         Coroutine m_running;
+        Vector3 m_originalScale;
 
         static readonly int s_opacity      = Shader.PropertyToID("_GsplatOpacityMul");
         static readonly int s_shockCenter  = Shader.PropertyToID("_GsplatShockCenter");
@@ -47,6 +48,7 @@ namespace Midterms
         void Awake()
         {
             m_renderer = GetComponent<Gsplat.GsplatRenderer>();
+            m_originalScale = transform.localScale;
         }
 
         void Start()
@@ -63,6 +65,7 @@ namespace Midterms
             ConfigurePuff(pb);
             pb.SetFloat(s_shockDisp, 0f);
             pb.SetFloat(s_sparkleI, 0f);
+            transform.localScale = Vector3.zero;
         }
 
         // Sets up the wave uniforms so that _GsplatShockDisplace produces a near-uniform outward push.
@@ -92,13 +95,14 @@ namespace Midterms
             {
                 float u = fadeCurve.Evaluate(t / fadeInDuration);
                 pb.SetFloat(s_opacity, u);
-                // Displace decays from revealDisplaceAmount to 0 as opacity grows.
                 pb.SetFloat(s_shockDisp, revealDisplaceAmount * (1f - u));
+                transform.localScale = Vector3.LerpUnclamped(Vector3.zero, m_originalScale, u);
                 t += Time.deltaTime;
                 yield return null;
             }
             pb.SetFloat(s_opacity, 1f);
             pb.SetFloat(s_shockDisp, 0f);
+            transform.localScale = m_originalScale;
             m_revealed = true;
             m_running = null;
         }
@@ -120,6 +124,7 @@ namespace Midterms
             m_revealed = false;
             if (m_running != null) StopCoroutine(m_running);
             m_running = null;
+            transform.localScale = Vector3.zero;
             StartCoroutine(DeferInitial());
         }
 
