@@ -1746,10 +1746,18 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Light Again
+  m_text: "Where lifeless\u2014fixed afar,\n\_A flaming ball to our dull sense is
+    given,\nImagine Phoebus Apollo, in his golden car,\n\_In silent glory sweeps
+    the fields of heaven! \n\nsince\n\nThe indolent ones who laze at home\nAre not
+    refreshed by the dawn;\nThey only know about rearing children,\nAbout cares,
+    burdens and the need for grain.\n\nIf you instead embark \Lto search for the
+    flower in blue\L\LBlossoms burst From every twig\nAnd a thousand voices From
+    every bush\n\nLight again, Leaf Again, Live Again, Love Again\LNew New New New.
+    \L\Lbut, Is it then So new?\L\nAs was I once myself a swinger of birches.\nAnd
+    so I dream of going back to be."
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 4e2b8a775311f408d8483e9a7b6c3736, type: 2}
+  m_sharedMaterial: {fileID: -5271650411735847653, guid: 4e2b8a775311f408d8483e9a7b6c3736, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1773,11 +1781,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 39.05
+  m_fontSize: 8.4
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 18
+  m_fontSizeMin: 5
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 1
@@ -10829,8 +10837,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2116838194}
   m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalPosition: {x: 0, y: 0, z: -3.46}
+  m_LocalScale: {x: 0.0069999998, y: 0.0069999998, z: 0.0069999998}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 854800222}
@@ -10838,8 +10846,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 3.69, y: 1.71}
+  m_SizeDelta: {x: 300, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2116838196
 MonoBehaviour:
