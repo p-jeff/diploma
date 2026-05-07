@@ -3,7 +3,15 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - QDSUIBackplateGradient
+  - QDSUIPrimaryButton
+  - QDSUISecondaryButton
+  - QDSUISharedThemeColor
+  - QDSUIAccentColor
+  - QDSUITextInvertedColor
+  - QDSUIIcon
+  - QDSUITextSecondaryInvertedColor
   layers:
   - Default
   - TransparentFX
@@ -12,6 +20,7 @@ TagManager:
   - Water
   - UI
   - Player
+  - Overlay UI
   - 
   - 
   - 
@@ -35,8 +44,7 @@ TagManager:
   - 
   - 
   - 
-  - 
-  - 
+  - OVROverlayCanvas Rendering
   m_SortingLayers:
   - name: Default
     uniqueID: 0
