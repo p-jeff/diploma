@@ -26,8 +26,10 @@ MonoBehaviour:
     m_path: Assets/_Projects/ScanAlignment/3.3.unity
   - m_enabled: 0
     m_path: "Assets/Samples/Meta XR Interaction \u200BSDK/85.0.0/Example Scenes/PoseExamples.unity"
-  - m_enabled: 1
+  - m_enabled: 0
     m_path: Assets/_Projects/HandPose/4.unity
+  - m_enabled: 1
+    m_path: Assets/_Projects/Midterms/Midterm_StandaloneStuff.unity
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
