@@ -26,11 +26,27 @@ namespace Midterms
 
         bool m_started;
 
+        void Start()
+        {
+            // Leaves start hidden but GameObject stays active and ready.
+            if (leaves != null) leaves.Hide();
+        }
+
         public void Begin()
         {
             if (m_started) return;
             m_started = true;
             StartCoroutine(Run());
+        }
+
+        public void Reset()
+        {
+            StopAllCoroutines();
+            m_started = false;
+            CurrentStage = Stage.Idle;
+            if (treeWave != null)   treeWave.ApplyInitialGreyscale();
+            if (groundWave != null) groundWave.ApplyInitialGreyscale();
+            if (leaves != null)     leaves.Hide();
         }
 
         IEnumerator Run()
@@ -68,5 +84,8 @@ namespace Midterms
 
         [ContextMenu("Begin (debug)")]
         void DebugBegin() => Begin();
+
+        [ContextMenu("Reset (debug)")]
+        void DebugReset() => Reset();
     }
 }
