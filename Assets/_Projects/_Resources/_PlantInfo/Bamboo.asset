@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1cd92da80c7495a8fe7eb91fa80c2f, type: 3}
+  m_Name: Bamboo
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
+  id: 3
+  displayName: Bamboo
+  facts:
+  - 'Look at those recesses in the banks of the Qi,
+
+    With their green bamboos,
+    so fresh and luxuriant!
+
+    There is our elegant and accomplished prince, -
+
+    As
+    from the knife and the file,
+
+    As from the chisel and the polisher!
+
+    How
+    grave is he and dignified!
+
+    How commanding and distinguished!
+
+    Our
+    elegant and accomplished prince, -
+
+    Never can he be forgotten!'
+  - "Better to eat without meat than to live without bamboo. / Without meat, one
+    merely grows thin; without bamboo, one grows vulgar. / Thinness can still be
+    remedied \u2014 vulgarity in a scholar cannot be cured"

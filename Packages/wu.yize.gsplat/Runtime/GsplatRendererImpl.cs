@@ -26,6 +26,7 @@ namespace Gsplat
         public GraphicsBuffer OrderSizeBuffer { get; private set; }
         public GraphicsBuffer BoundsBuffer { get; private set; }
         public ISorterResource SorterResource { get; private set; }
+        System.Type m_gsplatAssetType;
 
         static readonly int k_orderBuffer = Shader.PropertyToID("_OrderBuffer");
         static readonly int k_matrixM = Shader.PropertyToID("_MATRIX_M");
@@ -135,6 +136,7 @@ namespace Gsplat
         {
             Debug.Assert(m_gsplatAssetID == 0);
             m_gsplatAssetID = gsplatAsset.GetInstanceID();
+            m_gsplatAssetType = gsplatAsset.GetType();
             m_gsplatAsset = gsplatAsset;
             GsplatResource = GsplatResourceManager.Get(gsplatAsset);
             gsplatAsset.SetupMaterialPropertyBlock(m_propertyBlock, GsplatResource);
@@ -146,10 +148,11 @@ namespace Gsplat
 
         public void ReleaseGsplatAsset()
         {
-            GsplatResourceManager.Release(m_gsplatAssetID);
+            GsplatResourceManager.Release(m_gsplatAssetID, m_gsplatAssetType);
             GsplatResource = null;
             m_gsplatAsset = null;
             m_gsplatAssetID = 0;
+            m_gsplatAssetType = null;
         }
 
         void CreateResources(uint splatCount)
