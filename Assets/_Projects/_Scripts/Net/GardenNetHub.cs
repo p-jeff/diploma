@@ -27,7 +27,11 @@ namespace Plants.Net
         [Tooltip("Host broadcast rate (snapshots per second).")]
         [Range(1f, 60f)] public float sendRate = 15f;
 
+        [Tooltip("Log a throttled (~1/s) summary of broadcast (host) / apply (client) to help debug the spectator sync.")]
+        public bool verboseLogging = true;
+
         float m_nextSend;
+        float m_nextLog;
         readonly List<PlantState> m_scratch = new List<PlantState>(32);
 
         void Awake()
@@ -73,9 +77,24 @@ namespace Plants.Net
                 var p = kv.Value;
                 if (p != null) m_scratch.Add(p.Sample(root));
             }
-            if (m_scratch.Count == 0) return;
+            if (m_scratch.Count == 0)
+            {
+                if (verboseLogging && Time.unscaledTime >= m_nextLog)
+                {
+                    m_nextLog = Time.unscaledTime + 1f;
+                    Debug.LogWarning("[GardenNetHub] host: 0 NetPlants registered — nothing to broadcast " +
+                                     "(garden content inactive until LOCK IN?).");
+                }
+                return;
+            }
 
             NetworkServer.SendToAll(new GardenStateMessage { plants = m_scratch.ToArray() });
+
+            if (verboseLogging && Time.unscaledTime >= m_nextLog)
+            {
+                m_nextLog = Time.unscaledTime + 1f;
+                Debug.Log($"[GardenNetHub] host → {m_scratch.Count} plants to {NetworkServer.connections.Count} connection(s).");
+            }
         }
 
         /// <summary>Client message handler: reconcile local plants to the received snapshot.</summary>
@@ -85,11 +104,26 @@ namespace Plants.Net
             if (msg.plants == null) return;
 
             var root = GardenRoot;
+            int matched = 0;
             for (int i = 0; i < msg.plants.Length; i++)
             {
                 var s = msg.plants[i];
                 if (NetPlantRegistry.TryGet(s.id, out var p) && p != null)
+                {
                     p.Apply(in s, root);
+                    matched++;
+                }
+            }
+
+            if (verboseLogging && Time.unscaledTime >= m_nextLog)
+            {
+                m_nextLog = Time.unscaledTime + 1f;
+                if (matched == 0)
+                    Debug.LogWarning($"[GardenNetHub] client received {msg.plants.Length} plants but matched 0 local " +
+                                     "NetPlants (content not enabled yet, or NetPlant ids don't match the host's).");
+                else
+                    Debug.Log($"[GardenNetHub] client applied {matched}/{msg.plants.Length} plants " +
+                              $"(root '{(root != null ? root.name : "null")}').");
             }
         }
     }

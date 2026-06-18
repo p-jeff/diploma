@@ -107,6 +107,23 @@ namespace Plants
 
         void Awake()
         {
+            // SPECTATOR (Mac client): the garden is rendered purely from replicated host state, there
+            // is no local intro, and there are no hands to advance it. Running the normal gating here
+            // would hide the garden (ExperienceManager + plants) and then never reveal it — the touch
+            // that drives RevealGarden() never comes — leaving the spectator stuck on the title.
+            // Disabling this component via SpectatorModeController.componentsToDisable does NOT help:
+            // Awake runs on every component of an active GameObject regardless of the enabled flag. So
+            // skip the whole sequence here: hide the title visuals, leave the garden visible, opt out.
+            if (Plants.Net.SpectatorState.IsSpectator)
+            {
+                if (titlePoppy != null) titlePoppy.SetActive(false); // also stops the IdleSplatCycler under it
+                SetTextAlpha(touchMeLabel, 0f);
+                SetTextAlpha(titleCard, 0f);
+                SetTextAlpha(poemText, 0f);
+                enabled = false;
+                return;
+            }
+
             // Gate the garden in Awake — runs before ANY Start(), so the ExperienceManager's own
             // Start() never fires until we re-enable it at the end.
             if (experienceManager != null) experienceManager.SetActive(false);
