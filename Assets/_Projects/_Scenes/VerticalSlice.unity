@@ -4523,7 +4523,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3967473718266300107, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
   m_PrefabInstance: {fileID: 717881620697957263}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 717881620697957266}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 986608f6d5c3d5f44a4bea7e81488b5d, type: 3}
@@ -4557,7 +4557,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 3648001bbb8fec14dbf73cda316983d5, type: 3}
+  m_Resource: {fileID: 8300000, guid: b06c161177653f64ab049d58b9a61b06, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -13994,7 +13994,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3967473718266300107, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
   m_PrefabInstance: {fileID: 1549391152}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 1549391156}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 986608f6d5c3d5f44a4bea7e81488b5d, type: 3}
@@ -14016,6 +14016,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de76f7169412b8f4896235a1585d8939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.SelectorUnityEventWrapper
+--- !u!1 &1549391156 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3466727687825186521, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
+  m_PrefabInstance: {fileID: 1549391152}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1554794616
 GameObject:
   m_ObjectHideFlags: 0
@@ -15150,11 +15155,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e74fb7b8c420434bae154982cc93a74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.SpectatorModeController
-  ovrRig: {fileID: 0}
-  passthrough: {fileID: 0}
+  objectsToDisable:
+  - {fileID: 419167060}
+  - {fileID: 334891645}
+  - {fileID: 1549391156}
+  - {fileID: 717881620697957266}
+  - {fileID: 600885717}
+  - {fileID: 1308639809}
+  - {fileID: 2146477505}
+  - {fileID: 512113455}
+  componentsToDisable:
+  - {fileID: 1015637056}
+  - {fileID: 4278882559347271652}
   spectatorCamera: {fileID: 0}
-  ovrRigName: '[BuildingBlock] Camera Rig'
-  passthroughName: '[BuildingBlock] Passthrough'
 --- !u!4 &1839522162
 Transform:
   m_ObjectHideFlags: 0
@@ -16092,6 +16105,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de76f7169412b8f4896235a1585d8939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.SelectorUnityEventWrapper
+--- !u!1 &717881620697957266 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3466727687825186521, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
+  m_PrefabInstance: {fileID: 717881620697957263}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4278882559347271650
 PrefabInstance:
   m_ObjectHideFlags: 0

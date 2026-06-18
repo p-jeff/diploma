@@ -1,58 +1,66 @@
+using System.Collections.Generic;
 using Mirror;
-using Plants.Garden;
 using UnityEngine;
 
 namespace Plants.Net
 {
     /// <summary>
-    /// Lives in the garden scene. On the SPECTATOR client (a Mirror client that is
+    /// Lives in the garden scene. On the SPECTATOR client (a networked client that is
     /// NOT also the host) it strips the interactive headset layer and brings up a
     /// fixed-angle camera, so the Mac renders the garden purely as an audience view
     /// driven by the host's replicated state.
     ///
-    /// On the host — or when the scene is played standalone with no networking — it
-    /// does nothing, so the headset experience (and the host's display-1
-    /// "window into the digital" SpectatorCamera) is untouched.
+    /// WHAT gets stripped is fully data-driven — drag the headset-only objects/components
+    /// into the two lists below. That way, when something new on the headset throws on
+    /// the Mac (a gesture, a hand visual, an OVR helper…), you just add it here; no code
+    /// change. Typical entries: the OVR camera rig, passthrough, Like/Context gesture
+    /// objects, hand-proximity / hand-cue objects (objectsToDisable); ExperienceManager,
+    /// GardenPlacer, TitleSequenceController (componentsToDisable, when they live on a
+    /// shared root you can't deactivate wholesale).
+    ///
+    /// On the host — or when the scene is played standalone with no networking — it does
+    /// nothing, so the headset experience (and the host's display-1 SpectatorCamera) is
+    /// untouched.
     /// </summary>
-    [DefaultExecutionOrder(-1000)]   // run before SceneLockController/ExperienceManager so the local sim is disabled before it can Start
+    [DefaultExecutionOrder(-1000)]   // run before other components Start, so the local sim is disabled before it can run / throw
     public class SpectatorModeController : MonoBehaviour
     {
-        [Header("Disabled on the spectator (auto-found by name when unset)")]
-        public GameObject ovrRig;
-        public GameObject passthrough;
+        [Header("Disabled on the spectator client")]
+        [Tooltip("GameObjects fully deactivated on the spectator: OVR rig, passthrough, " +
+                 "Like/Context gesture objects, hand-proximity / hand-cue objects, etc.")]
+        public List<GameObject> objectsToDisable = new List<GameObject>();
 
+        [Tooltip("Individual components disabled (enabled=false) when you can't deactivate the " +
+                 "whole GameObject — e.g. ExperienceManager / GardenPlacer / TitleSequenceController.")]
+        public List<Behaviour> componentsToDisable = new List<Behaviour>();
+
+        [Header("Spectator camera")]
         [Tooltip("Camera used for the spectator view. If unset, the scene's SpectatorCamera is used.")]
         public Camera spectatorCamera;
 
-        [Header("Auto-find names")]
-        public string ovrRigName      = "[BuildingBlock] Camera Rig";
-        public string passthroughName = "[BuildingBlock] Passthrough";
+        bool IsSpectator => SpectatorState.IsSpectator || (NetworkClient.active && !NetworkServer.active);
+
+        void Awake()
+        {
+            if (!IsSpectator) return;
+
+            // Disable the headset-only objects/components BEFORE their own Awake/OnEnable/Update
+            // runs (this component is DefaultExecutionOrder -1000), so they can't throw on the
+            // Mac — e.g. Like/Context gestures dereferencing null hand anchors.
+            int objs = 0, comps = 0;
+            foreach (var go in objectsToDisable)
+                if (go != null) { go.SetActive(false); objs++; }
+            foreach (var c in componentsToDisable)
+                if (c != null) { c.enabled = false; comps++; }
+
+            Debug.Log($"[SpectatorMode] Disabled {objs} objects + {comps} components (spectator).", this);
+        }
 
         void Start()
         {
-            // Pure client only. Host (server+client) and non-networked play behave normally.
-            bool isSpectator = SpectatorState.IsSpectator || (NetworkClient.active && !NetworkServer.active);
-            if (!isSpectator) return;
-            EnterSpectatorMode();
-        }
-
-        void EnterSpectatorMode()
-        {
-            // 1. Kill the headset rig + passthrough (no VR / no hands on the spectator).
-            var rig = ovrRig != null ? ovrRig : GameObject.Find(ovrRigName);
-            if (rig != null) rig.SetActive(false);
-            var pt = passthrough != null ? passthrough : GameObject.Find(passthroughName);
-            if (pt != null) pt.SetActive(false);
-
-            // 2. Stop the local simulation — the host owns all of this and replicates it.
-            DisableAll<ExperienceManager>();
-            DisableAll<TitleSequenceController>();
-            DisableAll<GardenPlacer>();
-
-            // 3. Bring up the spectator camera on the main display.
-            SetupSpectatorCamera();
-
-            Debug.Log("[SpectatorMode] Entered spectator mode (rig/sim disabled, spectator camera live).", this);
+            if (!IsSpectator) return;
+            SetupSpectatorCamera();   // after the SpectatorCamera helper's Awake has forced display 1
+            Debug.Log("[SpectatorMode] Spectator camera live.", this);
         }
 
         void SetupSpectatorCamera()
@@ -92,16 +100,9 @@ namespace Plants.Net
             cam.enabled         = true;
             cam.tag             = "MainCamera";   // so Camera.main resolves to the spectator view
 
-            // The rig's AudioListener was just disabled — make sure the spectator has one.
+            // Whatever rig we just disabled probably owned the AudioListener — make sure there's one.
             if (cam.GetComponent<AudioListener>() == null)
                 cam.gameObject.AddComponent<AudioListener>();
-        }
-
-        static void DisableAll<T>() where T : Behaviour
-        {
-            var comps = Object.FindObjectsByType<T>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var c in comps)
-                if (c != null) c.enabled = false;
         }
     }
 }
