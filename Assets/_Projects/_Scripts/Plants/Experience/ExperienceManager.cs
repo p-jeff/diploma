@@ -28,15 +28,13 @@ namespace Plants
         [Header("Unlock Batches")]
         [Tooltip("The garden roster, grouped into unlock batches. Batch 0 is always active at start; " +
                  "each subsequent batch unlocks on a like. This list IS the roster — the flourish and " +
-                 "the story distribution walk it in order (batch 0 first). For the vertical slice, put " +
-                 "the start heroes in batch 0 and the rest in batch 1, set Flourish After Likes = 1, and " +
-                 "turn on Bloom Whole Roster On Flourish.")]
+                 "the story distribution walk it in order (batch 0 first). Liking progressively unlocks " +
+                 "the next batch as the user explores; the flourish itself is now triggered by SITTING " +
+                 "in the chair (see Sit()), not by a like count. Turn on Bloom Whole Roster On Flourish " +
+                 "so sitting bursts the WHOLE roster into bloom.")]
         [SerializeField] private List<UnlockBatch> unlockBatches = new List<UnlockBatch>();
 
         [Header("Flourish")]
-        [Tooltip("Number of likes needed to trigger the garden flourish. Set to 1 for the vertical " +
-                 "slice (the first like bursts the whole garden into bloom).")]
-        [SerializeField] private int flourishAfterLikes = 8;
         [Tooltip("OFF (staged garden): the flourish blooms only the plants the user kept, and hides " +
                  "the rest. ON (vertical slice): the flourish blooms the WHOLE roster — every plant in " +
                  "the batches, activating any not yet unlocked so they rise from the ground.")]
@@ -99,7 +97,7 @@ namespace Plants
         [Header("Debug")]
         [Tooltip("Which round the 'Debug Jump To Round' / '+ Flourish' helpers fast-forward to: " +
                  "the number of plants to auto-like. Each like unlocks the next batch, exactly as in " +
-                 "normal play. Capped at the total number of plants and at flourishAfterLikes.")]
+                 "normal play. Capped at the total number of plants.")]
         [SerializeField, Min(1)] private int debugJumpRound = 4;
 
         // ── Singleton ────────────────────────────────────────────────────────────
@@ -134,6 +132,17 @@ namespace Plants
         private int m_unlockedBatches;
         private bool m_flourished;
         private Plant m_exploringPlant;
+        private bool m_listenersWired;
+        private bool m_gardenOpen;
+
+        /// <summary>True once the garden has bloomed (the user sat down). The post-flourish gaze
+        /// explore is active while this is set.</summary>
+        public bool IsFlourished => m_flourished;
+
+        /// <summary>True only during the free-explore phase: the garden is open (revealed) and the
+        /// user has not yet sat down to flourish. The chair gates its sit detection on this so it
+        /// can't fire during calibration or while the title sequence is (re)playing.</summary>
+        public bool CanSit => m_gardenOpen && !m_flourished;
 
         // Post-flourish gaze hover-highlight state.
         private GameObject m_gazeInstance;                 // splat instance currently highlighted
@@ -148,6 +157,37 @@ namespace Plants
 
         void Start()
         {
+            WireGestureListeners();
+            BeginGarden();
+        }
+
+        /// <summary>Subscribe the like / context gesture wrappers once. Guarded so a restart
+        /// (which never destroys this component) can't double-subscribe.</summary>
+        private void WireGestureListeners()
+        {
+            if (m_listenersWired) return;
+            m_listenersWired = true;
+
+            // Wire gesture wrappers.
+            foreach (var w in likeGestureWrappers)
+                if (w != null) w.WhenSelected.AddListener(LikeSelected);
+
+            // Context gesture grows the nearest ungrown preview of the selected plant
+            // (proximity / stepping close is the primary reveal; this is the manual
+            // fallback — no gaze targeting).
+            foreach (var w in contextGestureWrappers)
+                if (w != null) w.WhenSelected.AddListener(GrowNearestContext);
+        }
+
+        /// <summary>
+        /// Open the garden to its initial state: deactivate every batch, re-activate batch 0
+        /// (the starting heroes) dormant, reset progression counters, show the touch prompt and
+        /// disable the gesture selectors. Idempotent — safe to call on a cold start AND on a
+        /// restart (Unity's Start() only runs once per component lifetime, so the title sequence
+        /// calls this explicitly each time it reveals the garden).
+        /// </summary>
+        public void BeginGarden()
+        {
             // Deactivate every plant in all batches, then activate only batch 0.
             foreach (var batch in unlockBatches)
             {
@@ -157,7 +197,11 @@ namespace Plants
             }
 
             // Batch 0 is the starting set (the heroes in the vertical slice); the rest stay hidden
-            // until unlocked (staged garden) or until the whole-roster flourish reveals them.
+            // until unlocked by a like (staged garden) or until the sit-triggered whole-roster
+            // flourish reveals them.
+            m_selected = null;
+            m_likedCount = 0;
+            m_flourished = false;
             m_unlockedBatches = 0;
             ActivateBatch(0);
             m_unlockedBatches = 1;
@@ -169,18 +213,11 @@ namespace Plants
                 if (firstPlant != null) touchPrompt.Show(firstPlant.transform);
             }
 
-            // Wire gesture wrappers.
-            foreach (var w in likeGestureWrappers)
-                if (w != null) w.WhenSelected.AddListener(LikeSelected);
-
-            // Context gesture grows the nearest ungrown preview of the selected plant
-            // (proximity / stepping close is the primary reveal; this is the manual
-            // fallback — no gaze targeting).
-            foreach (var w in contextGestureWrappers)
-                if (w != null) w.WhenSelected.AddListener(GrowNearestContext);
-
             // Both selector lists start disabled.
             SetSelectorsActive(false);
+
+            // The garden is now open for free exploration — the chair's sit detection may arm.
+            m_gardenOpen = true;
         }
 
         /// <summary>Head/centre-eye transform: serialized field if set, else Camera.main.</summary>
@@ -474,14 +511,67 @@ namespace Plants
 
             m_likedCount++;
 
-            // Like-driven progression: committing to a plant reveals the next batch. The flourish
-            // ends the experience, so it takes priority over a normal unlock. In the vertical slice
-            // flourishAfterLikes = 1, so the first like flourishes (and Bloom Whole Roster On Flourish
-            // bursts the whole garden into bloom — see StartFlourish/FlourishRoutine).
-            if (m_likedCount >= flourishAfterLikes)
-                StartFlourish();
-            else
-                UnlockNextBatch();
+            // Like-driven progression: committing to a plant reveals the next batch as the user
+            // explores. There is no longer a "max like" that ends the experience — the garden
+            // flourishes only when the user sits down in the chair (see Sit()).
+            UnlockNextBatch();
+        }
+
+        // ── Sit-to-flourish ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// The user took a seat in the chair. This is the finale trigger: it bursts the garden
+        /// into bloom (the whole roster when Bloom Whole Roster On Flourish is on) and switches the
+        /// experience into post-flourish gaze-explore mode. Idempotent — only the first sit blooms.
+        /// Wired from <c>ChairSit</c>'s head-enter event.
+        /// </summary>
+        public void Sit()
+        {
+            if (m_flourished) return;
+            StartFlourish();
+        }
+
+        // ── Soft reset (restart) ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Tear the experience back down to "before the garden" for an in-place restart: stop all
+        /// flourish/explore coroutines, drop the post-flourish gaze + replay state, restore every
+        /// roster plant to pristine (un-liked, spread destroyed) and deactivate it, and clear all
+        /// progression counters. Leaves the garden CLOSED — the title sequence re-opens it via
+        /// <see cref="BeginGarden"/> when it finishes replaying. The gesture listeners stay wired
+        /// (this component is never destroyed), so nothing is double-subscribed.
+        /// </summary>
+        public void ResetAll()
+        {
+            StopAllCoroutines();
+            m_enableSelectorsRoutine = null;
+
+            // Drop any post-flourish gaze highlight / in-progress explore replay.
+            ClearGazeHighlight();
+            if (m_exploringPlant != null) { m_exploringPlant.EndReplay(); m_exploringPlant = null; }
+            m_gazePlant = null;
+
+            // Interrupt any live 180° environment moment.
+            var moment = GetMoment();
+            if (moment != null) moment.Interrupt();
+
+            HandReadyCue.Instance?.Hide();
+            if (touchPrompt != null) touchPrompt.Hide();
+            SetSelectorsActive(false);
+
+            // Restore every roster plant to pristine, then deactivate it (BeginGarden re-opens batch 0).
+            foreach (var p in AllRosterPlants())
+            {
+                if (p == null) continue;
+                p.ResetState();
+                p.gameObject.SetActive(false);
+            }
+
+            m_selected = null;
+            m_likedCount = 0;
+            m_unlockedBatches = 0;
+            m_flourished = false;
+            m_gardenOpen = false;
         }
 
         // ── Batch unlocking ───────────────────────────────────────────────────────
@@ -507,6 +597,7 @@ namespace Plants
         private void StartFlourish()
         {
             m_flourished = true;
+            m_gardenOpen = false;   // explore phase over; the chair won't re-trigger
 
             // Staged garden only: hide the active, un-liked plants so the finale shows just the
             // kept ones. When blooming the whole roster (vertical slice) we KEEP them — they bloom.
@@ -690,7 +781,7 @@ namespace Plants
                 if (p == null) break;
 
                 // Drive the real like path: counts the like, retires/keeps the right selectors,
-                // and unlocks the next batch (or flourishes once flourishAfterLikes is hit).
+                // and unlocks the next batch.
                 m_selected = p;
                 LikeSelected();
                 committed++;
@@ -713,14 +804,13 @@ namespace Plants
         public void DebugLike() => LikeSelected();
 
         /// <summary>Clamp the configured debug round to something sane: at least 1, never more than
-        /// the like threshold or the total plant count (so we don't loop past what exists).</summary>
+        /// the total plant count (so we don't loop past what exists).</summary>
         private int DebugRoundTarget()
         {
             int total = 0;
             foreach (var batch in unlockBatches)
                 if (batch?.plants != null) total += batch.plants.Count;
             int target = Mathf.Max(1, debugJumpRound);
-            if (flourishAfterLikes > 0) target = Mathf.Min(target, flourishAfterLikes);
             if (total > 0) target = Mathf.Min(target, total);
             return target;
         }
@@ -758,5 +848,13 @@ namespace Plants
         /// <summary>Explore the gazed liked plant (post-flourish) without the gesture.</summary>
         [ContextMenu("Debug Explore Gazed")]
         public void DebugExploreGazed() => ExploreGazed();
+
+        /// <summary>Sit down (trigger the finale flourish) from the inspector — headset-free testing.</summary>
+        [ContextMenu("Debug Sit")]
+        public void DebugSit() => Sit();
+
+        /// <summary>Soft-reset the experience (as the restart button does) — headset-free testing.</summary>
+        [ContextMenu("Debug Reset All")]
+        public void DebugResetAll() => ResetAll();
     }
 }

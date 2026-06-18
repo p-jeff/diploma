@@ -41,6 +41,18 @@ public class SceneLockController : MonoBehaviour
     [Tooltip("Everything that switches on the moment the scene is locked (plants, garden, Experience Manager …). Disabled until then.")]
     [SerializeField] private GameObject content;
 
+    [Header("Chair Placement")]
+    [Tooltip("The chair / sit-spot root (the glowing marker + ChairSit volume). MUST be a child of " +
+             "sceneRoot so its pose is anchor-relative. Positioned during calibration via the chair " +
+             "handle and persisted (relative to sceneRoot) so it survives across sessions.")]
+    [SerializeField] private Transform chairRoot;
+    [Tooltip("Grabbable used to position the chair over the user's REAL chair during setup. At startup " +
+             "its target transform is rebound to chairRoot, so grabbing the handle moves the chair root. Optional.")]
+    [SerializeField] private Grabbable chairGrabbable;
+    [Tooltip("Grab handle / visuals shown ONLY while calibrating (the thing you grab to place the chair). " +
+             "Hidden once the scene is locked. Optional.")]
+    [SerializeField] private GameObject chairPlacementHandle;
+
     [Header("World Lock")]
     [Tooltip("OVRManager whose recenter is disabled once locked, so the scene can't be nudged off its anchor. Optional.")]
     [SerializeField] private OVRManager ovrManager;
@@ -52,6 +64,8 @@ public class SceneLockController : MonoBehaviour
     [SerializeField] private bool persistAcrossSessions = true;
     [Tooltip("PlayerPrefs key the saved anchor UUID is stored under.")]
     [SerializeField] private string anchorPrefKey = "SceneLock.AnchorUuid";
+    [Tooltip("PlayerPrefs key the chair's saved local pose (relative to sceneRoot) is stored under.")]
+    [SerializeField] private string chairPosePrefKey = "SceneLock.ChairPose";
     [Tooltip("Seconds to wait for the runtime to create / localize the anchor before giving up.")]
     [SerializeField, Min(1f)] private float anchorTimeout = 6f;
 
@@ -74,6 +88,10 @@ public class SceneLockController : MonoBehaviour
         // own Start, so grabbing the box drives the whole hierarchy.
         if (boxGrabbable != null && sceneRoot != null)
             boxGrabbable.InjectOptionalTargetTransform(sceneRoot);
+
+        // Same for the chair handle: grabbing it should move the chair root, not the handle itself.
+        if (chairGrabbable != null && chairRoot != null)
+            chairGrabbable.InjectOptionalTargetTransform(chairRoot);
     }
 
     void Start()
@@ -93,6 +111,11 @@ public class SceneLockController : MonoBehaviour
         if (content != null) content.SetActive(false);
         if (calibrationBox != null) calibrationBox.SetActive(true);
 
+        // Start the chair at its last-saved spot (if any) so the user fine-tunes rather than
+        // re-places from scratch, and show the grab handle for positioning over their real chair.
+        LoadChairPose();
+        if (chairPlacementHandle != null) chairPlacementHandle.SetActive(true);
+
         if (ovrManager != null) ovrManager.AllowRecenter = true;
         if (useMrukWorldLock && MRUK.Instance != null) MRUK.Instance.EnableWorldLock = false;
 
@@ -111,8 +134,12 @@ public class SceneLockController : MonoBehaviour
     {
         State = LockState.Locked;
 
-        // Stop grabbing immediately so the root can't drift while we anchor it.
+        // Stop grabbing immediately so the root (and the chair) can't drift while we anchor it.
         if (calibrationBox != null) calibrationBox.SetActive(false);
+        if (chairPlacementHandle != null) chairPlacementHandle.SetActive(false);
+
+        // Persist the chair's final placement (relative to the root, which the anchor world-locks).
+        SaveChairPose();
 
         // Create a spatial anchor at the root's final pose.
         var anchorGo = new GameObject("[SceneAnchor]");
@@ -165,6 +192,7 @@ public class SceneLockController : MonoBehaviour
         State = LockState.Restoring;
         if (content != null) content.SetActive(false);
         if (calibrationBox != null) calibrationBox.SetActive(false);
+        if (chairPlacementHandle != null) chairPlacementHandle.SetActive(false);
 
         try
         {
@@ -200,6 +228,7 @@ public class SceneLockController : MonoBehaviour
             ua.BindTo(m_anchor);
 
             AttachRootToAnchor(anchorGo.transform);
+            LoadChairPose();   // restore the chair where the user placed it (relative to the root)
             ApplyWorldLock();
             EnableContent();
             State = LockState.Locked;
@@ -233,6 +262,40 @@ public class SceneLockController : MonoBehaviour
     private void EnableContent()
     {
         if (content != null) content.SetActive(true);
+    }
+
+    // ── Chair pose persistence ────────────────────────────────────────────────────
+    // The chair root lives under sceneRoot, so its LOCAL pose is what the anchor world-locks.
+    // We persist that local pose (position + euler) as a CSV string, invariant-culture so the
+    // headset's locale can't corrupt the decimal separator.
+
+    private void SaveChairPose()
+    {
+        if (!persistAcrossSessions || chairRoot == null) return;
+        Vector3 p = chairRoot.localPosition;
+        Vector3 e = chairRoot.localEulerAngles;
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        PlayerPrefs.SetString(chairPosePrefKey, string.Format(ci, "{0},{1},{2},{3},{4},{5}",
+            p.x, p.y, p.z, e.x, e.y, e.z));
+        PlayerPrefs.Save();
+    }
+
+    private void LoadChairPose()
+    {
+        if (chairRoot == null) return;
+        string s = PlayerPrefs.GetString(chairPosePrefKey, "");
+        if (string.IsNullOrEmpty(s)) return;
+
+        var parts = s.Split(',');
+        if (parts.Length != 6) return;
+
+        var ci = System.Globalization.CultureInfo.InvariantCulture;
+        var f = new float[6];
+        for (int i = 0; i < 6; i++)
+            if (!float.TryParse(parts[i], System.Globalization.NumberStyles.Float, ci, out f[i])) return;
+
+        chairRoot.localPosition = new Vector3(f[0], f[1], f[2]);
+        chairRoot.localEulerAngles = new Vector3(f[3], f[4], f[5]);
     }
 
     // ── Recalibrate / escape hatch ────────────────────────────────────────────────

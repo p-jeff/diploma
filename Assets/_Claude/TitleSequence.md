@@ -28,10 +28,40 @@ so it can be dropped into `Experience.unity` later.
 - `PlantTouchTrigger.cs` — added one additive accessor `AddTouchListener(UnityAction)`. The title's
   trigger carries NO plant, so the touch only fires our event (the manager routing no-ops on null).
 
+## Idle cross-dissolve (waiting animation)
+While waiting to be touched, the title splat doesn't sit static — it cross-dissolves through a small set
+of flowers (poppy → lavender → daffodil → …) so there's gentle life. Built 2026-06-18.
+- **`IdleSplatCycler.cs`** (`_Scripts/Plants/Experience/`, ns `Plants`) on `TitlePoppy`. Holds a list of
+  flowers (each = a `GsplatRenderer` + its `GsplatRevealAnimator`), cadence `holdDuration=5` then a quick
+  `morphDuration=1` cross-dissolve. A transition is just `next.Play()` (assemble in) alongside
+  `current.PlayReverse()` (dissolve out) — it **reuses the existing reveal pipeline** (bloom + scatter),
+  so NO shader work, NO per-pair init, and a shown flower (settled at progress 1) costs zero per-frame GPU.
+- **Why this approach** (not a geometric two-splat morph): cycling N splats with the geometric morph would
+  re-pair (O(n·m) NN) per transition = a hitch every cycle. The cross-dissolve has none of that and scales
+  to any number of flowers; downside is it's a clean dissolve, not a literal shape-shift (acceptable for an
+  idle). Optional `hueDriftDuringMorph` knob (off by default) washes hue across the swap.
+- **All flower GOs stay enabled** for the title's life; hidden ones are parked at progress 0 (fully
+  transparent because their animators use `startAt=0`). Nothing toggles active → no 1-frame full-detail
+  flash. The 2 hidden flowers each hold one pooled morph buffer (trivial). Does NOT reintroduce idle
+  dispatch (parked flowers dispatch once then idle — consistent with the dispatch-gating rule).
+- **Touch interrupts cleanly**: `TitleSequenceController.onSequenceStarted` → `cycler.StopCycle()` (wired
+  as a persistent UnityEvent call in the prefab). The controller's `Begin` then fades **every** renderer
+  under `TitlePoppy`, so whichever flower is showing is dismissed — no per-flower handling needed. The
+  `TouchZone` collider is independent of the splats, so the user can touch at any point in the cycle.
+- **All 3 reveal animators retuned** for a clean dissolve: `startAt=0`, `startGaussianScale=1`,
+  `startPositionScale=1`, `startDesaturation=0`, `radial=true`, `scatterAmount=0.03`, `duration=1`. NOTE:
+  this changes the poppy's INITIAL reveal too (was 3s grow-from-small-desaturated; now a 1s radial
+  bloom+scatter at full scale/colour) — unavoidable, since the cycle needs the poppy's progress-0 state
+  fully hidden. Scales are meant to be hand-tuned per flower so they read roughly equal.
+- Test flowers: poppy/lavender/daffodil (narcissus). Wired into `TitleSequence.prefab` via unity-mcp.
+
 ## Scene structure (`SceneRoot/Content/TitleSequence`)
 - `TitlePoppy` (root, pos (0,0,1.0), rot (0,35,0)) — replicates the garden poppy's transform.
+  Hosts `IdleSplatCycler` (above).
   - `Gaussian` (rot (180,0,0) = gsplat upright flip): standalone `GsplatRenderer` → `mohnblume.ply`
-    (NOT the Poppy prefab) + `GsplatRevealAnimator` (reveal=true, duration 3, GsplatMorph.compute).
+    (NOT the Poppy prefab) + `GsplatRevealAnimator` (reveal=true, GsplatMorph.compute).
+  - `Gaussian_Lavender`, `Gaussian_Daffodil`: clones of `Gaussian` with the lavender/daffodil PLY assets
+    (the other two idle-cycle flowers).
   - `TouchZone` (pos (0,0.3,0)): BoxCollider trigger 0.6³ + **kinematic Rigidbody** (required for
     OnTriggerEnter to fire, matching the plant-collider model) + `PlantTouchTrigger` (no plant,
     handTag "Player").

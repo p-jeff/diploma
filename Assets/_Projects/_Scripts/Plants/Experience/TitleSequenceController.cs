@@ -121,6 +121,16 @@ namespace Plants
 
         void Start()
         {
+            ArmTitle();
+        }
+
+        /// <summary>
+        /// Put the title into its opening state: clear the card/poem text, (re)show the title poppy
+        /// with its reveal/fade-in, and fade the "Touch Me" label in. Called on Start() and again by
+        /// <see cref="Replay"/> for an in-place restart.
+        /// </summary>
+        private void ArmTitle()
+        {
             if (titleCard != null) SetTextAlpha(titleCard, 0f);
             if (poemText != null) SetTextAlpha(poemText, 0f);
 
@@ -207,16 +217,49 @@ namespace Plants
 
         private IEnumerator RevealGarden()
         {
-            // Enabling the manager runs its Start(), which deactivates every batched plant and
-            // re-activates its starting batch — so the first plants come up dormant exactly as in
-            // normal play. We only fade their opacity in on top (inactive renderers included, so the
-            // fade is armed no matter when the manager activates them — no full-opacity flash).
+            // On the FIRST reveal the manager is still disabled (gated in Awake): enabling it runs
+            // its Awake + Start, and Start calls BeginGarden() — batch 0 comes up dormant. On a
+            // RESTART the manager is already enabled (its Start ran once, and Unity never re-runs
+            // Start), so we open the garden explicitly via BeginGarden(). Either way the garden ends
+            // up freshly opened to batch 0; we only fade its opacity in on top (inactive renderers
+            // included, so the fade is armed no matter when the plants activate — no full-opacity flash).
+            bool wasInactive = experienceManager != null && !experienceManager.activeSelf;
             if (experienceManager != null) experienceManager.SetActive(true);
 
-            yield return null; // let the manager's Start() run before we fade
+            yield return null; // let the manager's Awake/Start run on first activation
+
+            if (!wasInactive && ExperienceManager.Instance != null)
+                ExperienceManager.Instance.BeginGarden();
 
             if (gardenFadeRoot != null)
                 yield return FadeRenderers(gardenFadeRoot, k_hiddenOpacity, 1f, gardenFadeInDuration);
+        }
+
+        // ── Restart (replay in place) ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Restart the whole experience in place, back to the title sequence. Soft-resets the garden
+        /// (un-likes every plant, destroys the spreads, closes the garden via
+        /// <see cref="ExperienceManager.ResetAll"/>), re-gates the garden objects, and re-arms the
+        /// title from the top. The ExperienceManager GameObject is intentionally left enabled — its
+        /// Start() already ran, and <see cref="RevealGarden"/> re-opens the garden with BeginGarden().
+        /// Wired to the chair's restart button (see <c>ChairSit.RestartExperience</c>).
+        /// </summary>
+        [ContextMenu("Restart (replay title)")]
+        public void Replay()
+        {
+            StopAllCoroutines();
+
+            if (ExperienceManager.Instance != null) ExperienceManager.Instance.ResetAll();
+
+            // ResetAll already deactivated the roster plants; re-hide any other objects in the list.
+            foreach (var go in hideDuringTitle)
+                if (go != null) go.SetActive(false);
+
+            m_started = false;
+            m_done = false;
+
+            ArmTitle();
         }
 
         // ── Fades ──────────────────────────────────────────────────────────────────
