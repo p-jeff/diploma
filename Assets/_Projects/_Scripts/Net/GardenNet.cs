@@ -29,6 +29,23 @@ namespace Plants.Net
     }
 
     /// <summary>
+    /// Set once in the boot scene (NetworkBootstrap) when this instance starts as a
+    /// spectator client — BEFORE the garden scene loads — so scene-load-time code
+    /// (e.g. SceneLockController) can branch on spectator-ness without taking a Mirror
+    /// dependency itself.
+    /// </summary>
+    public static class SpectatorState
+    {
+        public static bool IsSpectator;
+
+        // Reset at the start of every play session, so a stale value (statics persist when the
+        // editor's domain reload is disabled, or across a host<->client switch) can't make a
+        // non-spectator run skip the scene lock. NetworkBootstrap re-sets it per role.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetOnPlay() => IsSpectator = false;
+    }
+
+    /// <summary>
     /// Scene-wide lookup of every <see cref="NetPlant"/> by its stable id. The host
     /// samples this set to build a snapshot; the client uses it to route incoming
     /// state back to the matching local plant. Host and client agree on ids because

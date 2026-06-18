@@ -14,6 +14,7 @@ namespace Plants.Net
     /// does nothing, so the headset experience (and the host's display-1
     /// "window into the digital" SpectatorCamera) is untouched.
     /// </summary>
+    [DefaultExecutionOrder(-1000)]   // run before SceneLockController/ExperienceManager so the local sim is disabled before it can Start
     public class SpectatorModeController : MonoBehaviour
     {
         [Header("Disabled on the spectator (auto-found by name when unset)")]
@@ -30,7 +31,7 @@ namespace Plants.Net
         void Start()
         {
             // Pure client only. Host (server+client) and non-networked play behave normally.
-            bool isSpectator = NetworkClient.active && !NetworkServer.active;
+            bool isSpectator = SpectatorState.IsSpectator || (NetworkClient.active && !NetworkServer.active);
             if (!isSpectator) return;
             EnterSpectatorMode();
         }

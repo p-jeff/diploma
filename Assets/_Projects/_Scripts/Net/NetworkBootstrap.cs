@@ -60,6 +60,10 @@ namespace Plants.Net
 
         public void StartRole(Role r)
         {
+            // Tell scene-load-time code (SceneLockController etc.) we're a spectator,
+            // before the garden scene is loaded by Mirror.
+            SpectatorState.IsSpectator = (r == Role.Client);
+
             switch (r)
             {
                 case Role.Host:

@@ -96,10 +96,29 @@ public class SceneLockController : MonoBehaviour
 
     void Start()
     {
+        // Networked spectator (Mac client): no OVR, no room to calibrate, and the host owns
+        // the placement. Skip calibration/anchoring entirely and just switch the garden on at
+        // its default scene pose; the spectator camera frames it.
+        if (Plants.Net.SpectatorState.IsSpectator)
+        {
+            EnterSpectatorBypass();
+            return;
+        }
+
         if (persistAcrossSessions && Guid.TryParse(PlayerPrefs.GetString(anchorPrefKey, ""), out _))
             RestoreAsync();
         else
             BeginCalibration();
+    }
+
+    /// <summary>Spectator bypass: content on, calibration box/handle off, state Locked, no anchor.</summary>
+    private void EnterSpectatorBypass()
+    {
+        State = LockState.Locked;
+        if (calibrationBox != null) calibrationBox.SetActive(false);
+        if (chairPlacementHandle != null) chairPlacementHandle.SetActive(false);
+        if (content != null) content.SetActive(true);
+        Debug.Log("[SceneLock] Spectator bypass — calibration skipped, content enabled.");
     }
 
     // ── Calibration ─────────────────────────────────────────────────────────────
