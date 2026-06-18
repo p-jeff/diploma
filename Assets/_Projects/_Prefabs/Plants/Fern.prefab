@@ -1,0 +1,469 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7809201085685409688
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7427574534530661666}
+  - component: {fileID: 798614429097540612}
+  - component: {fileID: 6667180346080723574}
+  - component: {fileID: 6266072650428096026}
+  - component: {fileID: 4277868877072002}
+  - component: {fileID: 9120350180200468895}
+  m_Layer: 0
+  m_Name: fernCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7427574534530661666
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809201085685409688}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8243795493552746021}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &798614429097540612
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809201085685409688}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5873994352958509184, guid: 44b8a33a6c58ea8409249d87ea3a1d83, type: 3}
+--- !u!54 &6667180346080723574
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809201085685409688}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &6266072650428096026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809201085685409688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 957484d19594d4cceb72c8adb1bffa91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
+  plant: {fileID: 4933111541104938115}
+  handLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  handTag: Player
+  onTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!33 &4277868877072002
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809201085685409688}
+  m_Mesh: {fileID: -5873994352958509184, guid: 44b8a33a6c58ea8409249d87ea3a1d83, type: 3}
+--- !u!23 &9120350180200468895
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7809201085685409688}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 5d0eeb918f3dc2c4180c5b4e162a2604, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &185475621781591558
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 682603678627368437, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2360.079
+      objectReference: {fileID: 0}
+    - target: {fileID: 682603678627368437, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 856.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 743477070500540393, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Name
+      value: Fern
+      objectReference: {fileID: 0}
+    - target: {fileID: 972729536885149041, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1530
+      objectReference: {fileID: 0}
+    - target: {fileID: 972729536885149041, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 810.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 1084795632955548664, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: dc2e964e2f8f81c4a970f43dd90194d7, type: 3}
+    - target: {fileID: 1415804250653427954, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 78c61cb50e7a67b4c9fbc86b9ea68e61, type: 3}
+    - target: {fileID: 1572070706008549119, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2750
+      objectReference: {fileID: 0}
+    - target: {fileID: 1572070706008549119, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 682.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2584.3809
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1828.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2592
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 3375.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2744.3809
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1948.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202677, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2752
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202677, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 3495.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: 1ab9af716d006944aa3e7d717d78ebf9, type: 3}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2590
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 562.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 3140797671614650397, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: bddc8dfab77e5ea4a87c8fec6aaee7a3, type: 3}
+    - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1690
+      objectReference: {fileID: 0}
+    - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 930.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2200.079
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 736.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 4479565408557461352, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: ad77fe71fc44caf4ca8bf3f196d1f4a0, type: 3}
+    - target: {fileID: 4479565408557461362, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 52a5bada4d71f7041993ff8c3f9e3736, type: 3}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: plantData
+      value: 
+      objectReference: {fileID: 11400000, guid: 362b03b67316ec546a90b40cad5cb837, type: 2}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: scatterer
+      value: 
+      objectReference: {fileID: 8931080370875138959}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: selectionCollider
+      value: 
+      objectReference: {fileID: 798614429097540612}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "In May it rains\nFerns unfurls in light green color,\nBut when?\n\n\u2014
+        Matsuo Basho"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5431834928911583791, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 7453befaa862c7b4e9d911d98f0fd83d, type: 3}
+    - target: {fileID: 5431834928911583797, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 54efa635c0a7e544f8b535bf50b4f11b, type: 3}
+    - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: instanceId
+      value: 19b92c50-e5a4-4105-925a-48c883ce50e6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "K\u0101rlis Skalbe \u2014 _Papardes zieds_ (also known as _J\u0101\u0146u
+        pasaka_, _Midsummer Tale_)\nLoose English:\n\n\"Let's go look for the fern
+        flower,\" the boy said, and his breath caught. For the fern flower appeared
+        only on J\u0101\u0146i night, a brief moment between evening's afterglow
+        and morning's light, and whoever finds it is happy. \"Let's go,\" the girl
+        whispered as quietly as the darkness in the forest. Hand in hand, they crept
+        under the alder branches, still sweetly flushed from the evening sun\u2026
+        Bending down, they groped with their hands through the forest darkness and
+        parted the fern clumps. They found glow-worms there and placed them on each
+        other's palms like drops of diamond. But the fern flower was not there. And
+        somehow, as they bent among the bushes, they no longer sought the flower,
+        but only each other's hands. They grew confused and stopped facing one another,
+        close, close. Their breath met \u2014 and what a wonder \u2014 when lips
+        drew near to lips, it was as though the fern flower had bloomed between them\u2026\""
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: 'Fern in Baltic Culture
+
+        In baltic tradition the Ferns flower
+        is essential to summer Solstice. Finding a flowering fern is said to come
+        with wealth and knowledge, like abilities to talk to animals or read minds.
+        The idea was that fern is so mystical that it only opens its flower on midnight
+        of the longest day of the year.
+
+
+        Further there are also romatic
+        connotations. Young couples going to the forest alone to "look for the fern
+        flower" was a euphemism for intimacy. This tradition was also a way to get
+        around societal regulations on who to marry.'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: GsplatAsset
+      value: 
+      objectReference: {fileID: 4599839170941234424, guid: 23e2f50798e222e46814ced506b347dd, type: 3}
+    - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_assetGuid
+      value: 23e2f50798e222e46814ced506b347dd
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 182840cef3134db4b8eefc2d6e80f7a3, type: 3}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "The Author Bash\u014D was not yet Bash\u014D when he wrote it. He was
+        T\u014Dsei, the unripe peach, watching a fern slowly unfurling. Ultimately
+        asking the question of himself."
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 7417057368276200879, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: d857c9a39eafdd343955be0779df14e7, type: 3}
+    - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 4770e91251e57104d82c76ef2a8c4e56, type: 3}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "Ode to Bamboo \u2014 Huang Tingjian (Excerpt)\n\u8568\u82BD\u521D\u653E\u5C0F\u513F\u62F3\u3002\nFern
+        buds barely unfurling \u2014 like a small child's fist."
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 7764549551351612197, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7427574534530661666}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+--- !u!114 &4933111541104938115 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 185475621781591558}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69f50596c0a69488d9bab40f59b75c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.Plant
+--- !u!4 &8243795493552746021 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 185475621781591558}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8931080370875138959 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8746944161505301897, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 185475621781591558}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15556978a942adf4ea0d8f74e184cd90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantInstanceScatterer

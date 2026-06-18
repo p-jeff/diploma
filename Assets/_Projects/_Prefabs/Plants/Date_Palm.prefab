@@ -1,0 +1,473 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1654867923667587628
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2142751587499853974}
+  - component: {fileID: 5536771475937557432}
+  - component: {fileID: 1602477025358418982}
+  - component: {fileID: 175196122164524171}
+  - component: {fileID: 8451121656187825984}
+  - component: {fileID: 4649160488442658015}
+  m_Layer: 0
+  m_Name: Tree_Phoenix-canariensis_H_spring-summer_collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2142751587499853974
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654867923667587628}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6215726817921886380}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &5536771475937557432
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654867923667587628}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -6514538479087609109, guid: 481e75017bc07ef458544fa16517c3d4, type: 3}
+--- !u!54 &1602477025358418982
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654867923667587628}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &175196122164524171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654867923667587628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 957484d19594d4cceb72c8adb1bffa91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
+  plant: {fileID: 6940192189058615818}
+  gazeOnly: 0
+  handLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  handTag: Player
+  onTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!33 &8451121656187825984
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654867923667587628}
+  m_Mesh: {fileID: -6514538479087609109, guid: 481e75017bc07ef458544fa16517c3d4, type: 3}
+--- !u!23 &4649160488442658015
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1654867923667587628}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 5d0eeb918f3dc2c4180c5b4e162a2604, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &2789869817337630863
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 682603678627368437, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2216
+      objectReference: {fileID: 0}
+    - target: {fileID: 682603678627368437, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1807.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 743477070500540393, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Name
+      value: Date_Palm
+      objectReference: {fileID: 0}
+    - target: {fileID: 972729536885149041, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2594
+      objectReference: {fileID: 0}
+    - target: {fileID: 972729536885149041, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 5474.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 1084795632955548664, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 326adca1d283c2b49a6a8aa994e2a09f, type: 3}
+    - target: {fileID: 1415804250653427954, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: abe4c372f58c5c84f8dbb821ae08e468, type: 3}
+    - target: {fileID: 1572070706008549119, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2390.5312
+      objectReference: {fileID: 0}
+    - target: {fileID: 1572070706008549119, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 2088.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2228.176
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 843.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "\"Psalm 92-12\n12 The righteous will flourish like a palm tree,\nthey
+        will grow like a cedar of Lebanon;\n13 planted in the house of the Lord,\nthey
+        will flourish in the courts of our God.\n14 They will still bear fruit in
+        old age,\nthey will stay fresh and green,\n15 proclaiming, \u201CThe Lord
+        is upright;\nhe is my Rock, and there is no wickedness in him.\u201D\""
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2388.176
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 963.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: 20c35e3758508c64294a328186a132ba, type: 3}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2230.5312
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1968.76
+      objectReference: {fileID: 0}
+    - target: {fileID: 3140797671614650397, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8e955e94f1030144eaabe5da05f51892, type: 3}
+    - target: {fileID: 3543956613794748753, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2754
+      objectReference: {fileID: 0}
+    - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 5594.77
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2056
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1687.51
+      objectReference: {fileID: 0}
+    - target: {fileID: 4479565408557461352, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8c978697ec7f9ac46982e076d5d794cd, type: 3}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: plantData
+      value: 
+      objectReference: {fileID: 11400000, guid: c08312a341a03d041b4db1112b9b7649, type: 2}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: scatterer
+      value: 
+      objectReference: {fileID: 6905417419167958278}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: contextMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: poemPlacement
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: fruitOrbRadius
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: selectionCollider
+      value: 
+      objectReference: {fileID: 5536771475937557432}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: fruitColliderRadius
+      value: 0.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: cylinderHeightOffset
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "Draxt \u012B \u0100s\u016Br\u012Bg ( \"The Babylonian Tree\")\n\nIn
+        X'anirala land \nthere is no tree of my stature. \nBecause the kings eat
+        of me \nwhen I bear first fruits. \nI am the plank for boats; \nI am the
+        mast for sails. \nThey make brooms of me \nwhich sweep house and home \nThey
+        make presses of me \nwhich pound barley and rice. \nI am shoes for farmers;
+        \nI am cushions for the barefoot. \nThey make ropes of me \nwhich bind thy
+        legs. \nThey make clubs of me \nwhich break thy neck. \nThey make pegs of
+        me \nwhich hang thee head downwards. \nI am fuel for fires \nwhich they roast
+        thy flesh. \nIn summer  am shade \nover the head of rulers \nI am vinegar
+        for farmers, \nhoney for noblemen. \nam a nest for little birds \nshade for
+        travellers. \nEven those persons \nwho have neither wine nor bread \neat
+        fruit from me \nuntil they become full"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5431834928911583797, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 4ff87bb8ffb98e04fa394d6d4ff3e322, type: 3}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: in southern Iran, Palms are to this day counted not in Units but in
+        persons.
+      objectReference: {fileID: 0}
+    - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: instanceId
+      value: 0617dfe2-ffa8-4af9-bc2a-af72ab9a0a44
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: 'Plutarch Table Talk:
+
+        But the palm-tree, which sheds none of
+        the leaves that grow on it, is truly always in leaf, and it is this strength
+        that it has which people particularly associate with the vigour that brings
+        victory.'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: Across the near east and mediterranean it spread, withstanding the harsh
+        desert Climate and dry nature
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: GsplatAsset
+      value: 
+      objectReference: {fileID: 4599839170941234424, guid: 9cdf1792de688af468e1316693d26477, type: 3}
+    - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_assetGuid
+      value: 9cdf1792de688af468e1316693d26477
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 398f53a9fdcc0fc418985782f3d04078, type: 3}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: In the Poem, a date Palm and a goat argue About who is worth more to
+        humans
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 7417057368276200879, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 95dcd13722d650c4990b057b100ecf67, type: 3}
+    - target: {fileID: 8582845393027873350, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 9f634bdcbfe1938498e38dfa1c81f43a, type: 3}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: Cultivated there since at least 4000 BCE, it was considered the tree
+        of life across the ancient Persia
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 7764549551351612197, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2142751587499853974}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+--- !u!4 &6215726817921886380 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 2789869817337630863}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6905417419167958278 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8746944161505301897, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 2789869817337630863}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15556978a942adf4ea0d8f74e184cd90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantInstanceScatterer
+--- !u!114 &6940192189058615818 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 2789869817337630863}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69f50596c0a69488d9bab40f59b75c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.Plant

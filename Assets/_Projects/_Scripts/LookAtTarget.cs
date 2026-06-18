@@ -1,6 +1,12 @@
 using UnityEngine;
 
-public class  LookAtTarget : MonoBehaviour
+/// <summary>
+/// Yaw-billboards this object to face a target (defaults to the main camera). It snaps
+/// once each time the object is enabled rather than tracking every frame, so labels read
+/// calmly in the headset instead of swimming as the viewer moves. Callers that reposition
+/// the object at runtime can re-aim it explicitly via <see cref="Snap"/>.
+/// </summary>
+public class LookAtTarget : MonoBehaviour
 {
     [Header("Target")]
     public Transform target;
@@ -11,51 +17,38 @@ public class  LookAtTarget : MonoBehaviour
     public bool rotateZ = false;
     public bool flipY = true;
 
-    [Header("Smoothing")]
-    [Tooltip("How quickly the object rotates toward the target. Lower = more rubberbanding.")]
-    [Range(0.1f, 20f)]
-    public float rotationSpeed = 5f;
+    // Lazily resolved fallback when target is not manually wired.
+    private Transform m_resolvedTarget;
 
-    [Tooltip("Angle deadzone in degrees — stops rotating when this close to target.")]
-    [Range(0f, 45f)]
-    public float deadzoneAngle = 2f;
-
-    [Header("Update Mode")]
-    public bool runOnStart = true;
-    public bool runOnUpdate = true;
-
-    void Start()
+    /// <summary>Returns the wired target if set; otherwise resolves Camera.main once and caches it.</summary>
+    private Transform ResolveTarget()
     {
-        if (runOnStart && target != null)
-            SnapToTarget();
+        if (target != null) return target;
+        if (m_resolvedTarget != null) return m_resolvedTarget;
+        var cam = Camera.main;
+        if (cam != null) m_resolvedTarget = cam.transform;
+        return m_resolvedTarget;
     }
 
-    void Update()
+    // Snap to face the target whenever the object becomes enabled (incl. SetActive(true) at
+    // runtime), then leave it fixed — no per-frame tracking.
+    void OnEnable() => Snap();
+
+    // Fallback for objects already active at scene load, in case Camera.main isn't
+    // resolvable yet during OnEnable.
+    void Start() => Snap();
+
+    /// <summary>Immediately aim at the target, ignoring smoothing. Use when an object is
+    /// repositioned at runtime and must billboard right away.</summary>
+    public void Snap()
     {
-        if (runOnUpdate && target != null)
-            RotateTowardTarget(Time.deltaTime);
-    }
-
-    void SnapToTarget()
-    {
-        Quaternion desired = GetDesiredRotation();
-        transform.rotation = desired;
-    }
-
-    void RotateTowardTarget(float deltaTime)
-    {
-        Quaternion desired = GetDesiredRotation();
-        float angle = Quaternion.Angle(transform.rotation, desired);
-
-        if (angle <= deadzoneAngle)
-            return;
-
-        transform.rotation = Quaternion.Slerp(transform.rotation, desired, rotationSpeed * deltaTime);
+        if (ResolveTarget() != null)
+            transform.rotation = GetDesiredRotation();
     }
 
     Quaternion GetDesiredRotation()
     {
-        Vector3 direction = target.position - transform.position;
+        Vector3 direction = ResolveTarget().position - transform.position;
 
         if (direction == Vector3.zero)
             return transform.rotation;

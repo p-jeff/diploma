@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Oculus.VR::OVROverlayCanvasSettings
   _transparentImposterShader: {fileID: 0}
   _opaqueImposterShader: {fileID: 0}
-  MaxSimultaneousCanvases: 4
+  MaxSimultaneousCanvases: 6
   CanvasRenderLayer: 31
-  HiddenCanvasLayer: -1
+  HiddenCanvasLayer: 7

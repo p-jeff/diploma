@@ -1,0 +1,140 @@
+// Per-splat morph between two Gaussian-splat configurations.
+// Reads two endpoint buffer sets (Src = progress 0, Dst = progress 1), both already
+// aligned and paired to the SAME index layout on the CPU side, and writes the
+// interpolated state into the live render buffers (_Out*). The GsplatRenderer that
+// owns _Out* then depth-sorts and draws the blended result, so the morph is fully
+// geometric: gaussians slide, rescale, rotate and recolour from Src to Dst.
+//
+// Optional "funky" effects are layered in behind multi_compile keywords, each driven by a
+// separate GsplatMorphModifier component on the C# side. Every geometric detour uses a
+// sin(PI*t) envelope so it vanishes at t=0 and t=1 — the endpoints always stay exactly Src/Dst.
+#pragma kernel Morph
+#pragma multi_compile _ MORPH_BLOOM
+#pragma multi_compile _ MORPH_SWIRL
+#pragma multi_compile _ MORPH_SCATTER
+
+#define PI 3.14159265358979
+
+uint  _Count;
+float _T;
+
+StructuredBuffer<float3> _SrcPos;
+StructuredBuffer<float3> _SrcScale;
+StructuredBuffer<float4> _SrcRot;
+StructuredBuffer<float4> _SrcColor;
+
+StructuredBuffer<float3> _DstPos;
+StructuredBuffer<float3> _DstScale;
+StructuredBuffer<float4> _DstRot;
+StructuredBuffer<float4> _DstColor;
+
+RWStructuredBuffer<float3> _OutPos;
+RWStructuredBuffer<float3> _OutScale;
+RWStructuredBuffer<float4> _OutRot;
+RWStructuredBuffer<float4> _OutColor;
+
+// --- Bloom (staggered spatial reveal) ---
+float3 _BloomOrigin;
+float3 _BloomDir;     // normalized
+float  _BloomLength;  // extent of the cloud along _BloomDir
+float  _BloomBand;    // fraction of the timeline each splat's transition occupies (0..1]
+float  _BloomInvert;
+float  _BloomRadial;  // >0.5 = distance from origin instead of projection along _BloomDir
+float  _BloomReveal;  // >0.5 = fade each splat in over its own transition (visible "unfurl")
+
+// --- Swirl (arc + twist mid-flight detour) ---
+float3 _SwirlAxis;    // normalized
+float3 _SwirlCenter;
+float  _SwirlAngle;   // radians, peak twist at mid-morph
+float  _SwirlBulge;   // metres, peak outward bulge at mid-morph
+
+// --- Scatter (explode & reassemble) ---
+float  _ScatterAmount; // metres
+float  _ScatterFreq;
+float3 _ScatterSeed;
+
+float3 hash33(float3 p)
+{
+    p = float3(dot(p, float3(127.1, 311.7, 74.7)),
+               dot(p, float3(269.5, 183.3, 246.1)),
+               dot(p, float3(113.5, 271.9, 124.6)));
+    return frac(sin(p) * 43758.5453123) * 2.0 - 1.0; // per-position stable vector in [-1,1]^3
+}
+
+float3 rotateAroundAxis(float3 v, float3 axis, float angle)
+{
+    float c = cos(angle);
+    float s = sin(angle);
+    return v * c + cross(axis, v) * s + axis * dot(axis, v) * (1.0 - c); // Rodrigues
+}
+
+[numthreads(256, 1, 1)]
+void Morph(uint3 id : SV_DispatchThreadID)
+{
+    uint i = id.x;
+    if (i >= _Count)
+        return;
+
+    float t = _T;
+    float bloomReveal = 1.0;
+
+    // Bloom: remap the global clock to a per-splat local t, staggered by the splat's position
+    // along _BloomDir. Early splats finish first; everything still spans 0..1 over the full clock.
+    // With _BloomReveal on, each splat also fades in over its own transition so the cloud visibly
+    // assembles along the sweep (at progress 0 the flower is empty and blooms in to full).
+    #ifdef MORPH_BLOOM
+    {
+        float raw = (_BloomRadial > 0.5)
+            ? length(_DstPos[i] - _BloomOrigin)
+            : dot(_DstPos[i] - _BloomOrigin, _BloomDir);
+        float along = saturate(raw / max(_BloomLength, 1e-5));
+        if (_BloomInvert > 0.5) along = 1.0 - along;
+        float band = max(_BloomBand, 1e-3);
+        float delay = along * (1.0 - band);
+        t = saturate((_T - delay) / band);
+        if (_BloomReveal > 0.5)
+            bloomReveal = smoothstep(0.0, 0.35, t); // pop in quickly once the wavefront arrives
+    }
+    #endif
+
+    // Base interpolation.
+    float3 pos = lerp(_SrcPos[i], _DstPos[i], t);
+
+    float3 sa = max(_SrcScale[i], 1e-6);
+    float3 sb = max(_DstScale[i], 1e-6);
+    _OutScale[i] = exp(lerp(log(sa), log(sb), t)); // log-space for even perceived growth
+
+    float4 qa = _SrcRot[i];
+    float4 qb = _DstRot[i];
+    if (dot(qa, qb) < 0.0) qb = -qb;
+    _OutRot[i] = normalize(lerp(qa, qb, t)); // shortest-path nlerp (wxyz)
+
+    float4 col = lerp(_SrcColor[i], _DstColor[i], t); // rgb = raw DC SH, w = opacity
+    col.w *= bloomReveal;
+
+    _OutColor[i] = col;
+
+    // Mid-flight detours (0 at both endpoints).
+    float bump = sin(PI * t);
+
+    #ifdef MORPH_SWIRL
+    {
+        float3 axis = normalize(_SwirlAxis);
+        float3 rel = pos - _SwirlCenter;
+        rel = rotateAroundAxis(rel, axis, _SwirlAngle * bump);
+        float3 radial = rel - axis * dot(axis, rel);
+        float rl = length(radial);
+        float3 radialDir = rl > 1e-5 ? radial / rl : float3(0, 0, 0);
+        pos = _SwirlCenter + rel + radialDir * (_SwirlBulge * bump);
+    }
+    #endif
+
+    #ifdef MORPH_SCATTER
+    {
+        float3 n = hash33(_DstPos[i] * _ScatterFreq + _ScatterSeed);
+        pos += n * (_ScatterAmount * bump);
+    }
+    #endif
+
+    _OutPos[i] = pos;
+}

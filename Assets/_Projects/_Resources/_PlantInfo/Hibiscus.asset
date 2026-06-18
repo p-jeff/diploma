@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1cd92da80c7495a8fe7eb91fa80c2f, type: 3}
+  m_Name: Hibiscus
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
+  displayName: Hibiscus
+  audioClip: {fileID: 8300000, guid: 308fb3101233a1947a984be73794e805, type: 3}
+  environmentPainting: {fileID: 0}
+  poem:
+    text: "Bol Re Joba Bol (Speak, O Hibiscus, Speak)\n\nUtter, O' rose mallow flower
+      utter.\nWith which devotion at the feet of mother could you find shelter.\n\nBreaking
+      shackles of illusive fetter, you fell on feet of the mother.\nYou got salvation,
+      you bloom with joys and bewilder.\nYou teach me your devotion, O' mallow flower
+      so that my life may\nprosper.\n\nBlooms a million flower in woods, hearts which
+      wins over.\nHow could you find shelter under feet of mother, O rose mallow\nflower?\nI
+      wish to turn ruddy under feet of the mother, when may I become\nflower to offer.\n\nWhen
+      shall I turn red in color?\nO'dear, with touches of feet of the mother, When
+      shall I turn red in\ncolor?\nWhen shall my heart like you shall stain with
+      red color?\n\n\u2014 Kazu Nazrul Islam"
+    environmentPainting: {fileID: 0}
+  contextInfos:
+  - text: 'The red hibiscus is the flower of Maa Kali, the Hindu goddess of death
+      and transformation. In Bengali art she appears wreathed in them, garlanded
+      in red, goddess and flower merging in form. It is offered to her in worship.
+
+
+      ![[Kali_by_Raja_Ravi_Varma.jpg]]https://en.wikipedia.org/wiki/File:Kali_by_Raja_Ravi_Varma.jpg'
+    environmentPainting: {fileID: 0}
+  - text: 'Kazi Nazrul Islam - To the poets of the future
+
+      To the Poets of
+      the Future
+
+      [Na-Asha-Diner Kabir Proti]
+
+
+      O poets of the future,
+      may you arise
+
+      Like the morning sun,
+
+      Bright and red like hibiscus
+      blossoms.
+
+      In the golden dawn for which we long
+
+      May you wake up
+      like countless flocks of birds.
+
+      I sing in the hope that you will come
+
+      To
+      soar in the blue sky that I create.
+
+      I leave behind the memory of my
+      greetings to you:
+
+      Play on my veena the song of the new day.'
+    environmentPainting: {fileID: 0}
+  - text: 'hibiscus - matsuo basho
+
+      in the twilight rain
+
+
+      these brilliant-hued
+      hibiscus
+
+
+      a lovely sunset'
+    environmentPainting: {fileID: 0}
+  - text: 'Hibiscus, Bengal
+
+      The red hibiscus is the flower of Maa Kali, goddess
+      of time, death, and transformation. Time is her dance, the universe unfolds
+      and collapses in her steps. In Bengal she is approached as a mother: fierce
+      and absolute, but one who protects and offers liberation to those who come
+      to her as a child would. The hibiscus is offered to her in worship. https://en.wikipedia.org/wiki/File:Kali_by_Raja_Ravi_Varma.jpg'
+    environmentPainting: {fileID: 0}

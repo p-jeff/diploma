@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1cd92da80c7495a8fe7eb91fa80c2f, type: 3}
+  m_Name: Fern
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
+  displayName: Fern
+  audioClip: {fileID: 8300000, guid: 1ab9af716d006944aa3e7d717d78ebf9, type: 3}
+  environmentPainting: {fileID: 0}
+  poem:
+    text: "In May it rains\nFerns unfurls in light green color,\nBut when?\n\n\u2014
+      Matsuo Basho"
+    environmentPainting: {fileID: 0}
+  contextInfos:
+  - text: "The Author Bash\u014D was not yet Bash\u014D when he wrote it. He was
+      T\u014Dsei, the unripe peach, watching a fern slowly unfurling. Ultimately
+      asking the question of himself."
+    environmentPainting: {fileID: 0}
+  - text: "Ode to Bamboo \u2014 Huang Tingjian (Excerpt)\n\u8568\u82BD\u521D\u653E\u5C0F\u513F\u62F3\u3002\nFern
+      buds barely unfurling \u2014 like a small child's fist."
+    environmentPainting: {fileID: 0}
+  - text: 'Fern in Baltic Culture
+
+      In baltic tradition the Ferns flower is
+      essential to summer Solstice. Finding a flowering fern is said to come with
+      wealth and knowledge, like abilities to talk to animals or read minds. The
+      idea was that fern is so mystical that it only opens its flower on midnight
+      of the longest day of the year.
+
+
+      Further there are also romatic connotations.
+      Young couples going to the forest alone to "look for the fern flower" was a
+      euphemism for intimacy. This tradition was also a way to get around societal
+      regulations on who to marry.'
+    environmentPainting: {fileID: 0}
+  - text: "K\u0101rlis Skalbe \u2014 _Papardes zieds_ (also known as _J\u0101\u0146u
+      pasaka_, _Midsummer Tale_)\nLoose English:\n\n\"Let's go look for the fern
+      flower,\" the boy said, and his breath caught. For the fern flower appeared
+      only on J\u0101\u0146i night, a brief moment between evening's afterglow and
+      morning's light, and whoever finds it is happy. \"Let's go,\" the girl whispered
+      as quietly as the darkness in the forest. Hand in hand, they crept under the
+      alder branches, still sweetly flushed from the evening sun\u2026 Bending down,
+      they groped with their hands through the forest darkness and parted the fern
+      clumps. They found glow-worms there and placed them on each other's palms like
+      drops of diamond. But the fern flower was not there. And somehow, as they bent
+      among the bushes, they no longer sought the flower, but only each other's hands.
+      They grew confused and stopped facing one another, close, close. Their breath
+      met \u2014 and what a wonder \u2014 when lips drew near to lips, it was as
+      though the fern flower had bloomed between them\u2026\""
+    environmentPainting: {fileID: 0}

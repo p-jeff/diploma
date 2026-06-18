@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1cd92da80c7495a8fe7eb91fa80c2f, type: 3}
+  m_Name: Poppy
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
+  displayName: Poppy
+  audioClip: {fileID: 8300000, guid: dc211ab563e965b4797eb21ad6794a74, type: 3}
+  environmentPainting: {fileID: 0}
+  poem:
+    text: "The Poppy\n\nSummer set lip to earth's bosom bare, \nAnd left the flush'd
+      print in a poppy there; \nLike a yawn of fire from the grass it came, \nAnd
+      the fanning wind puff'd it to flapping flame. \nWith burnt mouth red like a
+      lion's it drank \nThe blood of the sun as he slaughter'd sank, \nAnd dipp'd
+      its cup in the purpurate shine \nWhen the eastern conduits ran with wine. \nTill
+      it grew lethargied with fierce bliss \n,And hot as a swinked gipsy is, \nAnd
+      drowsed in sleepy savageries, \nWith mouth wide a-pout for a sultry kiss.\n\n\u2014
+      Francis Thompson"
+    environmentPainting: {fileID: 0}
+  contextInfos:
+  - text: Poppies grow in the midst of the summer, red, hot, and they often don't
+      keep.
+    environmentPainting: {fileID: 0}
+  - text: It's german name is Klatschmohn, literally "clapping poppy". This Comes
+      from an old game About love.
+    environmentPainting: {fileID: 0}
+  - text: You fold a petal into a little pouch, bring your hands together with a
+      smack, and the louder it bursts, the more your love is said to love you back.
+    environmentPainting: {fileID: 0}
+  - text: "In China, the common Poppy is known as y\xFAm\u011Bir\xE9n, \"Yu the Beauty\"."
+    environmentPainting: {fileID: 0}
+  - text: Consort Yu took her own life as her Lovers army fell. Where she was burried,
+      red poppies grew. Perishing for love.
+    environmentPainting: {fileID: 0}
+  - text: "Song of Consort Yu:\n\n\u6F22\u5175\u5DF2\u7565\u5730\uFF0C\n\u56DB\u9762\u695A\u6B4C\u8072\u3002\n\u5927\u738B\u7FA9\u6C23\u76E1\uFF0C\n\u8CE4\u59BE\u4F55\u804A\u751F\u3002\n\nHan
+      forces have conquered our land;\nSurrounded by Chu songs;\nMy King's spirits
+      are low;\nWhy then should I live?"
+    environmentPainting: {fileID: 0}

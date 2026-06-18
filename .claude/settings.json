@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__unity-mcp__Unity_AssetGeneration_GenerateAsset",
+      "mcp__unity-mcp__Unity_AssetGeneration_GetModels",
+      "mcp__unity-mcp__Unity_Camera_Capture",
+      "mcp__unity-mcp__Unity_GetConsoleLogs",
+      "mcp__unity-mcp__Unity_PackageManager_GetData",
+      "mcp__unity-mcp__Unity_RunCommand",
+      "mcp__unity-mcp__Unity_SceneView_Capture2DScene",
+      "mcp__unity-mcp__Unity_SceneView_CaptureMultiAngleSceneView",
+      "mcp__unity-mcp__meta_add_camerarig",
+      "mcp__unity-mcp__meta_add_canvas_interaction_poke",
+      "mcp__unity-mcp__meta_add_canvas_interaction_ray",
+      "mcp__unity-mcp__meta_add_distance_grabbable",
+      "mcp__unity-mcp__meta_add_grabbable",
+      "mcp__unity-mcp__meta_add_interactionrig",
+      "mcp__unity-mcp__meta_add_teleport_hotspot",
+      "mcp__unity-mcp__meta_get_config_information",
+      "mcp__unity-mcp__meta_get_interactors_state",
+      "mcp__unity-mcp__meta_update_android_manifest"
+    ]
+  }
+}

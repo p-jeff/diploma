@@ -1,0 +1,489 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8137091746942307947
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8910109596814808273}
+  - component: {fileID: 2982013511771454611}
+  - component: {fileID: 8192625541419086222}
+  - component: {fileID: 4678508123531873737}
+  - component: {fileID: 3200154816320248902}
+  - component: {fileID: 201089823774048569}
+  m_Layer: 0
+  m_Name: figcollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8910109596814808273
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8137091746942307947}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1749510325339553098}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &2982013511771454611
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8137091746942307947}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 271559669945163071, guid: e57041cae7992da49be430ee3cf60620, type: 3}
+--- !u!54 &8192625541419086222
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8137091746942307947}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
+--- !u!114 &4678508123531873737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8137091746942307947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 957484d19594d4cceb72c8adb1bffa91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
+  plant: {fileID: 3338773446738845676}
+  gazeOnly: 0
+  handLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  handTag: Player
+  onTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!33 &3200154816320248902
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8137091746942307947}
+  m_Mesh: {fileID: 271559669945163071, guid: e57041cae7992da49be430ee3cf60620, type: 3}
+--- !u!23 &201089823774048569
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8137091746942307947}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 5d0eeb918f3dc2c4180c5b4e162a2604, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1001 &7544280435373229417
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 682603678627368437, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2484.2405
+      objectReference: {fileID: 0}
+    - target: {fileID: 682603678627368437, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 745.99994
+      objectReference: {fileID: 0}
+    - target: {fileID: 743477070500540393, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Name
+      value: Fig_Tree
+      objectReference: {fileID: 0}
+    - target: {fileID: 972729536885149041, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2332.3984
+      objectReference: {fileID: 0}
+    - target: {fileID: 972729536885149041, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 2888
+      objectReference: {fileID: 0}
+    - target: {fileID: 1084795632955548664, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8f0aba62c25922341bd82813efa0f876, type: 3}
+    - target: {fileID: 1415804250653427954, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 7f235d212c43b7b4fb7e28c1ddc119e6, type: 3}
+    - target: {fileID: 1572070706008549119, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2482
+      objectReference: {fileID: 0}
+    - target: {fileID: 1572070706008549119, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 458.10352
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 5340.0005
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 3778.1545
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 5462
+      objectReference: {fileID: 0}
+    - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 3904.4766
+      objectReference: {fileID: 0}
+    - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: 7330dac54b3f0564785a777a1dacee18, type: 3}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2358
+      objectReference: {fileID: 0}
+    - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 336.19922
+      objectReference: {fileID: 0}
+    - target: {fileID: 3140797671614650397, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: df2867c7d4e9ad842bba538ed5e75e38, type: 3}
+    - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2558.0002
+      objectReference: {fileID: 0}
+    - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 3114.6162
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 2363.3691
+      objectReference: {fileID: 0}
+    - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 622
+      objectReference: {fileID: 0}
+    - target: {fileID: 4479565408557461352, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: cfeeaf40c88145e43a9f4f885501ff9e, type: 3}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: plantData
+      value: 
+      objectReference: {fileID: 11400000, guid: 17110e34ade96c2419dadc4dfa964f75, type: 2}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: scatterer
+      value: 
+      objectReference: {fileID: 1284027591294619872}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: contextMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: poemPlacement
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: fruitOrbRadius
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: selectionCollider
+      value: 
+      objectReference: {fileID: 2982013511771454611}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: fruitColliderRadius
+      value: 0.18
+      objectReference: {fileID: 0}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: cylinderHeightOffset
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: 'Bhagavad Gita, Chapter XV
+
+
+        Krishna:
+
+        Men call the
+        Aswattha,--the Banyan-tree,--
+
+        Which hath its boughs beneath, its
+        roots above,--
+
+        The ever-holy tree. Yea! for its leaves
+
+        Are
+        green and waving hymns which whisper Truth!
+
+        Who knows the Aswattha,
+        knows Veds, and all.
+
+
+        Its branches shoot to heaven and sink to earth,
+
+        Even
+        as the deeds of men, which take their birth
+
+        From qualities: its
+        silver sprays and blooms,
+
+        And all the eager verdure of its girth,
+
+        Leap
+        to quick life at kiss of sun and air,
+
+        As men''s lives quicken to
+        the temptings fair
+
+        Of wooing sense: its hanging rootlets seek
+
+        The
+        soil beneath, helping to hold it there,'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5431834928911583797, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 6ff40fcf18efb134287c72f3785e2bc7, type: 3}
+    - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: instanceId
+      value: deb23b0a-5739-41c8-aa38-586660c92daf
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: The tree under which the Buddha attained enlightenment was a sacred
+        fig; known ever after as the Bodhi tree, from bodhi, "awakening."
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: 'Bhagavad Gita Chapter 10 Verse 26
+
+        Amongst trees I am the peepal
+        tree (sacred fig tree); of the celestial sages I am Narad. Amongst the gandharvas
+        I am Chitrath, and amongst the siddhas I am sage Kapil.'
+      objectReference: {fileID: 0}
+    - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: GsplatAsset
+      value: 
+      objectReference: {fileID: 4599839170941234424, guid: 85a11cf4ca5d41c4f8b34634739345ad, type: 3}
+    - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_assetGuid
+      value: 85a11cf4ca5d41c4f8b34634739345ad
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: dd81917df20a69b4298201e81c136e13, type: 3}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: 'Demeter an the Domestication of Figs
+
+        The greek goddes Demeter
+        was offered hospitality by Phytalus while searching for her daugher. As a
+        thank you for his kindness she taught him the domestication of figs,'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7417057368276200879, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b468d01805473fa4da7c021719aeed71, type: 3}
+    - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: d70e4a31e4b62d8429bd22f81ae2d9e3, type: 3}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "Quran \u2013 95. At-Tin (The Fig)\n1.By the fig and the olive \u02F9of
+        Jerusalem\u02FA, 2.and Mount Sinai, 3.and this secure city \u02F9of Mecca\u02FA!1
+        4.Indeed, We created humans in the best form. 5.But We will reduce them to
+        the lowest of the low \u02F9in Hell\u02FA, 6.except those who believe and
+        do good\u2014they will have a never-ending reward. 7.Now, what makes you
+        deny the \u02F9final\u02FA Judgment? 8.Is Allah not the most just of all
+        judges?\n\n\u0648\u064E\u0671\u0644\u062A\u0650\u0651\u064A\u0646\u0650 \u0648\u064E\u0671\u0644\u0632\u064E\u0651\u064A\u0652\u062A\u064F\u0648\u0646\u0650
+        \u0661 \u0648\u064E\u0637\u064F\u0648\u0631\u0650 \u0633\u0650\u064A\u0646\u0650\u064A\u0646\u064E
+        \u0662 \u0648\u064E\u0647\u064E\u0640\u0670\u0630\u064E\u0627 \u0671\u0644\u0652\u0628\u064E\u0644\u064E\u062F\u0650
+        \u0671\u0644\u0652\u0623\u064E\u0645\u0650\u064A\u0646\u0650 \u0663 \u0644\u064E\u0642\u064E\u062F\u0652
+        \u062E\u064E\u0644\u064E\u0642\u0652\u0646\u064E\u0627 \u0671\u0644\u0652\u0625\u0650\u0646\u0633\u064E\u0640\u0670\u0646\u064E
+        \u0641\u0650\u0649\u0653 \u0623\u064E\u062D\u0652\u0633\u064E\u0646\u0650
+        \u062A\u064E\u0642\u0652\u0648\u0650\u064A\u0645\u064D\u06E2 \u0664 \u062B\u064F\u0645\u064E\u0651
+        \u0631\u064E\u062F\u064E\u062F\u0652\u0646\u064E\u0640\u0670\u0647\u064F
+        \u0623\u064E\u0633\u0652\u0641\u064E\u0644\u064E \u0633\u064E\u0640\u0670\u0641\u0650\u0644\u0650\u064A\u0646\u064E
+        \u0665 \u0625\u0650\u0644\u064E\u0651\u0627 \u0671\u0644\u064E\u0651\u0630\u0650\u064A\u0646\u064E
+        \u0621\u064E\u0627\u0645\u064E\u0646\u064F\u0648\u0627\u06DF \u0648\u064E\u0639\u064E\u0645\u0650\u0644\u064F\u0648\u0627\u06DF
+        \u0671\u0644\u0635\u064E\u0651\u0640\u0670\u0644\u0650\u062D\u064E\u0640\u0670\u062A\u0650
+        \u0641\u064E\u0644\u064E\u0647\u064F\u0645\u0652 \u0623\u064E\u062C\u0652\u0631\u064C
+        \u063A\u064E\u064A\u0652\u0631\u064F \u0645\u064E\u0645\u0652\u0646\u064F\u0648\u0646\u064D\u06E2
+        \u0666 \u0641\u064E\u0645\u064E\u0627 \u064A\u064F\u0643\u064E\u0630\u0650\u0651\u0628\u064F\u0643\u064E
+        \u0628\u064E\u0639\u0652\u062F\u064F \u0628\u0650\u0671\u0644\u062F\u0650\u0651\u064A\u0646\u0650
+        \u0667 \u0623\u064E\u0644\u064E\u064A\u0652\u0633\u064E \u0671\u0644\u0644\u064E\u0651\u0647\u064F
+        \u0628\u0650\u0623\u064E\u062D\u0652\u0643\u064E\u0645\u0650 \u0671\u0644\u0652\u062D\u064E\u0640\u0670\u0643\u0650\u0645\u0650\u064A\u0646\u064E
+        \u0668"
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects:
+    - {fileID: 7764549551351612197, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8910109596814808273}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+--- !u!114 &1284027591294619872 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8746944161505301897, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 7544280435373229417}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15556978a942adf4ea0d8f74e184cd90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantInstanceScatterer
+--- !u!4 &1749510325339553098 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 7544280435373229417}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3338773446738845676 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 7544280435373229417}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69f50596c0a69488d9bab40f59b75c8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.Plant

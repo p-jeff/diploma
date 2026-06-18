@@ -1,4 +1,4 @@
-# gsplat-unity v1.2.1 — Renderer Architecture Reference
+st# gsplat-unity v1.2.1 — Renderer Architecture Reference
 
 ## Package Info
 - **Author**: Yize Wu (wuyize25)

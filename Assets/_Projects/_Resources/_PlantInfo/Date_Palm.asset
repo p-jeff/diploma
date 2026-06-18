@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e1cd92da80c7495a8fe7eb91fa80c2f, type: 3}
+  m_Name: Date_Palm
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
+  displayName: Date Palm
+  audioClip: {fileID: 8300000, guid: 20c35e3758508c64294a328186a132ba, type: 3}
+  environmentPainting: {fileID: 0}
+  poem:
+    text: "Draxt \u012B \u0100s\u016Br\u012Bg ( \"The Babylonian Tree\")\n\nIn X'anirala
+      land \nthere is no tree of my stature. \nBecause the kings eat of me \nwhen
+      I bear first fruits. \nI am the plank for boats; \nI am the mast for sails.
+      \nThey make brooms of me \nwhich sweep house and home \nThey make presses of
+      me \nwhich pound barley and rice. \nI am shoes for farmers; \nI am cushions
+      for the barefoot. \nThey make ropes of me \nwhich bind thy legs. \nThey make
+      clubs of me \nwhich break thy neck. \nThey make pegs of me \nwhich hang thee
+      head downwards. \nI am fuel for fires \nwhich they roast thy flesh. \nIn summer 
+      am shade \nover the head of rulers \nI am vinegar for farmers, \nhoney for
+      noblemen. \nam a nest for little birds \nshade for travellers. \nEven those
+      persons \nwho have neither wine nor bread \neat fruit from me \nuntil they
+      become full"
+    environmentPainting: {fileID: 0}
+  contextInfos:
+  - text: In the Poem, a date Palm and a goat argue About who is worth more to humans
+    environmentPainting: {fileID: 0}
+  - text: Cultivated there since at least 4000 BCE, it was considered the tree of
+      life across the ancient Persia
+    environmentPainting: {fileID: 0}
+  - text: Across the near east and mediterranean it spread, withstanding the harsh
+      desert Climate and dry nature
+    environmentPainting: {fileID: 0}
+  - text: 'Plutarch Table Talk:
+
+      But the palm-tree, which sheds none of the
+      leaves that grow on it, is truly always in leaf, and it is this strength that
+      it has which people particularly associate with the vigour that brings victory.'
+    environmentPainting: {fileID: 0}
+  - text: "\"Psalm 92-12\n12 The righteous will flourish like a palm tree,\nthey
+      will grow like a cedar of Lebanon;\n13 planted in the house of the Lord,\nthey
+      will flourish in the courts of our God.\n14 They will still bear fruit in old
+      age,\nthey will stay fresh and green,\n15 proclaiming, \u201CThe Lord is upright;\nhe
+      is my Rock, and there is no wickedness in him.\u201D\""
+    environmentPainting: {fileID: 0}
+  - text: in southern Iran, Palms are to this day counted not in Units but in persons.
+    environmentPainting: {fileID: 0}

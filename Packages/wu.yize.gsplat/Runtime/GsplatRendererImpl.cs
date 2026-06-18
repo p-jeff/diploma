@@ -21,6 +21,10 @@ namespace Gsplat
         int m_gsplatAssetID;
 
         public GsplatResource GsplatResource;
+        // The refcounted shared resource from GsplatResourceManager. Kept for the renderer's whole
+        // life; GsplatResource above points either here (static/completed) or at a borrowed private
+        // resource while a morph component is driving this renderer (see SetResourceOverride).
+        GsplatResource m_sharedResource;
         public GraphicsBuffer OrderBuffer { get; private set; }
         public GraphicsBuffer CutoutsBuffer { get; private set; }
         public GraphicsBuffer OrderSizeBuffer { get; private set; }
@@ -138,7 +142,7 @@ namespace Gsplat
             m_gsplatAssetID = gsplatAsset.GetInstanceID();
             m_gsplatAssetType = gsplatAsset.GetType();
             m_gsplatAsset = gsplatAsset;
-            GsplatResource = GsplatResourceManager.Get(gsplatAsset);
+            GsplatResource = m_sharedResource = GsplatResourceManager.Get(gsplatAsset);
             gsplatAsset.SetupMaterialPropertyBlock(m_propertyBlock, GsplatResource);
             if (asyncUpload)
                 gsplatAsset.UploadDataAsync(GsplatResource);
@@ -150,9 +154,25 @@ namespace Gsplat
         {
             GsplatResourceManager.Release(m_gsplatAssetID, m_gsplatAssetType);
             GsplatResource = null;
+            // Don't dispose an override here — it's owned by GsplatMorphBufferPool and returned by
+            // the morph component. Just drop our references.
+            m_sharedResource = null;
             m_gsplatAsset = null;
             m_gsplatAssetID = 0;
             m_gsplatAssetType = null;
+        }
+
+        /// <summary>
+        /// Redirect this renderer's depth-sort, init-order and draw at a PRIVATE resource (own GPU
+        /// buffers) for the duration of a morph, without releasing the refcounted shared resource.
+        /// Pass null to revert to the shared resource. Used by the morph components so an animating
+        /// instance never writes the shared "full detail" buffer that completed instances read.
+        /// </summary>
+        public void SetResourceOverride(GsplatResource resource)
+        {
+            GsplatResource = resource ?? m_sharedResource;
+            if (GsplatResource != null && m_gsplatAsset != null)
+                m_gsplatAsset.SetupMaterialPropertyBlock(m_propertyBlock, GsplatResource);
         }
 
         void CreateResources(uint splatCount)

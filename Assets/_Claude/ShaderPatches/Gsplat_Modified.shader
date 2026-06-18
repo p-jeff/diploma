@@ -49,6 +49,8 @@ Shader "Gsplat/Standard"
             float _GsplatHueShift;
             float4 _GsplatTintColor;
             float _GsplatOpacityMul;
+            float _GsplatExplodeStrength;  // 0 = normal, >0 = expand splat quad corners (gaze explode)
+            float _GsplatExplodeScale;     // max corner offset scale at full strength (e.g. 0.3 = 30% bigger)
 
             // RGB <-> HSV conversion
             float3 GsplatRGBtoHSV(float3 rgb)
@@ -156,6 +158,9 @@ Shader "Gsplat/Standard"
                 #endif
 
                 ClipCorner(corner, color.w);
+
+                // Gaze explode: inflate splat quads outward for gaze targeting effect.
+                corner.offset *= (1.0 + _GsplatExplodeStrength * _GsplatExplodeScale);
 
                 o.vertex = center.proj + float4(corner.offset.x, _ProjectionParams.x * corner.offset.y, 0, 0);
                 o.color = color;

@@ -74,6 +74,18 @@ namespace Gsplat
 
         public GsplatResource GsplatResource => m_renderer?.GsplatResource;
         public MaterialPropertyBlock PropertyBlock => m_renderer?.PropertyBlock;
+
+        /// <summary>
+        /// Drive this renderer from a PRIVATE resource (own GPU buffers) instead of the asset's
+        /// shared one — used by the morph components so an actively-morphing instance doesn't write
+        /// the shared buffer that completed/static instances of the same .ply read. Pass null (or
+        /// call <see cref="ClearResourceOverride"/>) to revert to the shared resource. No-op until
+        /// the renderer has bound its asset.
+        /// </summary>
+        public void SetResourceOverride(GsplatResource resource) => m_renderer?.SetResourceOverride(resource);
+
+        /// <summary>Revert to the shared resource (see <see cref="SetResourceOverride"/>).</summary>
+        public void ClearResourceOverride() => m_renderer?.SetResourceOverride(null);
         public bool ComputeSortRequired => m_renderer.ComputeSortRequired;
         public bool ComputeCutoutsRequired => m_renderer.ComputeCutoutsRequired;
         public GsplatSortMode SortMode = GsplatSortMode.Always;

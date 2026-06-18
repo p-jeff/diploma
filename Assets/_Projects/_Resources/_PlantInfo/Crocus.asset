@@ -12,13 +12,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e1cd92da80c7495a8fe7eb91fa80c2f, type: 3}
   m_Name: Crocus
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
-  id: 0
   displayName: Crocus
-  facts:
-  - "They heard the South wind sighing\nA murmur of the rain;\nAnd they knew that
-    Earth was longing\nTo see them all again.\n\nThough a tremor of the winter\nDid
-    shivering through them run;\nYet they lifted up their foreheads\nTo greet the
-    vernal sun.\n\nAnd the sunbeams gave them welcome,\nAs did the morning air\u2014\nAnd
-    scattered o\u2019er their simple robes\nRich tints of beauty rare.\n\nFirst to
-    weave for Earth a chaplet\nTo crown her dear old head;\nAnd to beauty the pathway\nWhere
-    winter still did tread.\n\nFrances Allen Harper \u2014 The Crocuses"
+  audioClip: {fileID: 8300000, guid: 3648001bbb8fec14dbf73cda316983d5, type: 3}
+  environmentPainting: {fileID: 0}
+  poem:
+    text: "The Crocus's Soliloquy\n\nDown in my solitude under the snow, \nWhere
+      nothing cheering can reach me; \nHere, without light to see how to grow, \nI'll
+      trust to nature to teach me. \nSoon as the frost will get out of my bed, \nFrom
+      this cold dungeon to free me \n,I will peer up with my little bright head;
+      \nAll will be joyful to see me. \nMany, perhaps, from so simple a flower \nThis
+      little lesson may borrow \u2014 \nPatient to-day, through its gloomiest hour,
+      \nWe come out the brighter to-morrow.\n\n\u2014 Hannah Flagg Gould"
+    environmentPainting: {fileID: 0}
+  contextInfos:
+  - text: '## Crocus, Greek Mythology
+
+      Crocus was a young mortal, who was in
+      love with the Nymph Smilax. Either the love was not returned, or no love was
+      possible between mortal and nymph, leading to the gods taking pity upon Crocus,
+      turning him into the saffron flower as a relief for his grief.'
+    environmentPainting: {fileID: 0}
+  - text: "## Crocus, Minoans\nThe Minoans were a Bronze Age civilization centered
+      on Crete and the Cyclades (c. 2000\u20131400 BCE), known for their palace complexes,
+      vivid frescoes, and far-reaching Aegean trade. Among their art, the crocus
+      held notable cultural relevance, likely due to the many-layered value of saffron,
+      used as dye, medicine, colorant, and possibly a ritual substance, and its consistent
+      links to women, animals, and a likely deity, suggesting it was woven deep into
+      Minoan myth and identity. Today it survives mainly in their frescoes and pottery.\n\n![[_Die_Fresken_von_Akrotiri_z\xE4hlen_zu_den_spektakul\xE4rsten_Zeugen_der_Bronzezeit.__11.jpg]]\nhttps://commons.wikimedia.org/wiki/Category:Saffron_gatherers_(Akrotiri)"
+    environmentPainting: {fileID: 0}
+  - text: "## Frances Allen Harper \u2014 The Crocuses (excerpt)\n\nNot a daffodil
+      nor daisy\nHad dared to raise its head;\nNot a fairhaired dandelion\nPeeped
+      timid from its bed;\n\nThough a tremor of the winter\nDid shivering through
+      them run;\nYet they lifted up their foreheads\nTo greet the vernal sun.\n\nAnd
+      the sunbeams gave them welcome,\nAs did the morning air\u2014\nAnd scattered
+      o\u2019er their simple robes\nRich tints of beauty rare.\n\nSoon a host of
+      lovely flowers\nFrom vales and woodland burst;\nBut in all that fair procession\nThe
+      crocuses were first."
+    environmentPainting: {fileID: 0}

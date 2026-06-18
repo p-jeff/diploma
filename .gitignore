@@ -3,6 +3,10 @@
 .AppleDouble
 .LSOverride
 
+#Builds
+/devBuild
+
+
 # Icon must end with two \r
 Icon
 
@@ -109,3 +113,7 @@ crashlytics-build.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/unity,macos
 .vsconfig
+Assets/_Claude/.obsidian/workspace.json
+Assets/_Claude/.obsidian/core-plugins.json
+Assets/_Claude/.obsidian/appearance.json
+Assets/_Claude/.obsidian/app.json
