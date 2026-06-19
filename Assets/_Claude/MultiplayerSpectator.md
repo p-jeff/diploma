@@ -1,6 +1,9 @@
 # Multiplayer Spectator — Networked Garden View
 
-Status: in progress · Branch: `multiplayer` · Started 2026-06-18
+Status: **working — two-machine verified 2026-06-19** · Branch: `multiplayer` · Started 2026-06-18
+
+Full garden mirroring confirmed on the Mac: the static roster (incl. staged like-unlocks),
+runtime scatter clones, canopy fruit orbs, and the whole-roster flourish all replicate.
 
 A second machine (a Mac) renders the Gaussian-splat garden **itself** as a live
 "audience" view, from its own camera angle, while the Windows PC running the Quest
@@ -185,12 +188,14 @@ The editor's auto-role only picks "client" in a real macOS **build**
 > Press Play from **Boot.unity** so `NetworkBootstrap` runs — the editor plays whatever
 > scene is open, not necessarily build index 0.
 
-### Expected & confirmation
+### Expected & confirmation — ✅ verified 2026-06-19
 The Mac skips the lock box and shows the garden through the spectator camera; plants sit
-in the host's layout, and blooming a plant on the headset reveals it on the Mac. Mac
-Console should show:
+in the host's layout, blooming a plant on the headset reveals it on the Mac, staged
+like-unlocks appear, and the sit-triggered whole-roster flourish (scatter clones + fruit
+orbs) mirrors. Mac Console should show:
 - `[SceneLock] Spectator bypass — calibration skipped, content enabled.`
 - `[SpectatorMode] Disabled N objects + M components (spectator).` / `Spectator camera live.`
+- `[GardenNetHub] client applied N, spawned M, despawned …` (M climbs during the flourish).
 
 ### Auto-pause troubleshooting
 If Play mode auto-pauses on the client, the Console's **Error Pause** is on and something
