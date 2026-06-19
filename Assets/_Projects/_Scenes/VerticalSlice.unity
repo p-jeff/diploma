@@ -1104,44 +1104,6 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 0
---- !u!1 &158033711 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4156531393919751863, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &158033712 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5168435808966073500, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &158033715
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 158033711}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee10491ef6d5d1d49a270cf6b09bdc19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Oculus.VR::OVROverlayCanvas
-  _mipmapMode: 0
-  _dynamicResolution: 1
-  _redrawResolutionThreshold: 2147483647
-  rectTransform: {fileID: 158033712}
-  maxTextureSize: 2048
-  manualRedraw: 0
-  renderInterval: 1
-  renderIntervalFrameOffset: 0
-  superSample: 0
-  layer: 5
-  opacity: 2
-  shape: 0
-  curveRadius: 1
-  overlapMask: 0
-  compositionMode: 2
-  _overlayEnabled: 1
 --- !u!1 &166075777
 GameObject:
   m_ObjectHideFlags: 0
@@ -2392,6 +2354,7 @@ MonoBehaviour:
   onSceneLocked:
     m_PersistentCalls:
       m_Calls: []
+  disableAnchorForTesting: 1
 --- !u!4 &404635121
 Transform:
   m_ObjectHideFlags: 0
@@ -3101,27 +3064,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.21643965
+      value: 0.15304597
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.15304597
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.976296
+      value: 0.6903455
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -0.6903455
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 155
       objectReference: {fileID: 0}
     - target: {fileID: 1132861892082735370, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -3325,6 +3288,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 2
+  kind: 0
+  speciesId: 0
 --- !u!1 &552328075
 GameObject:
   m_ObjectHideFlags: 0
@@ -3726,79 +3691,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _facing: 0
   _doubleSided: 0
---- !u!1001 &854673075
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1000000000000000001, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_Name
-      value: SpectatorCamera
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000002, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: field of view
-      value: 103.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000002, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_FOVAxisMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000002, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_NormalizedViewPortRect.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000003, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_RendererIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.20805
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 2.792
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -3.77
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1000000000000000004, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2, type: 3}
 --- !u!1001 &861800823
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4005,44 +3897,6 @@ Transform:
   - {fileID: 406204728}
   m_Father: {fileID: 358441001}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &925674589 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 676590400456565749, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &925674590 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 2327226965567357489, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &925674593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 925674589}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee10491ef6d5d1d49a270cf6b09bdc19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Oculus.VR::OVROverlayCanvas
-  _mipmapMode: 0
-  _dynamicResolution: 1
-  _redrawResolutionThreshold: 2147483647
-  rectTransform: {fileID: 925674590}
-  maxTextureSize: 2048
-  manualRedraw: 0
-  renderInterval: 1
-  renderIntervalFrameOffset: 0
-  superSample: 0
-  layer: 5
-  opacity: 2
-  shape: 0
-  curveRadius: 1
-  overlapMask: 0
-  compositionMode: 2
-  _overlayEnabled: 1
 --- !u!1 &935717157
 GameObject:
   m_ObjectHideFlags: 0
@@ -4523,7 +4377,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3967473718266300107, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
   m_PrefabInstance: {fileID: 717881620697957263}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717881620697957266}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 986608f6d5c3d5f44a4bea7e81488b5d, type: 3}
@@ -4557,7 +4411,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: b06c161177653f64ab049d58b9a61b06, type: 3}
+  m_Resource: {fileID: 8300000, guid: 3648001bbb8fec14dbf73cda316983d5, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -4961,6 +4815,8 @@ MonoBehaviour:
   bloomWholeRosterOnFlourish: 1
   flourishInstancesPerSpecies: 2
   flourishSpeciesStagger: 0.3
+  revealBuildsPerFrame: 1
+  gsplatSortRefreshRate: 1
   head: {fileID: 166075781}
   touchPrompt: {fileID: 1336258689}
   likeGestureWrappers:
@@ -6461,6 +6317,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 9
+  kind: 0
+  speciesId: 0
 --- !u!1 &1360409870
 GameObject:
   m_ObjectHideFlags: 0
@@ -7119,6 +6977,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 7
+  kind: 0
+  speciesId: 0
 --- !u!114 &1525211928 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3137393489738898555, guid: 1eba3cbd966af5e47a1c8e77de7d62cf, type: 3}
@@ -7143,6 +7003,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 8
+  kind: 0
+  speciesId: 0
 --- !u!1001 &1542243228
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13994,7 +13856,7 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3967473718266300107, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
   m_PrefabInstance: {fileID: 1549391152}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1549391156}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 986608f6d5c3d5f44a4bea7e81488b5d, type: 3}
@@ -14016,11 +13878,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de76f7169412b8f4896235a1585d8939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.SelectorUnityEventWrapper
---- !u!1 &1549391156 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3466727687825186521, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
-  m_PrefabInstance: {fileID: 1549391152}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1554794616
 GameObject:
   m_ObjectHideFlags: 0
@@ -14251,6 +14108,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 5
+  kind: 0
+  speciesId: 0
 --- !u!1 &1588432802
 GameObject:
   m_ObjectHideFlags: 0
@@ -15126,63 +14985,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!1 &1839522160
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1839522162}
-  - component: {fileID: 1839522161}
-  m_Layer: 0
-  m_Name: SpectatorMode
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1839522161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1839522160}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e74fb7b8c420434bae154982cc93a74, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.SpectatorModeController
-  objectsToDisable:
-  - {fileID: 419167060}
-  - {fileID: 334891645}
-  - {fileID: 1549391156}
-  - {fileID: 717881620697957266}
-  - {fileID: 600885717}
-  - {fileID: 1308639809}
-  - {fileID: 2146477505}
-  - {fileID: 512113455}
-  componentsToDisable:
-  - {fileID: 1015637056}
-  - {fileID: 4278882559347271652}
-  spectatorCamera: {fileID: 0}
---- !u!4 &1839522162
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1839522160}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1857607841
 GameObject:
   m_ObjectHideFlags: 0
@@ -15268,6 +15070,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 4
+  kind: 0
+  speciesId: 0
 --- !u!114 &1885479429 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8931080370875138959, guid: 8ef6d0ed7d7b45e4fb361a4891290dcf, type: 3}
@@ -15292,6 +15096,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 3
+  kind: 0
+  speciesId: 0
 --- !u!1001 &1905118143
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -15479,6 +15285,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 1
+  kind: 0
+  speciesId: 0
 --- !u!1 &1930278479
 GameObject:
   m_ObjectHideFlags: 0
@@ -15593,6 +15401,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
   id: 6
+  kind: 0
+  speciesId: 0
 --- !u!82 &1937458359 stripped
 AudioSource:
   m_CorrespondingSourceObject: {fileID: 3476833398165554874, guid: ba443080352f3284bb3818342960e03f, type: 3}
@@ -15814,44 +15624,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 100597948}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2135387407 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2868018917755235999, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!224 &2135387408 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 5104736178015899382, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2135387411
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2135387407}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ee10491ef6d5d1d49a270cf6b09bdc19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Oculus.VR::OVROverlayCanvas
-  _mipmapMode: 0
-  _dynamicResolution: 1
-  _redrawResolutionThreshold: 2147483647
-  rectTransform: {fileID: 2135387408}
-  maxTextureSize: 2048
-  manualRedraw: 0
-  renderInterval: 1
-  renderIntervalFrameOffset: 0
-  superSample: 0
-  layer: 5
-  opacity: 2
-  shape: 0
-  curveRadius: 1
-  overlapMask: 0
-  compositionMode: 2
-  _overlayEnabled: 1
 --- !u!1 &2146477505
 GameObject:
   m_ObjectHideFlags: 0
@@ -16105,11 +15877,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de76f7169412b8f4896235a1585d8939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Oculus.Interaction::Oculus.Interaction.SelectorUnityEventWrapper
---- !u!1 &717881620697957266 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3466727687825186521, guid: be9673c5cbe97b145babacf1583bba0e, type: 3}
-  m_PrefabInstance: {fileID: 717881620697957263}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &4278882559347271650
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16136,15 +15903,15 @@ PrefabInstance:
       objectReference: {fileID: 166075781}
     - target: {fileID: 676590400456565749, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2361993429157877970, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2868018917755235999, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2899883986728133353, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: gardenFadeRoot
@@ -16232,7 +15999,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4156531393919751863, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5113375251586768915, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_OverridePixelPerfect
@@ -16240,7 +16007,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5152577897936107036, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5595975813139532387, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: flipY
@@ -16260,7 +16027,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7884349326273628582, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
-      value: 7
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8736000952711587044, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_text
@@ -16271,16 +16038,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4156531393919751863, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 158033715}
-    - targetCorrespondingSourceObject: {fileID: 676590400456565749, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 925674593}
-    - targetCorrespondingSourceObject: {fileID: 2868018917755235999, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2135387411}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
 --- !u!4 &4278882559347271651 stripped
 Transform:
@@ -16313,5 +16071,3 @@ SceneRoots:
   - {fileID: 434751567}
   - {fileID: 512113457}
   - {fileID: 404635121}
-  - {fileID: 854673075}
-  - {fileID: 1839522162}

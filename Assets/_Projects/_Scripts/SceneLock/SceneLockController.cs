@@ -56,8 +56,17 @@ public class SceneLockController : MonoBehaviour
     [Header("World Lock")]
     [Tooltip("OVRManager whose recenter is disabled once locked, so the scene can't be nudged off its anchor. Optional.")]
     [SerializeField] private OVRManager ovrManager;
-    [Tooltip("If true and an MRUK instance exists, also toggle MRUK world-lock (the spatial anchor is the primary lock; this is extra drift insurance).")]
+    [Tooltip("If true and an MRUK instance exists, also toggle MRUK world-lock (the spatial anchor is the primary lock; this is extra drift insurance). Only used in legacy follow mode (Freeze After Placement OFF) — it continuously re-localizes, which is part of the drift.")]
     [SerializeField] private bool useMrukWorldLock = true;
+    [Tooltip("Recommended ON: use the spatial anchor to PLACE the scene once (on lock, and on restore " +
+             "across sessions), let it settle, then STOP following it — the root freezes in tracking " +
+             "space instead of being re-corrected every frame. Kills the per-frame anchor drift/jitter " +
+             "while keeping cross-session reproducibility (the saved anchor still defines the placement). " +
+             "OFF = legacy: parent to the anchor and follow its every correction.")]
+    [SerializeField] private bool freezeAfterPlacement = true;
+    [Tooltip("Seconds to keep following the anchor after placement (so its localization can converge) " +
+             "before freezing. Only used when Freeze After Placement is on.")]
+    [SerializeField, Min(0f)] private float freezeSettleSeconds = 1f;
 
     [Header("Persistence")]
     [Tooltip("If false, the placement is never saved/restored — you recalibrate every launch (it still anchors for the running session).")]
@@ -73,12 +82,20 @@ public class SceneLockController : MonoBehaviour
     [SerializeField] private UnityEvent onCalibrationStarted;
     [SerializeField] private UnityEvent onSceneLocked;
 
+    [Header("Debug")]
+    [Tooltip("TEST ONLY — lock the scene at the transform you placed it at with NO spatial anchor and " +
+             "NO world-lock, so it sits fixed in tracking space (no drift correction, no persistence). " +
+             "Use this to confirm whether 'the whole garden drifts' is the spatial anchor re-localizing. " +
+             "Turn OFF for normal use.")]
+    [SerializeField] private bool disableAnchorForTesting = false;
+
     // ── State ───────────────────────────────────────────────────────────────────
 
     public enum LockState { Restoring, Calibrating, Locked }
     public LockState State { get; private set; } = LockState.Restoring;
 
     private OVRSpatialAnchor m_anchor;
+    private Transform m_rootOriginalParent;
 
     // ── Lifecycle ───────────────────────────────────────────────────────────────
 
@@ -92,6 +109,10 @@ public class SceneLockController : MonoBehaviour
         // Same for the chair handle: grabbing it should move the chair root, not the handle itself.
         if (chairGrabbable != null && chairRoot != null)
             chairGrabbable.InjectOptionalTargetTransform(chairRoot);
+
+        // Remember the root's original parent so freeze-after-placement can detach it back here
+        // (keeping its converged world pose) instead of leaving it parented to the anchor.
+        if (sceneRoot != null) m_rootOriginalParent = sceneRoot.parent;
     }
 
     void Start()
@@ -102,6 +123,13 @@ public class SceneLockController : MonoBehaviour
         if (Plants.Net.SpectatorState.IsSpectator)
         {
             EnterSpectatorBypass();
+            return;
+        }
+
+        if (disableAnchorForTesting)
+        {
+            Debug.LogWarning("[SceneLock] disableAnchorForTesting ON — ignoring any saved anchor; calibrate then lock with NO anchor.");
+            BeginCalibration();
             return;
         }
 
@@ -160,6 +188,18 @@ public class SceneLockController : MonoBehaviour
         // Persist the chair's final placement (relative to the root, which the anchor world-locks).
         SaveChairPose();
 
+        if (disableAnchorForTesting)
+        {
+            // TEST: no spatial anchor, no world-lock — leave the root at its placed pose so it sits
+            // fixed in tracking space. Confirms whether the "whole garden drifts" is anchor re-localizing.
+            if (ovrManager != null) ovrManager.AllowRecenter = false;
+            if (useMrukWorldLock && MRUK.Instance != null) MRUK.Instance.EnableWorldLock = false;
+            Debug.LogWarning("[SceneLock] LOCKED WITH NO ANCHOR (disableAnchorForTesting) — not drift-corrected, not persisted.");
+            EnableContent();
+            onSceneLocked.Invoke();
+            yield break;
+        }
+
         // Create a spatial anchor at the root's final pose.
         var anchorGo = new GameObject("[SceneAnchor]");
         anchorGo.transform.SetPositionAndRotation(sceneRoot.position, sceneRoot.rotation);
@@ -178,6 +218,9 @@ public class SceneLockController : MonoBehaviour
         ApplyWorldLock();
         EnableContent();
         onSceneLocked.Invoke();
+
+        // Freeze mode: stop following the anchor once it settles (kills the per-frame drift).
+        if (freezeAfterPlacement) StartCoroutine(FreezeAfterSettle());
 
         if (persistAcrossSessions && m_anchor.Created)
             SaveAnchorJob(m_anchor);
@@ -252,6 +295,10 @@ public class SceneLockController : MonoBehaviour
             EnableContent();
             State = LockState.Locked;
             onSceneLocked.Invoke();
+
+            // Freeze mode: follow the restored anchor only until it converges, then detach.
+            if (freezeAfterPlacement) StartCoroutine(FreezeAfterSettle());
+
             Debug.Log($"[SceneLock] Restored placement from anchor {uuid}.");
         }
         catch (Exception e)
@@ -275,7 +322,21 @@ public class SceneLockController : MonoBehaviour
     private void ApplyWorldLock()
     {
         if (ovrManager != null) ovrManager.AllowRecenter = false;
-        if (useMrukWorldLock && MRUK.Instance != null) MRUK.Instance.EnableWorldLock = true;
+        // MRUK world-lock continuously re-localizes — only use it in legacy follow mode. In freeze
+        // mode we intentionally stop following after placement, so it must stay OFF (it would
+        // re-introduce the per-frame drift we're eliminating).
+        if (useMrukWorldLock && MRUK.Instance != null) MRUK.Instance.EnableWorldLock = !freezeAfterPlacement;
+    }
+
+    /// <summary>Freeze-after-placement: the root is parented to the anchor for <see cref="freezeSettleSeconds"/>
+    /// so the anchor's localization can converge, then detached back to its original parent — keeping
+    /// the converged world pose — so the runtime no longer nudges it. Stops the per-frame anchor drift
+    /// while preserving the placement the (still-saved) anchor established.</summary>
+    private IEnumerator FreezeAfterSettle()
+    {
+        if (freezeSettleSeconds > 0f) yield return new WaitForSeconds(freezeSettleSeconds);
+        if (sceneRoot != null) sceneRoot.SetParent(m_rootOriginalParent, worldPositionStays: true);
+        Debug.Log("[SceneLock] Root frozen at the converged anchor pose — no further drift correction.");
     }
 
     private void EnableContent()

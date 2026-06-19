@@ -373,7 +373,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
-      value: 0617dfe2-ffa8-4af9-bc2a-af72ab9a0a44
+      value: 4fb5e997-30a8-4bdd-b041-402467f8d27e
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
@@ -396,10 +396,10 @@ PrefabInstance:
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: GsplatAsset
       value: 
-      objectReference: {fileID: 4599839170941234424, guid: 9cdf1792de688af468e1316693d26477, type: 3}
+      objectReference: {fileID: 4599839170941234424, guid: e7bf73558b887bb4eafbc8fc790ff6f6, type: 3}
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_assetGuid
-      value: 9cdf1792de688af468e1316693d26477
+      value: e7bf73558b887bb4eafbc8fc790ff6f6
       objectReference: {fileID: 0}
     - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite

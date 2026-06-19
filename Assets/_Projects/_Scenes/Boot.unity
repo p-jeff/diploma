@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetworkBootstrap
   role: 0
-  hostAddress: 127.0.0.1
+  hostAddress: 192.168.50.107
   autoStart: 1
 --- !u!114 &349497519
 MonoBehaviour:
@@ -169,6 +169,7 @@ MonoBehaviour:
   gardenRoot: {fileID: 0}
   gardenRootName: SceneRoot
   sendRate: 15
+  verboseLogging: 1
 --- !u!114 &349497520
 MonoBehaviour:
   m_ObjectHideFlags: 0

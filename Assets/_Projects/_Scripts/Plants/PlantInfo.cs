@@ -59,16 +59,13 @@ namespace Plants
             }
         }
 
-        /// <summary>Ensure a label's Canvas renders as a Meta compositor layer for crisp text
-        /// (see <see cref="LabelOverlayCanvas"/>). Used for both the poem and the context labels.
-        /// Runtime only — never spawns the overlay's hidden helper objects in the edit-mode scene.</summary>
+        /// <summary>No-op. The OVR compositor-layer overlay for crisp label text was removed
+        /// project-wide (per-frame render-texture re-render + TMP ForceMeshUpdate every frame, the
+        /// compositor layer-count limit, and ASW mis-reprojecting it all caused stutter/glitches).
+        /// Labels now render as plain world-space canvases; any overlay baked into a scene is stripped
+        /// on load by <see cref="OverlayCanvasStripper"/>. Kept as a no-op so call sites stay valid.</summary>
         private static void EnsureLabelOverlay(PlantLabel label)
         {
-            if (!Application.isPlaying || label == null) return;
-            var canvas = label.GetComponentInParent<Canvas>();
-            if (canvas == null) return;
-            if (canvas.GetComponent<LabelOverlayCanvas>() == null)
-                canvas.gameObject.AddComponent<LabelOverlayCanvas>();
         }
 
         // Placement mode + radius, mirrored from Plant via PositionPoem / PositionPoemCylinder

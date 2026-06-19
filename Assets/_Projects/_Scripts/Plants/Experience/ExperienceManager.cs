@@ -39,10 +39,22 @@ namespace Plants
                  "the rest. ON (vertical slice): the flourish blooms the WHOLE roster — every plant in " +
                  "the batches, activating any not yet unlocked so they rise from the ground.")]
         [SerializeField] private bool bloomWholeRosterOnFlourish = false;
-        [Tooltip("Additional instances spawned per liked species during flourish.")]
-        [SerializeField] private int flourishInstancesPerSpecies = 4;
+        [Tooltip("Additional instances spawned per liked species during flourish. Fewer = fewer splat " +
+                 "instances to depth-sort each frame (a major GPU cost in the bloomed garden).")]
+        [SerializeField] private int flourishInstancesPerSpecies = 2;
         [Tooltip("Seconds between each liked species flourishing.")]
         [SerializeField] private float flourishSpeciesStagger = 1f;
+        [Tooltip("Garden-wide cap on how many heavy gsplat reveal-builds may BEGIN per frame. Each " +
+                 "newly-revealed instance does an O(n) morph-buffer build (CPU + GPU uploads) its " +
+                 "first active frame; without a cap, overlapping flourish cascades pile many into one " +
+                 "frame — the flourish stutter. 1 = smoothest; raise only if reveals feel too slow to " +
+                 "populate the garden.")]
+        [SerializeField, Min(1)] private int revealBuildsPerFrame = 1;
+        [Tooltip("GPU sort throttle: sort each gsplat's gaussians once every N frames instead of every " +
+                 "frame — the flourished garden's single biggest GPU cost (~72%). A >10° head turn still " +
+                 "forces a re-sort (GsplatSettings.CameraRotationRefreshTreshold) so it stays correct " +
+                 "while looking around. 0 = off (every frame); 3 is a good start.")]
+        [SerializeField, Min(0)] private int gsplatSortRefreshRate = 3;
 
         [Header("Head")]
         [Tooltip("Head/centre-eye transform used for proximity reveal. Falls back to Camera.main if unset.")]
@@ -110,6 +122,16 @@ namespace Plants
                 Debug.LogWarning($"[ExperienceManager] Multiple instances; '{name}' overriding existing.", this);
             Instance = this;
 
+            // Garden-wide reveal-build throttle (anti-flourish-stutter): cap how many heavy gsplat
+            // morph builds may begin per frame. Read here so it applies for the whole session.
+            RevealBudget.PerFrame = revealBuildsPerFrame;
+
+            // Garden-wide GPU sort throttle (cuts the flourished garden's biggest GPU cost): sort
+            // gsplats every N frames instead of every frame, pushed to every renderer in the scene.
+            // Runtime scatter clones pick it up in PlantInstanceScatterer.Spawn.
+            GsplatSortThrottle.RefreshRate = (uint)Mathf.Max(0, gsplatSortRefreshRate);
+            GsplatSortThrottle.ApplyToScene();
+
             // Auto-add EnvironmentMoment if not present (required for 180° environments).
             if (GetComponent<EnvironmentMoment>() == null)
                 gameObject.AddComponent<EnvironmentMoment>();
@@ -123,6 +145,16 @@ namespace Plants
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
+        }
+
+        void OnValidate()
+        {
+            if (revealBuildsPerFrame < 1) revealBuildsPerFrame = 1;
+            RevealBudget.PerFrame = revealBuildsPerFrame;   // live-tune while playing
+
+            if (gsplatSortRefreshRate < 0) gsplatSortRefreshRate = 0;
+            GsplatSortThrottle.RefreshRate = (uint)gsplatSortRefreshRate;
+            if (Application.isPlaying) GsplatSortThrottle.ApplyToScene();   // live-tune while playing
         }
 
         // ── Private state ─────────────────────────────────────────────────────────

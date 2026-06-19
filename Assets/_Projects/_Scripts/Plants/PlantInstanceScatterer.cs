@@ -97,6 +97,7 @@ namespace Plants
                 copy.AddComponent<GardenOccupant>();
 
                 copy.SetActive(false); // caller's reveal cascade activates these one by one
+                GsplatSortThrottle.Apply(copy); // inherit the garden-wide GPU sort throttle (runtime clone)
                 result.Add(copy);
             }
 

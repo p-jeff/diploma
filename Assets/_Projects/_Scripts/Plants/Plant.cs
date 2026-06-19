@@ -735,15 +735,33 @@ namespace Plants
 
             var spawned = scatterer.Spawn(n, SpawnedPositions());
             TagScatterClones(spawned);
+            m_spawnedInstances.AddRange(spawned);   // list is correct immediately (copies still inactive)
+
+            // Activate + park-grey the previews over successive frames rather than all at once: each
+            // one's first active frame does the heavy gsplat morph build, so waking N together hitches
+            // the select. The garden-wide RevealBudget caps builds per frame (same gate the flourish
+            // cascade uses), and the copies stay inactive/invisible until their slot — no flash.
+            StartCoroutine(ActivatePreviewInstances(spawned));
+        }
+
+        /// <summary>Activate the spawned preview copies one global build-slot at a time
+        /// (see <see cref="RevealBudget"/>), parking each at its grey resting state. They stay
+        /// inactive — invisible — until their slot, so there is no full-detail flash and no select
+        /// hitch from many gsplat morph builds landing on one frame.</summary>
+        private IEnumerator ActivatePreviewInstances(List<GameObject> spawned)
+        {
             foreach (var go in spawned)
             {
                 if (go == null) continue;
+
+                while (!RevealBudget.TryConsume())
+                    yield return null;
+
                 go.SetActive(true);
                 var animators = go.GetComponentsInChildren<GsplatRevealAnimator>(true);
                 foreach (var a in animators)
                     if (a != null) a.ResetToStart();
             }
-            m_spawnedInstances.AddRange(spawned);
         }
 
         /// <summary>
@@ -978,6 +996,14 @@ namespace Plants
             {
                 var go = instances[i];
                 if (go == null) continue;
+
+                // Garden-wide reveal-build throttle: wait for a slot before waking this instance.
+                // Each clone does its heavy gsplat morph build (O(n) CPU + buffer uploads) the first
+                // frame it is active, so overlapping flourish cascades waking many clones on one
+                // frame are what spiked the frame (~46 ms). The clone stays inactive — invisible, no
+                // full-detail flash — until its turn, so only frame pacing changes, not the look.
+                while (!RevealBudget.TryConsume())
+                    yield return null;
 
                 go.SetActive(true);
 
