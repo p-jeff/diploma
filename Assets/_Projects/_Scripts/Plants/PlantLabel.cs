@@ -18,6 +18,11 @@ namespace Plants
         [Tooltip("Foreground TextMeshPro field showing the label text.")]
         [SerializeField] private TMP_Text text;
 
+        [Tooltip("Single source of truth for this label's font + formatting. Re-applied on enable and " +
+                 "on every SetContent so the label can't drift onto the wrong font, whatever a prefab " +
+                 "or scene instance left on its TMP. PlantInfo overrides this per role (poem/context).")]
+        [SerializeField] private LabelStyle style;
+
         [Tooltip("Background panel Image drawn behind the text. Sized to the text + Padding each " +
                  "Show; its tint + sprite (e.g. a 9-sliced rounded panel) are authored on the prefab.")]
         [SerializeField] private Image background;
@@ -34,16 +39,37 @@ namespace Plants
                  "prefab/instance state. Flip on to bring the panel back.")]
         [SerializeField] private bool showBackground = false;
 
-        void OnEnable() => ApplyBackgroundVisibility();
+        void OnEnable()
+        {
+            ApplyStyle();
+            ApplyBackgroundVisibility();
+        }
 
         /// <summary>Assign the label text (TMP) and (when enabled) size the background panel to fit it.
         /// Safe to call in edit mode.</summary>
         public void SetContent(PlantLabelContent content)
         {
             if (content == null) return;
+            ApplyStyle();
             if (text != null) text.text = content.text ?? string.Empty;
             ApplyBackgroundVisibility();
             if (showBackground) FitBackground();
+        }
+
+        /// <summary>Override this label's style (e.g. PlantInfo assigning a poem vs context style) and
+        /// re-apply it immediately.</summary>
+        public void SetStyle(LabelStyle newStyle)
+        {
+            if (newStyle == null) return;
+            style = newStyle;
+            ApplyStyle();
+        }
+
+        /// <summary>Force the TMP field to this label's <see cref="style"/> (font, size, alignment, …).
+        /// No-op when no style is assigned, so labels without one keep their authored look.</summary>
+        private void ApplyStyle()
+        {
+            if (style != null && text != null) style.Apply(text);
         }
 
         /// <summary>Force the panel GameObject active state to match <see cref="showBackground"/>, so a

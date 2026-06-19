@@ -43,6 +43,15 @@ namespace Plants
         [Tooltip("Pulse speed (cycles per second × 2π).")]
         [SerializeField, Min(0f)] private float pulseSpeed = 1.5f;
 
+        [Header("Invite particles")]
+        [Tooltip("Rising particle column — the same cue the plants use (HeroGlow) — that drifts up " +
+                 "around the chair to invite the sit once the garden is ready. Auto-created if unset.")]
+        [SerializeField] private HeroGlow glow;
+        [Tooltip("Tint of the invite particles (matches the plant touch-glow blue by default).")]
+        [SerializeField] private Color glowColor = new Color(0.45f, 0.85f, 1f, 1f);
+        [Tooltip("Radius (m) of the particle ring drifting up around the chair.")]
+        [SerializeField, Min(0f)] private float glowRadius = 0.35f;
+
         [Header("Restart")]
         [Tooltip("Restart button revealed a short while after sitting. Poking it restarts the whole " +
                  "experience back to the title sequence. Held disabled until the delay elapses.")]
@@ -57,6 +66,7 @@ namespace Plants
         [SerializeField] private UnityEvent onSit;
 
         private bool m_satDown;
+        private bool m_glowShown;
         private Vector3 m_markerBaseScale = Vector3.one;
         private Coroutine m_restartRoutine;
 
@@ -64,6 +74,10 @@ namespace Plants
         {
             if (groundMarker != null) m_markerBaseScale = groundMarker.transform.localScale;
             if (restartButton != null) restartButton.SetActive(false);
+
+            // Same rising-particle cue the plants use; built at runtime, no prefab wiring.
+            if (glow == null) glow = GetComponent<HeroGlow>();
+            if (glow == null) glow = gameObject.AddComponent<HeroGlow>();
             if (titleSequence == null)
 #if UNITY_2023_1_OR_NEWER
                 titleSequence = FindFirstObjectByType<TitleSequenceController>(FindObjectsInactive.Include);
@@ -92,7 +106,12 @@ namespace Plants
                 // flourished. This keeps a sit from firing during scene calibration or while the
                 // (replayed) title sequence is still running.
                 var em = ExperienceManager.Instance;
-                if (em == null || !em.CanSit) return;
+                bool armed = em != null && em.CanSit;
+
+                // The rising invite particles emit only once sitting is actually available, so they
+                // read as "the garden is ready — take a seat" rather than being on the whole time.
+                SetGlow(armed);
+                if (!armed) return;
 
                 Transform h = GetHead();
                 if (h == null) return;
@@ -111,11 +130,30 @@ namespace Plants
             groundMarker.transform.localScale = m_markerBaseScale * s;
         }
 
+        /// <summary>Start/stop the rising invite particles (the plant cue). They emit only while the
+        /// sit is armed; in-flight particles finish rising and fade out when hidden.</summary>
+        private void SetGlow(bool on)
+        {
+            if (glow == null) return;
+            if (on && !m_glowShown)
+            {
+                glow.Show(transform.position, glowColor, glowRadius);
+                m_glowShown = true;
+            }
+            else if (!on && m_glowShown)
+            {
+                glow.Hide();
+                m_glowShown = false;
+            }
+        }
+
         /// <summary>The user took a seat: bloom the garden and arm the restart button.</summary>
         public void SitDown()
         {
             if (m_satDown) return;
             m_satDown = true;
+
+            SetGlow(false); // the invite has been answered
 
             if (hideMarkerOnSit && groundMarker != null)
             {
@@ -155,6 +193,7 @@ namespace Plants
         {
             if (m_restartRoutine != null) { StopCoroutine(m_restartRoutine); m_restartRoutine = null; }
             m_satDown = false;
+            SetGlow(false); // re-armed on the next CanSit window
             if (restartButton != null) restartButton.SetActive(false);
             if (groundMarker != null)
             {

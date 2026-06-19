@@ -1,15 +1,19 @@
 using System.Collections;
+using Gsplat;
 using UnityEngine;
 
 namespace Plants
 {
     /// <summary>
-    /// A cheap glowing "fruit" orb that hangs in a tree's canopy and carries ONE context.
+    /// A cheap per-context "fruit" that hangs in a tree's canopy and carries ONE context. The
+    /// visual is either a generated glowing orb (default) or, when a fruit <see cref="GsplatAsset"/>
+    /// is supplied, an actual decimated splat (e.g. a date/pear scan) cloned at each canopy point.
     /// It replaces a full splat clone as the per-context grow/gaze target for high-splat plants
-    /// (trees), so a tree shows <b>1 splat body + N tiny orbs</b> instead of N splat copies.
+    /// (trees), so a tree shows <b>1 splat body + N tiny fruits</b> instead of N full splat copies.
     ///
     /// Self-building, like <see cref="Plants.Experience.HeroGlow"/>: it generates a small additive
-    /// sphere + a <c>Custom/URP/FruitOrb</c> material at runtime, plus a CHILD collider GameObject
+    /// sphere + a <c>Custom/URP/FruitOrb</c> material at runtime (or, in splat mode, a child
+    /// <see cref="GsplatRenderer"/>), plus a CHILD collider GameObject
     /// (trigger <see cref="SphereCollider"/> + a gaze-only <see cref="PlantTouchTrigger"/>). The
     /// child collider is what makes the existing gaze targeter resolve a ray hit back to this orb:
     /// <c>GazeInstanceTargeter</c> finds the owning <see cref="Plant"/> via the trigger and, with no
@@ -26,7 +30,8 @@ namespace Plants
 
         private const float k_hoverBoost = 1.8f;
 
-        private Material m_material;
+        private Material m_material;          // orb (sphere) visual; null in splat mode
+        private GsplatRenderer m_splat;       // fruit-splat visual; null in orb mode
         private float m_dormantIntensity = 0.22f;
         private float m_ripeIntensity = 1.4f;
         private float m_intensity;
@@ -39,18 +44,47 @@ namespace Plants
 
         public bool IsRipe => m_ripe;
 
-        /// <summary>Build the orb visual + its gaze collider, wired to <paramref name="owner"/>.</summary>
-        public void Init(Plant owner, float visualRadius, float colliderRadius, Color color,
-                         float dormantIntensity, float ripeIntensity)
+        /// <summary>Build the fruit visual + its gaze collider, wired to <paramref name="owner"/>.
+        /// When <paramref name="fruitSplat"/> is non-null the visual is that gsplat (scaled by
+        /// <paramref name="fruitSplatScale"/>); otherwise it is the generated glowing orb of
+        /// <paramref name="orbRadius"/> / <paramref name="orbColor"/>. The dormant/ripe levels map
+        /// to the orb material's <c>_Intensity</c> or, in splat mode, the renderer's Brightness.</summary>
+        public void Init(Plant owner, float colliderRadius, float dormantLevel, float ripeLevel,
+                         GsplatAsset fruitSplat, float fruitSplatScale, Quaternion fruitSplatRotation,
+                         bool gammaToLinear, int shDegree,
+                         float orbRadius, Color orbColor)
         {
-            m_dormantIntensity = dormantIntensity;
-            m_ripeIntensity = ripeIntensity;
-            BuildVisual(visualRadius, color);
+            m_dormantIntensity = dormantLevel;
+            m_ripeIntensity = ripeLevel;
+
+            if (fruitSplat != null) BuildSplatVisual(fruitSplat, fruitSplatScale, fruitSplatRotation, gammaToLinear, shDegree);
+            else BuildOrbVisual(orbRadius, orbColor);
+
             BuildCollider(owner, colliderRadius);
             SetIntensity(m_dormantIntensity);
         }
 
-        private void BuildVisual(float radius, Color color)
+        /// <summary>Hang an actual gsplat "fruit" (e.g. a decimated date/pear scan) under this orb
+        /// root as the visual, in place of the generated glowing sphere. The root keeps unit scale;
+        /// the splat child carries <paramref name="scale"/> so the gaze collider stays in metres.
+        /// Dormant/ripe drives the renderer's per-instance Brightness (see <see cref="SetIntensity"/>);
+        /// all clones of one .ply share its GPU buffer read-only (no morph here), so N fruits stay cheap.</summary>
+        private void BuildSplatVisual(GsplatAsset asset, float scale, Quaternion rotation, bool gammaToLinear, int shDegree)
+        {
+            var go = new GameObject("Splat");
+            go.transform.SetParent(transform, false);
+            go.transform.localScale = Vector3.one * Mathf.Max(1e-4f, scale);
+            go.transform.localRotation = rotation;   // upright the scan (e.g. 90° about X)
+
+            m_splat = go.AddComponent<GsplatRenderer>();
+            m_splat.GsplatAsset = asset;
+            // Match the plant body's colour pipeline so the fruit doesn't read washed-out/dark.
+            m_splat.GammaToLinear = gammaToLinear;
+            m_splat.SHDegree = Mathf.Clamp(shDegree, 0, 3);
+            m_splat.Brightness = m_dormantIntensity;
+        }
+
+        private void BuildOrbVisual(float radius, Color color)
         {
             if (s_sphereMesh == null)
             {
@@ -106,7 +140,8 @@ namespace Plants
         private void SetIntensity(float v)
         {
             m_intensity = v;
-            if (m_material != null) m_material.SetFloat(s_IntensityId, v);
+            if (m_splat != null) m_splat.Brightness = v;
+            else if (m_material != null) m_material.SetFloat(s_IntensityId, v);
         }
 
         /// <summary>Brighten from dormant to ripe with a small overshoot pulse. Idempotent.</summary>

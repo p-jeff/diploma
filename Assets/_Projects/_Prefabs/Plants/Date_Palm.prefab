@@ -163,6 +163,52 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6718412036543688213
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4134329882439009445}
+  - component: {fileID: 2471071340736222608}
+  m_Layer: 0
+  m_Name: FruitRing
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4134329882439009445
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6718412036543688213}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.020083427, y: 7.078863, z: 0.26970243}
+  m_LocalScale: {x: 5.7983794, y: 5.7983794, z: 5.7983794}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1132861892082735370}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2471071340736222608
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6718412036543688213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d579731e6400c154d8cfb521d7e96dae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.FruitRing
+  gizmoColor: {r: 1, g: 0.78, b: 0.32, a: 0.95}
+  gizmoSegments: 48
 --- !u!1001 &2789869817337630863
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -312,6 +358,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 8c978697ec7f9ac46982e076d5d794cd, type: 3}
     - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: fruitRing
+      value: 
+      objectReference: {fileID: 2471071340736222608}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: plantData
       value: 
       objectReference: {fileID: 11400000, guid: c08312a341a03d041b4db1112b9b7649, type: 2}
@@ -319,6 +369,10 @@ PrefabInstance:
       propertyPath: scatterer
       value: 
       objectReference: {fileID: 6905417419167958278}
+    - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: fruitSplat
+      value: 
+      objectReference: {fileID: 4599839170941234424, guid: b5bb60ebaa3df8a459d9ba8853251706, type: 3}
     - target: {fileID: 5109087311396199045, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: contextMode
       value: 1
@@ -373,7 +427,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
-      value: 4fb5e997-30a8-4bdd-b041-402467f8d27e
+      value: f6cadfa0-8c3d-49be-a029-bcb29ff3378c
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
@@ -396,10 +450,10 @@ PrefabInstance:
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: GsplatAsset
       value: 
-      objectReference: {fileID: 4599839170941234424, guid: e7bf73558b887bb4eafbc8fc790ff6f6, type: 3}
+      objectReference: {fileID: 4599839170941234424, guid: f178e50e8942e2a4fa0cfa1a3ef240b6, type: 3}
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_assetGuid
-      value: e7bf73558b887bb4eafbc8fc790ff6f6
+      value: f178e50e8942e2a4fa0cfa1a3ef240b6
       objectReference: {fileID: 0}
     - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
@@ -439,11 +493,19 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 7764549551351612197, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4134329882439009445}
     - targetCorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2142751587499853974}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+--- !u!4 &1132861892082735370 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+  m_PrefabInstance: {fileID: 2789869817337630863}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6215726817921886380 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}

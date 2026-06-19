@@ -137,12 +137,35 @@ namespace Plants
                  "so the gaze snaps onto the tiny orb easily.")]
         [SerializeField, Min(0.01f)] private float fruitColliderRadius = 0.16f;
 
-        [Tooltip("Canopy Fruit only: orb glow colour.")]
+        [Tooltip("Canopy Fruit only: orb glow colour (used only when no Fruit Splat is assigned).")]
         [SerializeField] private Color fruitColor = new Color(1f, 0.78f, 0.32f, 1f);
+
+        [Tooltip("Canopy Fruit only: OPTIONAL gsplat shown as each fruit instead of the glowing orb " +
+                 "(e.g. a decimated date/pear scan). Leave empty to keep the orb. The .ply's native " +
+                 "size is arbitrary, so tune Fruit Splat Scale until the fruit reads right.")]
+        [SerializeField] private GsplatAsset fruitSplat;
+
+        [Tooltip("Canopy Fruit only: uniform local scale applied to the Fruit Splat clone. Tune to " +
+                 "fruit size (start ~1, shrink/grow until the splat matches a real date/pear).")]
+        [SerializeField, Min(0.0001f)] private float fruitSplatScale = 1f;
+
+        [Tooltip("Canopy Fruit only: local rotation (Euler degrees) of the Fruit Splat so it sits " +
+                 "upright. Scans often import on their side — 90 about X is the usual fix.")]
+        [SerializeField] private Vector3 fruitSplatEuler = new Vector3(90f, 0f, 0f);
+
+        [Tooltip("Canopy Fruit only: OPTIONAL placement circle. Point this at a child FruitRing and " +
+                 "move/scale that circle in the Scene view to choose exactly where fruits hang. " +
+                 "Empty = auto-spread fruits across the canopy AABB band (Canopy Bottom/Top/Inset).")]
+        [SerializeField] private FruitRing fruitRing;
 
         // Orb glow intensities (dormant preview vs ripe/revealed). Tuned in code; tweak if needed.
         private const float k_fruitDormantIntensity = 0.22f;
         private const float k_fruitRipeIntensity = 1.4f;
+
+        // Fruit-splat dormant/ripe levels map to GsplatRenderer.Brightness (1 = normal), so they
+        // use a different scale than the additive-orb _Intensity above.
+        private const float k_fruitSplatDormantBrightness = 0.4f;
+        private const float k_fruitSplatRipeBrightness = 1.0f;
 
         [Header("Dormant Look")]
         [Tooltip("Desaturation of the unselected plant body (0 = full colour, 1 = grey). 0.5 = half grey / half colour. Cleared to full colour on select.")]
@@ -169,6 +192,14 @@ namespace Plants
 
         // Instances that have been individually grown via GrowInstance().
         private readonly HashSet<GameObject> m_grown = new HashSet<GameObject>();
+
+        // Per-instance context assignment in INTERACTION order (not spawn position): the first
+        // instance the user grows/gazes is bound to this plant's context 0, the next to context 1,
+        // and so on (wrapping at the context count). Keyed by instance so re-touching the same one
+        // always shows the same context. Cleared when the spread is dropped (deselect/reset), so a
+        // fresh engagement with this plant restarts its story at context 0.
+        private readonly Dictionary<GameObject, int> m_contextOrder = new Dictionary<GameObject, int>();
+        private int m_nextContextOrder;
 
 
         [Tooltip("Seconds over which un-grown instances fade out when CompleteSpecies() is called.")]
@@ -204,6 +235,42 @@ namespace Plants
             return -1;
         }
 
+        /// <summary>
+        /// If <paramref name="t"/> (e.g. a touched collider) sits anywhere under one of this plant's
+        /// spawned preview/flourish instances, return that instance's root (the object held in the
+        /// spawned list); otherwise null. Lets a hand touch on a scattered copy's collider map back to
+        /// the specific instance whose context should grow. The hero body is never a spawned instance,
+        /// so touching it returns null (and the caller routes that to selection instead).
+        /// </summary>
+        public GameObject FindSpawnedInstance(Transform t)
+        {
+            for (Transform cur = t; cur != null; cur = cur.parent)
+            {
+                var go = cur.gameObject;
+                for (int i = 0; i < m_spawnedInstances.Count; i++)
+                    if (m_spawnedInstances[i] == go) return go;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// The context index bound to <paramref name="instance"/>, assigned in the ORDER the user
+        /// first interacts with instances rather than by spawn position: the first instance grown/
+        /// gazed gets context 0, the next context 1, and so on (wrapping at this plant's context
+        /// count). The assignment is remembered, so re-touching the same instance always shows the
+        /// same context. Returns -1 only for a null instance.
+        /// </summary>
+        public int ContextIndexFor(GameObject instance)
+        {
+            if (instance == null) return -1;
+            if (m_contextOrder.TryGetValue(instance, out int idx)) return idx;
+            int n = Mathf.Max(1, OwnContextCount());
+            idx = m_nextContextOrder % n;
+            m_nextContextOrder++;
+            m_contextOrder[instance] = idx;
+            return idx;
+        }
+
         private Coroutine m_showRoutine;
         private Coroutine m_sproutRoutine;
         private Coroutine m_replayRoutine;
@@ -235,8 +302,23 @@ namespace Plants
         {
             var go = new GameObject(name + "_Fruit");
             var fruit = go.AddComponent<ContextFruit>();
-            fruit.Init(this, fruitOrbRadius, fruitColliderRadius, fruitColor,
-                       k_fruitDormantIntensity, k_fruitRipeIntensity);
+            bool useSplat = fruitSplat != null;
+
+            // Mirror the plant body's gsplat colour pipeline onto the fruit so it doesn't read
+            // washed-out / dark from mismatched gamma. Defaults if the body has no renderer.
+            bool gamma = false;
+            int sh = 3;
+            if (useSplat)
+            {
+                var body = m_splatRenderers.Count > 0 ? m_splatRenderers[0] : null;
+                if (body != null) { gamma = body.GammaToLinear; sh = body.SHDegree; }
+            }
+
+            fruit.Init(this, fruitColliderRadius,
+                       useSplat ? k_fruitSplatDormantBrightness : k_fruitDormantIntensity,
+                       useSplat ? k_fruitSplatRipeBrightness : k_fruitRipeIntensity,
+                       fruitSplat, fruitSplatScale, Quaternion.Euler(fruitSplatEuler), gamma, sh,
+                       fruitOrbRadius, fruitColor);
             return go;
         }
 
@@ -565,7 +647,7 @@ namespace Plants
         {
             if (info == null || selectionCollider == null) return;
 
-            // Tell the labels whether contexts hang as canopy fruit (placed just above their orb,
+            // Tell the labels whether contexts hang as canopy fruit (placed just below their orb,
             // no collider top-lift) or float above scattered instances (the default).
             info.SetFruitContext(IsFruitMode);
 
@@ -800,6 +882,9 @@ namespace Plants
         /// </summary>
         private List<Vector3> SampleCanopyPoints(int count)
         {
+            // Authored layout: spread fruits evenly within a single circle the user placed/scaled.
+            if (fruitRing != null) return SampleRingPoints(count, fruitRing);
+
             var result = new List<Vector3>(Mathf.Max(0, count));
             if (count <= 0) return result;
 
@@ -827,6 +912,43 @@ namespace Plants
                         b.center.x + Random.Range(-ix, ix),
                         Random.Range(yMin, yMax),
                         b.center.z + Random.Range(-iz, iz));
+
+                    float nearest = result.Count == 0 ? 1f : float.MaxValue;
+                    for (int j = 0; j < result.Count; j++)
+                        nearest = Mathf.Min(nearest, (result[j] - p).sqrMagnitude);
+
+                    if (nearest > bestScore) { bestScore = nearest; best = p; }
+                }
+                result.Add(best);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Spread <paramref name="count"/> points evenly within the disc of <paramref name="ring"/>
+        /// (its world centre, plane and radius), using the same best-candidate spread as the AABB
+        /// sampler. Lets the fruit layout be authored by moving/scaling one circle instead of
+        /// auto-sampling the canopy box. Points are coplanar on the ring's plane.
+        /// </summary>
+        private List<Vector3> SampleRingPoints(int count, FruitRing ring)
+        {
+            var result = new List<Vector3>(Mathf.Max(0, count));
+            if (count <= 0) return result;
+
+            Vector3 c = ring.Center;
+            float r = Mathf.Max(0f, ring.WorldRadius);
+            ring.GetPlaneBasis(out var u, out var v);
+
+            const int candidates = 16;
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 best = c;
+                float bestScore = -1f;
+                for (int k = 0; k < candidates; k++)
+                {
+                    float ang = Random.value * Mathf.PI * 2f;
+                    float rad = r * Mathf.Sqrt(Random.value);   // sqrt => uniform over the disc area
+                    Vector3 p = c + (u * Mathf.Cos(ang) + v * Mathf.Sin(ang)) * rad;
 
                     float nearest = result.Count == 0 ? 1f : float.MaxValue;
                     for (int j = 0; j < result.Count; j++)
@@ -898,6 +1020,15 @@ namespace Plants
                 if (m_spawnedInstances[i] != null) Destroy(m_spawnedInstances[i]);
             m_spawnedInstances.Clear();
             m_grown.Clear();
+            ClearContextOrder();
+        }
+
+        /// <summary>Forget the interaction-order context assignment so the next time this plant is
+        /// engaged its story restarts at context 0 (the first instance grown → context 0 again).</summary>
+        private void ClearContextOrder()
+        {
+            m_contextOrder.Clear();
+            m_nextContextOrder = 0;
         }
 
         /// <summary>
@@ -1041,6 +1172,7 @@ namespace Plants
                 if (m_spawnedInstances[i] != null) Destroy(m_spawnedInstances[i]);
             m_spawnedInstances.Clear();
             m_grown.Clear();
+            ClearContextOrder();
 
             // Hide the manually placed fallback copies that a previous like activated.
             for (int i = 0; i < likedInstances.Count; i++)
@@ -1090,7 +1222,7 @@ namespace Plants
             if (!m_spawnedInstances.Contains(instance)) return false;
             if (m_grown.Contains(instance)) return false;
 
-            int idx = m_spawnedInstances.IndexOf(instance);
+            int idx = ContextIndexFor(instance);
 
             var animators = instance.GetComponentsInChildren<GsplatRevealAnimator>(true);
             foreach (var a in animators)
@@ -1333,9 +1465,9 @@ namespace Plants
             // Float ONLY the gazed instance's own context above it (spawn index mod context count,
             // so decorative copies map back onto a real context). One context, not the group.
             int n = OwnContextCount();
-            int idx = gazedInstance != null ? m_spawnedInstances.IndexOf(gazedInstance) : -1;
+            int idx = ContextIndexFor(gazedInstance);
             if (n > 0 && idx >= 0)
-                info.PlaceContextAt(idx % n, gazedInstance.transform, contextHeightOffset);
+                info.PlaceContextAt(idx, gazedInstance.transform, contextHeightOffset);
 
             // No audio: asking post-flourish shows the poem text + the one context to read.
             if (audioSource != null) audioSource.Stop();

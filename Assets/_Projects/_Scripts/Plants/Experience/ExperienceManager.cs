@@ -78,10 +78,6 @@ namespace Plants
         [Header("Timing")]
         [SerializeField, Min(0f)] private float likeEnableDelay = 0f;
 
-        [Header("Proximity Reveal")]
-        [Tooltip("Horizontal distance (m) from the head at which an ungrown context instance auto-reveals when you step close. 0 = off (gesture-only).")]
-        [SerializeField, Min(0f)] private float revealRadius = 0.9f;
-
         [Header("Post-Flourish Gaze Explore")]
         [Tooltip("Raycaster used post-flourish to find the splat instance you're looking at " +
                  "(replaces the old gaze cone). Auto-added if unset.")]
@@ -205,8 +201,8 @@ namespace Plants
                 if (w != null) w.WhenSelected.AddListener(LikeSelected);
 
             // Context gesture grows the nearest ungrown preview of the selected plant
-            // (proximity / stepping close is the primary reveal; this is the manual
-            // fallback — no gaze targeting).
+            // (touching a preview is the primary reveal now; this hand-pose gesture is the
+            // manual fallback — no gaze targeting).
             foreach (var w in contextGestureWrappers)
                 if (w != null) w.WhenSelected.AddListener(GrowNearestContext);
         }
@@ -260,7 +256,7 @@ namespace Plants
             return cam != null ? cam.transform : null;
         }
 
-        // ── Per-frame proximity reveal ──────────────────────────────────────────
+        // ── Per-frame update ─────────────────────────────────────────────────────
 
         void Update()
         {
@@ -268,37 +264,49 @@ namespace Plants
 
             // Post-flourish the experience is in explore mode: hover-highlight the splat instance
             // the user is gazing at; the context gesture then asks that plant to speak again.
+            // Pre-flourish there is no per-frame work — a context now grows when the user TOUCHES a
+            // spread preview instance (see Touch), not by stepping close to it.
             if (m_flourished)
-            {
                 UpdateGazeHighlight();
-                return;
-            }
-
-            if (m_selected == null || revealRadius <= 0f) return;
-
-            var ungrown = m_selected.GetUngrownInstances();
-            if (ungrown == null || ungrown.Count == 0) return;
-
-            Transform h = GetHead();
-            if (h == null) return;
-
-            // Grow any ungrown instance the user has physically stepped close to
-            // (horizontal distance from the head). This is the primary "ask" — no
-            // gesture needed for the first reveal.
-            Vector3 hp = h.position;
-            float r2 = revealRadius * revealRadius;
-            for (int i = 0; i < ungrown.Count; i++)
-            {
-                var go = ungrown[i];
-                if (go == null) continue;
-                Vector3 d = go.transform.position - hp;
-                d.y = 0f;
-                if (d.sqrMagnitude <= r2)
-                    GrowInstanceWithContext(m_selected, go);
-            }
         }
 
         // ── Public API ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Entry point for every hand touch on a plant collider (routed from <see cref="PlantTouchTrigger"/>).
+        /// During the regular pre-flourish steps, touching one of the SELECTED plant's spread preview
+        /// instances grows THAT instance's context — the primary "ask", replacing the old step-close
+        /// proximity reveal. Any other touch (a different plant's hero body, or the selected plant's own
+        /// body) routes to <see cref="Select"/> as before. Post-flourish, exploration is gaze-driven, so
+        /// hero touches fall through to Select (which no-ops while flourished).
+        /// </summary>
+        public void Touch(Plant plant, Transform touched)
+        {
+            if (plant == null) return;
+
+            // Touch a spread preview of the active plant → grow that instance's own context.
+            if (!m_flourished && plant == m_selected && !plant.IsLiked && touched != null)
+            {
+                var instance = plant.FindSpawnedInstance(touched);
+                if (instance != null)
+                {
+                    // Hold context reveals until the poem VO finishes (same gate as the like
+                    // gesture): touching a preview while the plant is still narrating does nothing,
+                    // so the reading is never cut short.
+                    if (PoemPlaying(plant)) return;
+                    GrowInstanceWithContext(plant, instance);
+                    return;
+                }
+            }
+
+            // Otherwise it's a hero-body touch: select (or switch to) this plant.
+            Select(plant);
+        }
+
+        /// <summary>True while <paramref name="p"/>'s poem VO is still narrating. Context reveals are
+        /// held until it finishes so the reading isn't cut short (mirrors the like-gesture gate).</summary>
+        private static bool PoemPlaying(Plant p) =>
+            p != null && p.AudioSource != null && p.AudioSource.isPlaying;
 
         /// <summary>
         /// Called by PlantTouchTrigger. Guards: null, inactive, already liked,
@@ -325,13 +333,20 @@ namespace Plants
 
             p.Show();
 
-            // Trigger 180° environment if the plant has one.
-            if (p.Data != null && p.Data.environmentPainting != null && moment != null)
+            // Trigger 180° environment if the plant has one (parallax layers preferred, single
+            // environmentPainting as fallback).
+            if (p.Data != null && moment != null)
             {
-                Transform h = GetHead();
-                Vector3 center = h != null ? h.position : p.transform.position;
-                Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
-                moment.Trigger(p.Data.environmentPainting, center, forward, p.AudioSource);
+                var layers = p.Data.environmentLayers;
+                bool hasLayers = layers != null && layers.Count > 0;
+                if (hasLayers || p.Data.environmentPainting != null)
+                {
+                    Transform h = GetHead();
+                    Vector3 center = h != null ? h.position : p.transform.position;
+                    Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
+                    if (hasLayers) moment.Trigger(layers, center, forward, p.AudioSource);
+                    else moment.Trigger(p.Data.environmentPainting, center, forward, p.AudioSource);
+                }
             }
 
             m_selected = p;
@@ -369,12 +384,18 @@ namespace Plants
 
             plant.PlaySfx(contextSfx, sfxVolume);   // a context label is growing in
 
-            // 180° painting for this plant's own context (by spawn index).
-            int idx = plant.IndexOfSpawned(go);
+            // 180° environment for this plant's own context (by interaction order — GrowInstance
+            // above already assigned this instance its context index, so this returns the same one).
+            // Parallax layers preferred, single environmentPainting as fallback.
+            int idx = plant.ContextIndexFor(go);
             var data = plant.Data;
-            Texture2D tex = (data != null && idx >= 0 && idx < data.contextInfos.Count)
-                ? data.contextInfos[idx].environmentPainting : null;
-            if (tex == null) return;
+            PlantLabelContent ctx = (data != null && idx >= 0 && idx < data.contextInfos.Count)
+                ? data.contextInfos[idx] : null;
+            if (ctx == null) return;
+
+            var layers = ctx.environmentLayers;
+            bool hasLayers = layers != null && layers.Count > 0;
+            if (!hasLayers && ctx.environmentPainting == null) return;
 
             var moment = GetMoment();
             if (moment == null) return;
@@ -382,13 +403,14 @@ namespace Plants
             Transform h = GetHead();
             Vector3 center = h != null ? h.position : go.transform.position;
             Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
-            moment.Trigger(tex, center, forward, plant.AudioSource);
+            if (hasLayers) moment.Trigger(layers, center, forward, plant.AudioSource);
+            else moment.Trigger(ctx.environmentPainting, center, forward, plant.AudioSource);
         }
 
         /// <summary>
         /// Context gesture (no gaze): grow the ungrown preview of the selected plant that
-        /// is nearest the head. Proximity (stepping close) is the primary reveal; this is
-        /// the manual fallback to summon the closest one without walking right up to it.
+        /// is nearest the head. Touching a preview is the primary reveal now; this is the
+        /// manual fallback to summon the closest one without walking up to touch it.
         /// </summary>
         public void GrowNearestContext()
         {
@@ -396,6 +418,7 @@ namespace Plants
             // finished garden (asks the plant you're GAZING at to speak) instead of growing previews.
             if (m_flourished) { ExploreGazed(); return; }
             if (m_selected == null) return;
+            if (PoemPlaying(m_selected)) return;   // wait for the poem to finish before growing a context
 
             var ungrown = m_selected.GetUngrownInstances();
             if (ungrown == null || ungrown.Count == 0) return;

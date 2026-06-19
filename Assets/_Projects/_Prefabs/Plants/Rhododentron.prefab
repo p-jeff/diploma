@@ -378,7 +378,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
-      value: c1a1332d-956b-4e0f-bc7a-5e3288e89908
+      value: b4b68d51-4cb1-4f1e-80dd-d9b19fea84cb
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
@@ -402,10 +402,10 @@ PrefabInstance:
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: GsplatAsset
       value: 
-      objectReference: {fileID: 4599839170941234424, guid: 9f04634133f54894e844484bbf4ccbd4, type: 3}
+      objectReference: {fileID: 4599839170941234424, guid: e2bda0455c83e554b9326651ad7568d3, type: 3}
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_assetGuid
-      value: 9f04634133f54894e844484bbf4ccbd4
+      value: e2bda0455c83e554b9326651ad7568d3
       objectReference: {fileID: 0}
     - target: {fileID: 6350206799883668920, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x

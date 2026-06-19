@@ -67,6 +67,19 @@ MonoBehaviour:
   poemPlacement: 0
   cylinderRadius: 0.5
   cylinderHeightOffset: 1
+  manualPoemHeight: 0
+  manualPoemHeightValue: 1
+  contextMode: 0
+  canopyBottom: 0.5
+  canopyTop: 0.85
+  canopyInset: 0.15
+  fruitOrbRadius: 0.09
+  fruitColliderRadius: 0.16
+  fruitColor: {r: 1, g: 0.78, b: 0.32, a: 1}
+  fruitSplat: {fileID: 0}
+  fruitSplatScale: 1
+  fruitSplatEuler: {x: 90, y: 0, z: 0}
+  fruitRing: {fileID: 0}
   idleDesat: 0.5
   glowColor: {r: 0.45, g: 0.85, b: 1, a: 1}
   glowRadius: 0.6
@@ -75,6 +88,7 @@ MonoBehaviour:
   sproutStartScale: 0.05
   sproutMaxStartDelay: 0.25
   instanceFadeOutDuration: 1.5
+  replayHoldDuration: 12
 --- !u!114 &8746944161505301897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -378,7 +392,7 @@ MonoBehaviour:
   startGaussianScale: 0.6
   startPositionScale: 1
   startDesaturation: 0.5
-  revealAxis: {x: 0, y: 0, z: 1}
+  revealAxis: {x: 0, y: 1, z: 0}
   radial: 0
   reveal: 0
   bandFraction: 0.4
@@ -386,12 +400,6 @@ MonoBehaviour:
   scatterAmount: 0.02
   scatterFrequency: 8
   scatterSeed: 0
-  sparkleStrength: 1
-  sparkleSizeAmount: 0.15
-  sparkleAlphaAmount: 0.25
-  sparkleSpeed: 1.5
-  sparkleSparsity: 0.6
-  sparkleSeed: 0
   duration: 4
   resetOnEnable: 1
   previewInEditMode: 1
@@ -490,6 +498,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
   plant: {fileID: 5109087311396199045}
+  gazeOnly: 0
   handLayers:
     serializedVersion: 2
     m_Bits: 1

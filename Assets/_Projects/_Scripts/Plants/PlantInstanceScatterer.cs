@@ -38,6 +38,16 @@ namespace Plants
         [Tooltip("Default number of copies for the parameterless Spawn().")]
         [SerializeField, Min(0)] private int count = 8;
 
+        [Header("Framing")]
+        [Tooltip("Fraction of copies deliberately placed BEHIND the touched plant (from the viewer's " +
+                 "head) so it reads as a foreground anchor with its kin receding behind it. " +
+                 "0 = off (scatter freely), 1 = every copy behind. ~0.35 = about a third.")]
+        [SerializeField, Range(0f, 1f)] private float behindAnchorFraction = 0.35f;
+
+        [Tooltip("Half-angle (degrees) of the cone behind the plant that 'behind' copies fall within. " +
+                 "Narrow = stacked directly behind it; wide = loosely across the back region.")]
+        [SerializeField, Range(5f, 120f)] private float behindConeAngle = 45f;
+
         /// <summary>The convex mesh collider used to measure footprints / test overlap.</summary>
         private Collider ResolveFootprint()
         {
@@ -77,14 +87,29 @@ namespace Plants
             GardenPlacer placer = GardenPlacer.GetOrCreate();
             Transform p = parent != null ? parent : transform;
 
+            // Anchor the "behind" framing on the touched plant's position (this scatterer lives under
+            // it). Evenly pick behindCount of the copies to sit behind it; the rest scatter freely.
+            var plant = GetComponentInParent<Plant>();
+            Vector3 anchor = plant != null ? plant.transform.position : p.position;
+            int behindCount = Mathf.RoundToInt(spawnCount * Mathf.Clamp01(behindAnchorFraction));
+
             for (int i = 0; i < spawnCount; i++)
             {
+                // Evenly spread the behind picks across the spawn order (and thus the reveal cascade)
+                // rather than clumping them at the start: copy i is "behind" when the running count
+                // of selected copies ticks over at this index.
+                bool behind = behindCount > 0 &&
+                              (i * behindCount / spawnCount) != ((i + 1) * behindCount / spawnCount);
+                var bias = behind
+                    ? GardenPlacer.BehindBias.Behind(anchor, behindConeAngle)
+                    : default;
+
                 // Find a free pose for a clone of `source`, testing the hero footprint shape
                 // against everything already placed. ComputePenetration reads the collider's
                 // geometry regardless of its enabled state, so this still works after Like()
                 // has disabled the selection collider.
                 if (!placer.TryFindRootPose(source.transform, footprint, true,
-                                            out Pose rootPose, out Pose footPose))
+                                            out Pose rootPose, out Pose footPose, bias))
                     break; // no boundary configured — nothing we can do
 
                 GameObject copy = Instantiate(source, p);

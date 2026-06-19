@@ -40,7 +40,8 @@
       "mcp__unity-mcp__Unity_Profiler_GetFrameRangeTopTimeSummary",
       "mcp__unity-mcp__Unity_Profiler_GetFrameTopTimeSam_ccc85b2d",
       "Read(//e/e/GitHub/diploma/**)",
-      "Read(//e/e/GitHub/diploma/ProfilerCaptures/**)"
+      "Read(//e/e/GitHub/diploma/ProfilerCaptures/**)",
+      "mcp__unity-mcp__Unity_ManageMenuItem"
     ]
   }
 }
