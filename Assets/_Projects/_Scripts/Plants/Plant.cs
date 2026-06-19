@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Gsplat;
 using Gsplat.Animation;
+using Mirror;
 using Plants.Garden;
+using Plants.Net;
 using UnityEngine;
 
 namespace Plants
@@ -206,6 +208,56 @@ namespace Plants
         private Coroutine m_sproutRoutine;
         private Coroutine m_replayRoutine;
 
+        // ── Networking (spectator replication) ──────────────────────────────────────
+        // On the HOST, runtime-spawned instances (scatter clones, canopy fruit orbs) are tagged with
+        // a NetPlant so the spectator client can recreate them. Hero bodies carry an authored NetPlant.
+
+        private NetPlant m_net;
+
+        /// <summary>This plant's network species id (its authored hero NetPlant id), or 0 if none.</summary>
+        public ushort SpeciesId
+        {
+            get
+            {
+                if (m_net == null) m_net = GetComponent<NetPlant>();
+                return m_net != null ? m_net.id : (ushort)0;
+            }
+        }
+
+        /// <summary>The object the scatterer clones — exposed so the spectator client can clone the
+        /// same source to recreate a scatter instance the host spawned.</summary>
+        public GameObject ScatterCloneSource => scatterer != null ? scatterer.Source : null;
+
+        /// <summary>Build a dormant canopy fruit orb wired to this plant. Used by both the host's
+        /// <see cref="SpawnFruit"/> and the spectator client (which then sets ripe + pose from the
+        /// snapshot via NetPlant.Apply).</summary>
+        public GameObject BuildFruitOrb()
+        {
+            var go = new GameObject(name + "_Fruit");
+            var fruit = go.AddComponent<ContextFruit>();
+            fruit.Init(this, fruitOrbRadius, fruitColliderRadius, fruitColor,
+                       k_fruitDormantIntensity, k_fruitRipeIntensity);
+            return go;
+        }
+
+        /// <summary>Host only: tag a freshly-spawned instance with a NetPlant so it replicates to
+        /// spectators. No-op unless a host server is running (so single-player / spectator never tags).</summary>
+        private void TagNetInstance(GameObject go, NetKind kind)
+        {
+            if (go == null || !NetworkServer.active) return;
+            var np = go.GetComponent<NetPlant>();
+            if (np == null) np = go.AddComponent<NetPlant>();
+            np.Configure(NetPlantRegistry.NextDynamicId(), kind, SpeciesId);
+        }
+
+        /// <summary>Host only: tag a batch of scatter clones for replication.</summary>
+        private void TagScatterClones(List<GameObject> clones)
+        {
+            if (clones == null || !NetworkServer.active) return;
+            foreach (var go in clones)
+                TagNetInstance(go, NetKind.ScatterClone);
+        }
+
         // ── Dormant look ───────────────────────────────────────────────────────────
         // While active, unselected and un-liked, the plant body reads desaturated.
         // Renderers are the plant's OWN splats (not scatter copies).
@@ -242,6 +294,11 @@ namespace Plants
 
         void OnEnable()
         {
+            // Spectator: this plant is a passive shell — its pose + reveal are driven entirely by
+            // NetPlant.Apply from the host. Don't self-animate (sprout), reserve garden footprints,
+            // or show the touch glow, all of which would fight the replicated state.
+            if (Application.isPlaying && SpectatorState.IsSpectator) return;
+
             // A freshly activated (unselected) plant is dormant (desaturated).
             if (!m_liked) m_idle = true;
 
@@ -290,6 +347,7 @@ namespace Plants
         public void PlaceInGarden()
         {
             if (selectionCollider == null) return;
+            if (SpectatorState.IsSpectator) return;   // spectator never runs garden placement
             var placer = GardenPlacer.GetOrCreate();
             placer.Remove(this);
             placer.ApplyAndRegister(transform, selectionCollider, placeRandomYaw, this);
@@ -298,6 +356,7 @@ namespace Plants
         void Update()
         {
             if (!Application.isPlaying) return;
+            if (SpectatorState.IsSpectator) return;   // spectator: look is driven by replicated reveal
             if (!m_idle) return;
 
             // Dormant plants render desaturated until touched. Static — no sparkle.
@@ -675,6 +734,7 @@ namespace Plants
             if (scatterer == null) return;
 
             var spawned = scatterer.Spawn(n, SpawnedPositions());
+            TagScatterClones(spawned);
             foreach (var go in spawned)
             {
                 if (go == null) continue;
@@ -698,15 +758,18 @@ namespace Plants
             var points = SampleCanopyPoints(count);
             for (int i = 0; i < points.Count; i++)
             {
-                var go = new GameObject(name + "_Fruit_" + i);
+                var go = BuildFruitOrb();
+                go.name = name + "_Fruit_" + i;
                 go.transform.SetParent(transform, true); // follows the plant (e.g. scene-lock moves)
                 go.transform.position = points[i];
 
-                var fruit = go.AddComponent<ContextFruit>();
-                fruit.Init(this, fruitOrbRadius, fruitColliderRadius, fruitColor,
-                           k_fruitDormantIntensity, k_fruitRipeIntensity);
-                if (ripe) fruit.Ripen();
+                if (ripe)
+                {
+                    var fruit = go.GetComponent<ContextFruit>();
+                    if (fruit != null) fruit.Ripen();
+                }
 
+                TagNetInstance(go, NetKind.FruitOrb);
                 m_spawnedInstances.Add(go);
             }
         }
@@ -878,6 +941,7 @@ namespace Plants
                 if (extra > 0)
                 {
                     var more = scatterer.Spawn(extra, SpawnedPositions());
+                    TagScatterClones(more);
                     m_spawnedInstances.AddRange(more);
                     StartCoroutine(RevealLikedInstances(more));
                 }
@@ -1102,6 +1166,7 @@ namespace Plants
             if (scatterer != null && count > 0)
             {
                 var more = scatterer.Spawn(count, SpawnedPositions());
+                TagScatterClones(more);
                 m_spawnedInstances.AddRange(more);
 
                 // Re-enable each clone's fitted collider so the post-flourish gaze ray can hit it.
@@ -1180,6 +1245,7 @@ namespace Plants
             if (scatterer != null && spawnCount > 0)
             {
                 var more = scatterer.Spawn(spawnCount, SpawnedPositions());
+                TagScatterClones(more);
                 m_spawnedInstances.AddRange(more);
 
                 // Enable each clone's collider so the post-flourish gaze ray can hit it.

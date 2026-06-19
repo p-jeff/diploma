@@ -119,6 +119,15 @@ namespace Plants
             m_fade = StartCoroutine(RipenRoutine());
         }
 
+        /// <summary>Set ripe/dormant immediately with no pulse — used by the spectator client to
+        /// reconcile to the host's replicated state. Safe before/after <see cref="Init"/>.</summary>
+        public void SetRipeImmediate(bool ripe)
+        {
+            m_ripe = ripe;
+            if (m_fade != null) { StopCoroutine(m_fade); m_fade = null; }
+            SetIntensity(ripe ? m_ripeIntensity : m_dormantIntensity);
+        }
+
         private IEnumerator RipenRoutine()
         {
             float start = m_intensity;

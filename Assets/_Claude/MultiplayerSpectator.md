@@ -22,31 +22,48 @@ with its own camera.
 
 ---
 
-## 2. Architecture: host-authoritative snapshot + reconcile
+## 2. Architecture: host-authoritative per-instance snapshot + spawn/despawn reconcile
 
 ```
 HOST (Windows)                                 SPECTATOR (Mac)
 ─────────────                                  ───────────────
-ExperienceManager / GardenPlacer / input        (all of the above DISABLED)
-        │ drives plants                                  ▲
-        ▼                                                │ applies
-   NetPlant.Sample()  ──►  GardenStateMessage  ──►  NetPlant.Apply()
-   (pose + reveal progress,   (Mirror, ~15 Hz,      (sets transform + reveal
-    relative to SceneRoot)     KCP/UDP 7777)         progress on the local plant)
+ExperienceManager / GardenPlacer / input        (all of the above DISABLED;
+        │ drives + SPAWNS instances                Plant/PlantManager passive)
+        ▼                                                ▲
+   NetPlant.Sample() × every live instance              │ reconcile
+   (hero bodies + scatter clones + fruit orbs)          │
+        │                                               │  known id → Apply
+        ▼                                               │  unknown  → SPAWN by kind
+   GardenStateMessage { InstanceState[] }  ──►  GardenNetHub.ApplyState()
+   (Mirror, ~15 Hz, KCP/UDP 7777)                       │  gone     → DESPAWN
 ```
 
-Why snapshot-and-reconcile rather than "just run the same thing"? Because
-`GardenPlacer` is **non-deterministic** (random darts + `Physics.ComputePenetration`),
-so two independent runs never produce the same layout. The host therefore *sends* the
-authoritative poses; the client never simulates.
+Replication is per **live splat object**, not per authored plant. Each instance carries a
+`NetPlant` with an `id`, a `kind` (`HeroBody` / `ScatterClone` / `FruitOrb`), and a
+`speciesId` (its owning hero plant). The host streams a full snapshot of all live instances;
+the client reconciles — applies known ids, **spawns** unknown dynamic instances by recreating
+the same scatter clone / fruit orb the host made, and **despawns** ids the host dropped.
 
-The whole visual state of a plant collapses to a tiny payload:
-- **Pose** — position + rotation + scale, expressed **relative to `SceneRoot`** so the
-  spectator's framing is independent of where the headset anchored the garden.
-- **Reveal** — a single float, `GsplatRevealAnimator.progress` (0..1). The morph it
-  drives is deterministic, so replicating that float reproduces the exact bloom on the
-  Mac's own GPU. No animation playback is sent over the wire.
+Why snapshot-and-reconcile rather than "just run the same thing"? Because the experience is
+**non-deterministic** (`GardenPlacer` random darts + `Physics.ComputePenetration`, random
+scatter, random canopy sampling), so two independent runs never produce the same garden. The
+host therefore *sends* the authoritative poses; the client never simulates.
+
+Each instance collapses to a tiny payload (`InstanceState`):
+- **id / kind / speciesId** — identity + how the client recreates it (descriptor on first sight).
+- **Pose** — position + rotation + scale, **relative to `SceneRoot`** so the spectator's
+  framing is independent of where the headset anchored the garden.
+- **Reveal** — splat kinds: a single float `GsplatRevealAnimator.progress` (0..1); the morph it
+  drives is deterministic, so replicating that float reproduces the exact bloom on the Mac's GPU.
+- **Ripe** — fruit orbs: a single bool (ripe/dormant).
 - **Active** flag.
+
+**Routing no longer depends on a plant being active.** `NetPlantRegistry` is filled at
+garden-scene load by a rescan (`RescanAndRegisterScene`, incl. inactive hero bodies) driven
+from `GardenNetHub`'s `sceneLoaded` hook, and `NetPlant` no longer unregisters on disable — so
+a hidden plant stays routable and an incoming `active = true` can revive it (the old
+OnEnable/OnDisable model dropped inactive plants out of the table for good). Runtime instances
+register on `Configure()` and unregister on destroy.
 
 ---
 
@@ -54,9 +71,9 @@ The whole visual state of a plant collapses to a tiny payload:
 
 | File | Responsibility |
 |------|----------------|
-| `GardenNet.cs` | `PlantState` (the per-plant payload), `GardenStateMessage` (Mirror `NetworkMessage`), `NetPlantRegistry` (id → NetPlant lookup), and `SpectatorState` (a global flag — see §6). |
-| `NetPlant.cs` | Tag + stable `ushort id` on each syncable plant. **Sample** (host reads pose+progress) / **Apply** (client writes them). Reads/writes pose relative to the garden root. |
-| `GardenNetHub.cs` | The pump. On the host, broadcasts a snapshot of all `NetPlant`s ~15×/s. On the client, `ApplyState` reconciles. Host never applies to itself. Resolves the garden root by name (`SceneRoot`). |
+| `GardenNet.cs` | `NetKind` enum, `InstanceState` (the per-instance payload), `GardenStateMessage` (Mirror `NetworkMessage` carrying `InstanceState[]`), `NetPlantRegistry` (id → NetPlant lookup + dynamic-id allocator + `Clear`/`RescanAndRegisterScene`), and `SpectatorState` (a global flag — see §6). |
+| `NetPlant.cs` | Identity (`id` + `kind` + `speciesId`) on each live instance. **Sample** (host reads pose + reveal progress *or* fruit ripe + active) / **Apply** (client writes them, across **all** child reveal animators). `Configure()` tags + registers a runtime instance. Registers in OnEnable when id≠0; does **not** unregister on disable (only on destroy). |
+| `GardenNetHub.cs` | The pump. On the host, broadcasts a snapshot of every live `NetPlant` ~15×/s. On the client, `ApplyState` reconciles: known id → `Apply`, unknown dynamic id → **spawn** (clone the species' `ScatterCloneSource` / `BuildFruitOrb`), id gone → **despawn**. Rescans+registers the scene's NetPlants on `sceneLoaded`. Host never applies to itself. Resolves the garden root by name (`SceneRoot`). |
 | `GardenNetworkManager.cs` | `Mirror.NetworkManager` subclass. Registers the `GardenStateMessage` handler when the client starts. |
 | `NetworkBootstrap.cs` | Decides role and starts networking. Sets `SpectatorState.IsSpectator`. CLI/UI hooks. |
 | `SpectatorModeController.cs` | On the spectator, strips the headset layer (see §5) and brings up the spectator camera. No-op on host. |
@@ -184,11 +201,20 @@ threw. Turn off Error Pause, read the first red error, and add the offending obj
 
 ## 8. What syncs / current limitations
 
-**Synced:** the 9 static plants' pose + reveal progress + active state.
+**Synced:**
+- the 9 static plants' pose + reveal progress + active (incl. staged like-unlocks — the
+  active-flag trapdoor is fixed, so hidden plants now revive on the Mac);
+- **dynamic instances** — runtime scatter clones (preview spread, liked spread, flourish) and
+  canopy fruit orbs, via spawn/despawn-by-id. The whole-roster flourish mirrors.
 
-**Not yet synced (TODO):**
-- **Dynamic instances** — runtime-spawned plants (bloom-whole-roster, context orbs) are
-  not reconciled yet. Needs spawn/despawn-by-id in the snapshot.
+So the client's `Plant` / `PlantManager` are made **passive** (a `SpectatorState` guard skips
+sprout / garden-placement / idle-desat / round flow) so they don't fight the replicated state.
+
+**Not synced (by design / TODO):**
+- **Instance fade-out** — `CompleteSpecies` fades ungrown clones out via a shader opacity anim
+  that isn't replicated; on the Mac they pop out when the host destroys them (cosmetic).
+- **Idle desaturation** — the dormant half-grey overlay (`Plant.Update`) is host-only; the
+  reveal animator's own start-state desat carries most of the look on the Mac.
 - **Title sequence / intro** — host-only; the spectator skips it and shows the garden.
 - **Audio / VO** — host plays its own; not synced. The spectator just has an AudioListener.
 - **Gaze / context highlights** — by design the spectator is an *independent* free view
@@ -197,6 +223,8 @@ threw. Turn off Error Pause, read the first red error, and add the offending obj
   pose; fixed-angle presets / framing tuning is a later art pass.
 - **Connect UI** — role/IP are set on the `NetworkBootstrap` inspector for now; a Mac
   connect screen (host-IP field + Connect button) is planned for the Boot scene.
+- **Mac VRAM/perf** — each replicated clone allocates its own morph buffer (as on the host);
+  a heavy flourish spawns many clones, so watch frame time on the Mac.
 
 ---
 

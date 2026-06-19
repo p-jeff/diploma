@@ -22,6 +22,10 @@ namespace Plants
         [Tooltip("Prefab or scene object cloned for each instance. Usually the plant's gsplat visual root.")]
         [SerializeField] private GameObject source;
 
+        /// <summary>The source object cloned per instance — the spectator client clones the same one
+        /// to recreate a scatter instance the host spawned.</summary>
+        public GameObject Source => source;
+
         [Tooltip("Parent for the spawned copies. Defaults to this object's transform.")]
         [SerializeField] private Transform parent;
 
