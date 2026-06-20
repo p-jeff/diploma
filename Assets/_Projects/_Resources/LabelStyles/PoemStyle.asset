@@ -19,8 +19,11 @@ MonoBehaviour:
   fontSize: 120
   fontSizeMin: 18
   fontSizeMax: 120
+  wrapWidth: 0
+  wrapHeight: 0
   characterSpacing: 0
   wordSpacing: 0
   lineSpacing: 0
   paragraphSpacing: 0
   color: {r: 1, g: 1, b: 1, a: 1}
+  materialPreset: {fileID: 2100000, guid: 829c2fd0b5266314690f981fd2d1825e, type: 2}

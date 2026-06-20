@@ -177,6 +177,14 @@ namespace Plants
         /// "take a seat" invite on this so the finale isn't offered before the user has engaged.</summary>
         public bool HasLikedAny => m_likedCount > 0;
 
+        /// <summary>Vertical slice only: once the user likes their first plant, all hand-touch is
+        /// retired (both context-reveal-by-touch and hero selection) — the experience then proceeds
+        /// gesture/sit-driven, and the post-flourish bloom is explored by gaze. Gaze never routes
+        /// through <see cref="Touch"/>, so it stays live. Gated on the vertical-slice marker
+        /// (<see cref="bloomWholeRosterOnFlourish"/>); the staged garden keeps touch because its
+        /// progression depends on liking several plants in turn, so it never locks.</summary>
+        private bool TouchLockedByFirstLike => bloomWholeRosterOnFlourish && m_likedCount >= 1;
+
         // Post-flourish gaze hover-highlight state.
         private GameObject m_gazeInstance;                 // splat instance currently highlighted
         private Plant m_gazePlant;                         // owning plant of the gazed instance
@@ -269,10 +277,13 @@ namespace Plants
 
             // Post-flourish the experience is in explore mode: hover-highlight the splat instance
             // the user is gazing at; the context gesture then asks that plant to speak again.
-            // Pre-flourish there is no per-frame work — a context now grows when the user TOUCHES a
-            // spread preview instance (see Touch), not by stepping close to it.
+            // Pre-flourish, most plants grow a context when the user TOUCHES a spread preview
+            // instance (see Touch) — but canopy-fruit TREES hang their orbs too high to touch, so
+            // those are explored by gaze even before the bloom (see UpdateFruitGaze).
             if (m_flourished)
                 UpdateGazeHighlight();
+            else
+                UpdateFruitGaze();
         }
 
         // ── Public API ────────────────────────────────────────────────────────────
@@ -288,6 +299,11 @@ namespace Plants
         public void Touch(Plant plant, Transform touched)
         {
             if (plant == null) return;
+
+            // Vertical slice: hand-touch is one-shot — after the first like the experience is
+            // gaze/gesture/sit-driven, so retire ALL further touch (context reveal + selection).
+            // See TouchLockedByFirstLike; gaze never routes here, so it remains live.
+            if (TouchLockedByFirstLike) return;
 
             // Touch a spread preview of the active plant → grow that instance's own context.
             if (!m_flourished && plant == m_selected && !plant.IsLiked && touched != null)
@@ -425,6 +441,15 @@ namespace Plants
             if (m_selected == null) return;
             if (PoemPlaying(m_selected)) return;   // wait for the poem to finish before growing a context
 
+            // Canopy-fruit trees hang their orbs too high to touch, so the gesture grows the fruit
+            // you're GAZING at. Fall back to the nearest ungrown instance if the gaze isn't on one of
+            // this tree's fruits this frame.
+            if (m_selected.IsFruitMode)
+            {
+                var gazed = GazedFruitOf(m_selected);
+                if (gazed != null) { GrowInstanceWithContext(m_selected, gazed); return; }
+            }
+
             var ungrown = m_selected.GetUngrownInstances();
             if (ungrown == null || ungrown.Count == 0) return;
 
@@ -441,6 +466,22 @@ namespace Plants
             }
 
             if (nearest != null) GrowInstanceWithContext(m_selected, nearest);
+        }
+
+        /// <summary>The selected canopy-fruit tree's orb currently under the gaze (a fresh ray first,
+        /// else the last orb the per-frame fruit gaze highlighted), or null. Lets the pre-flourish
+        /// context gesture grow the looked-at fruit instead of the nearest one.</summary>
+        private GameObject GazedFruitOf(Plant tree)
+        {
+            if (tree == null) return null;
+            if (gazeTargeter != null && gazeTargeter.TryGetTarget(out var p, out var go)
+                && p == tree && go != null && go.GetComponent<ContextFruit>() != null)
+                return go;
+            // Sticky fallback: the last orb the per-frame fruit gaze highlighted (only ever set to
+            // one of the selected tree's own fruits).
+            if (m_gazeInstance != null && m_gazeInstance.GetComponent<ContextFruit>() != null)
+                return m_gazeInstance;
+            return null;
         }
 
         // ── Explore (post-flourish, gaze-driven) ──────────────────────────────────────
@@ -479,8 +520,8 @@ namespace Plants
 
         /// <summary>
         /// Per-frame (post-flourish): raycast from the centre-eye and brighten the single splat
-        /// instance under the gaze, restoring the previously highlighted one. The brightness lever
-        /// is <see cref="GsplatRenderer.Brightness"/>, which the renderer re-applies every frame.
+        /// instance under the gaze, plus drive the yellow "you can ask" hand cue. The brightness
+        /// lever is <see cref="GsplatRenderer.Brightness"/>, which the renderer re-applies every frame.
         /// </summary>
         private void UpdateGazeHighlight()
         {
@@ -498,6 +539,43 @@ namespace Plants
                 else HandReadyCue.Instance.Hide();
             }
 
+            SetGazeHighlight(instance);
+        }
+
+        /// <summary>
+        /// Per-frame (PRE-flourish): canopy-fruit trees hang their contexts as orbs too high in the
+        /// canopy to comfortably touch, so they are explored by GAZE even before the bloom. Brighten
+        /// the fruit the user is looking at — but only one of the SELECTED tree's own orbs, so the
+        /// gaze never lights up a different plant's hero body. The context gesture then grows that
+        /// gazed fruit (see <see cref="GrowNearestContext"/>). Deliberately does NOT touch the hand
+        /// cue: pre-flourish the green "keep" cue owns it, and the orb's brightness boost is the only
+        /// feedback needed here.
+        /// </summary>
+        private void UpdateFruitGaze()
+        {
+            if (m_selected == null || !m_selected.IsFruitMode) { SetGazeHighlight(null); return; }
+
+            GameObject instance = null;
+            Plant plant = null;
+            if (gazeTargeter != null) gazeTargeter.TryGetTarget(out plant, out instance);
+
+            // Accept only this tree's own canopy orbs (ignore hero bodies / other plants).
+            if (plant != m_selected || instance == null || instance.GetComponent<ContextFruit>() == null)
+            {
+                SetGazeHighlight(null);
+                return;
+            }
+
+            SetGazeHighlight(instance);
+        }
+
+        /// <summary>
+        /// Brighten <paramref name="instance"/> (a splat clone or a canopy orb) as the single gazed
+        /// target, restoring whatever was highlighted before. Shared by the post-flourish explore
+        /// highlight and the pre-flourish fruit gaze; the caller owns any hand-cue change.
+        /// </summary>
+        private void SetGazeHighlight(GameObject instance)
+        {
             if (instance == m_gazeInstance) return;   // highlighted instance unchanged this frame
 
             ClearGazeHighlight();

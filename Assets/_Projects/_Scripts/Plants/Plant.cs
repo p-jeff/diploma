@@ -178,6 +178,9 @@ namespace Plants
         [SerializeField, Min(0f)] private float glowRadius = 0.6f;
         [Tooltip("Ground-glow disc component. Auto-created if not assigned.")]
         [SerializeField] private HeroGlow glow;
+        [Tooltip("Floating \"touch me\" hand sprite shown above this plant when the viewer is near. " +
+                 "Auto-created if not assigned; rides the same touchable lifecycle as the glow.")]
+        [SerializeField] private TouchMePrompt touchMePrompt;
 
         [Header("Grow-In (Sprout)")]
         [Tooltip("Seconds for a newly unlocked plant to sprout up from the ground into its dormant state.")]
@@ -275,6 +278,15 @@ namespace Plants
         private Coroutine m_sproutRoutine;
         private Coroutine m_replayRoutine;
 
+        // Sprout pose restore: the plant shrinks synchronously at the start of a sprout, so if the
+        // sprout is interrupted by deactivation (e.g. the title hides the garden mid-sprout) we must
+        // restore the full pose on disable — otherwise the next enable would re-capture the shrunk
+        // scale/position as "full" and the plant would stay tiny/sunk forever.
+        private bool m_sprouting;
+        private Vector3 m_sproutRestorePos;
+        private Vector3 m_sproutRestoreScale = Vector3.one;
+        private bool m_sproutRestoreColliderEnabled = true;
+
         // ── Networking (spectator replication) ──────────────────────────────────────
         // On the HOST, runtime-spawned instances (scatter clones, canopy fruit orbs) are tagged with
         // a NetPlant so the spectator client can recreate them. Hero bodies carry an authored NetPlant.
@@ -361,6 +373,10 @@ namespace Plants
 
             if (glow == null) glow = GetComponent<HeroGlow>();
             if (glow == null) glow = gameObject.AddComponent<HeroGlow>();
+
+            // The prompt is authored on the "Touch Me Prompt" child of the base Plant.prefab (its
+            // settings live with its visual). A bare Plant without that child simply has no prompt.
+            if (touchMePrompt == null) touchMePrompt = GetComponentInChildren<TouchMePrompt>(true);
         }
 
         private void CacheSplatRenderers()
@@ -405,6 +421,12 @@ namespace Plants
 
         void OnDisable()
         {
+            // A sprout shrinks the plant synchronously before it animates back up. If we're disabled
+            // mid-sprout (Unity stops the coroutine without running its cleanup), restore the full
+            // pose AND the pre-sprout collider state so a later re-enable doesn't mistake the shrunk
+            // transform for the authored one (tiny/sunk) or leave the collider disabled (untouchable).
+            RestoreSproutPose();
+
             // Free this plant's footprint when it leaves the garden (deselected/reset).
             // Liked plants stay active, so they remain registered for the session.
             if (GardenPlacer.Instance != null) GardenPlacer.Instance.Remove(this);
@@ -482,13 +504,21 @@ namespace Plants
         /// <summary>Show the touch glow under this plant (invites interaction).</summary>
         private void ShowGlow()
         {
-            if (glow != null) glow.Show(GroundCenter, glowColor, glowRadius);
+            if (glow != null)
+            {
+                // Let the glow brighten as a hand approaches this plant's body (HandProximity).
+                glow.SetProximitySource(selectionCollider);
+                glow.Show(GroundCenter, glowColor, glowRadius);
+            }
+            // Arm the proximity "touch me" sprite on the same lifecycle (it appears only when near).
+            if (touchMePrompt != null) touchMePrompt.Arm(GroundCenter);
         }
 
         /// <summary>Fade the touch glow out.</summary>
         private void HideGlow()
         {
             if (glow != null) glow.Hide();
+            if (touchMePrompt != null) touchMePrompt.Disarm();
         }
 
         // ── Grow-in (sprout) ─────────────────────────────────────────────────────────
@@ -500,28 +530,66 @@ namespace Plants
 
         static readonly int s_opacityMulId = Shader.PropertyToID("_GsplatOpacityMul");
 
+        /// <summary>Undo an in-flight sprout's synchronous shrink + collider-disable: restore the
+        /// authored pose and the pre-sprout collider state. No-op when not sprouting. Called on a
+        /// mid-sprout deactivation (OnDisable) and before a restart sprout (StartSprout) so an
+        /// interrupted sprout never leaves the plant tiny/sunk or its collider stuck disabled
+        /// (which would re-capture as "off" on the next sprout and make the plant untouchable).</summary>
+        private void RestoreSproutPose()
+        {
+            if (!m_sprouting) return;
+            transform.position = m_sproutRestorePos;
+            transform.localScale = m_sproutRestoreScale;
+            if (selectionCollider != null) selectionCollider.enabled = m_sproutRestoreColliderEnabled;
+            m_sprouting = false;
+        }
+
         private void StartSprout()
         {
+            // If a previous sprout is still mid-flight, restore the full pose + pre-sprout collider
+            // state first so the new sprout re-captures the authored scale/position/collider rather
+            // than a half-shrunk, collider-disabled transform.
+            RestoreSproutPose();
             if (m_sproutRoutine != null) StopCoroutine(m_sproutRoutine);
             m_sproutRoutine = StartCoroutine(SproutIn());
         }
 
         private IEnumerator SproutIn()
         {
-            // Stagger a batch organically.
-            if (sproutMaxStartDelay > 0f)
-                yield return new WaitForSeconds(Random.Range(0f, sproutMaxStartDelay));
+            // Shrink + hide BEFORE the first yield so it runs synchronously inside OnEnable, before
+            // this plant renders a single frame. The authored editor scale is 1 (full size) so the
+            // plant can be placed in-editor; without this the plant would flash at full size for one
+            // frame before the pop-in animates it up from sproutStartScale.
 
             // Keep the reveal at its dormant resting state so the touch reveal stays intact.
             ResetAnimation();
 
             // No touching a half-sprouted plant; the footprint was already reserved at full pose.
-            bool colliderWas = selectionCollider != null && selectionCollider.enabled;
+            // Remember the pre-sprout collider state in a MEMBER (not a local) so an interrupted
+            // sprout can restore it — a local would be lost on interruption and the next sprout would
+            // re-capture the disabled state, leaving the plant permanently untouchable.
+            m_sproutRestoreColliderEnabled = selectionCollider != null && selectionCollider.enabled;
             if (selectionCollider != null) selectionCollider.enabled = false;
 
             Vector3 origPos = transform.position;
             Vector3 origScale = transform.localScale;
             Vector3 ground = GroundCenter;
+
+            // Remember the full pose so an interrupted sprout (deactivation) can restore it; without
+            // this a re-enable would re-capture the shrunk transform as "full" and stay tiny.
+            m_sproutRestorePos = origPos;
+            m_sproutRestoreScale = origScale;
+            m_sprouting = true;
+
+            // Drop straight to the sprout start pose (about the ground point) and hide the splats.
+            float startScale = Mathf.Clamp(sproutStartScale, 0.01f, 1f);
+            transform.localScale = origScale * startScale;
+            transform.position = ground + (origPos - ground) * startScale;
+            SetSplatOpacity(0.002f);
+
+            // Stagger a batch organically — already shrunk + hidden, so no full-size flash while we wait.
+            if (sproutMaxStartDelay > 0f)
+                yield return new WaitForSeconds(Random.Range(0f, sproutMaxStartDelay));
 
             float dur = Mathf.Max(sproutDuration, 0.0001f);
             float t = 0f;
@@ -529,7 +597,7 @@ namespace Plants
             {
                 t += Time.deltaTime;
                 float e = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / dur));
-                float f = Mathf.Lerp(Mathf.Clamp(sproutStartScale, 0.01f, 1f), 1f, e);
+                float f = Mathf.Lerp(startScale, 1f, e);
 
                 // Scale the whole plant about the ground point so the base stays put and it rises.
                 transform.localScale = origScale * f;
@@ -543,8 +611,9 @@ namespace Plants
             transform.localScale = origScale;
             transform.position = origPos;
             SetSplatOpacity(1f);
+            m_sprouting = false; // completed cleanly — no restore needed on a later disable
 
-            if (selectionCollider != null) selectionCollider.enabled = colliderWas;
+            if (selectionCollider != null) selectionCollider.enabled = m_sproutRestoreColliderEnabled;
 
             // Now it's a touchable dormant plant: invite the touch.
             if (!m_liked) ShowGlow();
@@ -796,8 +865,9 @@ namespace Plants
         }
 
         /// <summary>True when this plant hangs its contexts as canopy fruit (1 hero body + N orbs)
-        /// instead of scattering one splat clone per context.</summary>
-        private bool IsFruitMode => contextMode == ContextPlacementMode.CanopyFruit;
+        /// instead of scattering one splat clone per context. Public so the experience can route the
+        /// pre-flourish gaze/gesture to a tree's high-hanging orbs (which can't be touched).</summary>
+        public bool IsFruitMode => contextMode == ContextPlacementMode.CanopyFruit;
 
         /// <summary>Spawn the on-select preview: N instances (N = context blocks), each
         /// activated and parked greyscale (reveal not played yet). In Canopy Fruit mode this

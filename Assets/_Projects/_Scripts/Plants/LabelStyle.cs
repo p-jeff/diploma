@@ -61,6 +61,13 @@ namespace Plants
         [Tooltip("Text colour. The alpha here is ignored — the label's fade owns alpha.")]
         public Color color = Color.white;
 
+        [Header("Material")]
+        [Tooltip("Optional TMP material preset — e.g. an outline + soft-underlay variant that keeps " +
+                 "white text legible over a bright passthrough background. Applied AFTER the font (which " +
+                 "resets the material to the font default), so it can't be clobbered. Null = use the " +
+                 "font asset's default material.")]
+        public Material materialPreset;
+
         /// <summary>Write every property of this style onto a TMP field. Null-safe. The field's
         /// current alpha is preserved so applying a style never interrupts a fade.</summary>
         public void Apply(TMP_Text t)
@@ -70,6 +77,11 @@ namespace Plants
             // Setting the font reassigns TMP's default material for that font — this is what fixes
             // labels that drifted onto the wrong font/material (e.g. the built-in LiberationSans).
             if (fontAsset != null) t.font = fontAsset;
+
+            // Re-assert the material preset AFTER the font: setting t.font above resets the TMP
+            // material back to the font's default, so a preset (outline/underlay for legibility)
+            // would be lost if applied any earlier.
+            if (materialPreset != null) t.fontSharedMaterial = materialPreset;
 
             t.fontStyle = fontStyle;
             t.alignment = alignment;

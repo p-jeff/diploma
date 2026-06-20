@@ -39,6 +39,12 @@ namespace Plants
                  "prefab/instance state. Flip on to bring the panel back.")]
         [SerializeField] private bool showBackground = false;
 
+        // Authored outline/underlay alphas read once from the style's material preset, so SetAlpha can
+        // fade the outline + soft halo together with the text. <0 means "no such property / no preset".
+        private bool alphasCached;
+        private float baseOutlineAlpha = -1f;
+        private float baseUnderlayAlpha = -1f;
+
         void OnEnable()
         {
             ApplyStyle();
@@ -62,6 +68,7 @@ namespace Plants
         {
             if (newStyle == null) return;
             style = newStyle;
+            alphasCached = false;   // new style may carry a different (or no) material preset
             ApplyStyle();
         }
 
@@ -104,16 +111,65 @@ namespace Plants
         }
 
         /// <summary>Set the alpha of both the text and the background. The panel keeps its authored
-        /// translucency (<see cref="backgroundOpacity"/>) scaled by the fade.</summary>
+        /// translucency (<see cref="backgroundOpacity"/>) scaled by the fade. When the style carries a
+        /// material preset with an outline/underlay, those fade with the text too so a fading label
+        /// never leaves a stray halo behind.</summary>
         public void SetAlpha(float a)
         {
-            if (text != null) text.alpha = a;
+            if (text != null)
+            {
+                text.alpha = a;
+                FadeMaterialEffects(a);
+            }
             if (showBackground && background != null)
             {
                 var c = background.color;
                 c.a = backgroundOpacity * a;
                 background.color = c;
             }
+        }
+
+        /// <summary>Scale the TMP outline + underlay colour alphas by <paramref name="a"/> so they fade
+        /// in step with the text. The underlay alpha in particular is a material property that does NOT
+        /// follow <c>text.alpha</c> on its own, so without this a fading label would keep its shadow.
+        /// No-op unless the style's preset actually defines those properties (so plain labels never
+        /// instantiate a material).</summary>
+        private void FadeMaterialEffects(float a)
+        {
+            EnsureBaseAlphas();
+            if (baseOutlineAlpha < 0f && baseUnderlayAlpha < 0f) return;
+
+            var m = text.fontMaterial;   // per-instance clone of the preset; cheap for the few live labels
+            if (baseOutlineAlpha >= 0f)
+            {
+                var c = m.GetColor(ShaderUtilities.ID_OutlineColor);
+                c.a = baseOutlineAlpha * a;
+                m.SetColor(ShaderUtilities.ID_OutlineColor, c);
+            }
+            if (baseUnderlayAlpha >= 0f)
+            {
+                var c = m.GetColor(ShaderUtilities.ID_UnderlayColor);
+                c.a = baseUnderlayAlpha * a;
+                m.SetColor(ShaderUtilities.ID_UnderlayColor, c);
+            }
+        }
+
+        /// <summary>Read the authored outline/underlay alphas from the style's material preset once, so
+        /// the fade multiplies the authored value (not a compounding one). Leaves both at -1 when there
+        /// is no preset or the property is absent.</summary>
+        private void EnsureBaseAlphas()
+        {
+            if (alphasCached) return;
+            alphasCached = true;
+            baseOutlineAlpha = -1f;
+            baseUnderlayAlpha = -1f;
+
+            var src = style != null ? style.materialPreset : null;
+            if (src == null) return;
+            if (src.HasProperty(ShaderUtilities.ID_OutlineColor))
+                baseOutlineAlpha = src.GetColor(ShaderUtilities.ID_OutlineColor).a;
+            if (src.HasProperty(ShaderUtilities.ID_UnderlayColor))
+                baseUnderlayAlpha = src.GetColor(ShaderUtilities.ID_UnderlayColor).a;
         }
     }
 }

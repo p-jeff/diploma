@@ -14,6 +14,17 @@ Flip `showBackground` on (and re-enable the child) to bring it back. Not yet hea
 > force-hide landed, it **no longer reproduces** — most likely a stale pre-disable instance. If it ever
 > returns, it is NOT the label panel; check the grown gsplat instance / a leftover quad in that plant.
 
+## Legibility over bright/white passthrough — material outline + underlay  *(2026-06-20)*
+
+The panel stays OFF. Legibility against an unknown (possibly white) passthrough background is now
+**baked into the glyphs** via a TMP SDF **dark outline + soft dark underlay (halo)**, enforced
+through the `LabelStyle` SSOT (`LabelStyle.materialPreset`, applied after `t.font`; `PlantLabel.SetAlpha`
+fades the outline/underlay too). Two presets in `_Resources/Fonts/`: `Roboto-Light Outline SDF.mat`
+(→ ContextStyle) + `Junicode-Italic Outline SDF.mat` (→ PoemStyle).
+
+**Full write-up — values, fade handling, the MCP `EnableKeyword` gotcha, verification — lives in
+[`LabelLegibility.md`](LabelLegibility.md).**
+
 ## Goal
 
 Replace the two pre-rendered Photoshop **sprite `Image`s** (text + background) on every `Label`

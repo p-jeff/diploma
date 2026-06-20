@@ -18,11 +18,25 @@ namespace Plants
         [SerializeField] private Transform head;
         [Tooltip("Maximum gaze ray length (metres).")]
         [SerializeField, Min(0f)] private float maxRayDistance = 12f;
+        [Tooltip("Radius of the gaze sphere-cast (metres). A fat cast catches the wispy / irregular " +
+                 "splat colliders that a thin ray slips past, so you no longer have to aim dead-on. " +
+                 "0 degrades to an ordinary thin ray.")]
+        [SerializeField, Min(0f)] private float gazeRadius = 0.18f;
+        [Tooltip("After the cast stops hitting a plant, keep reporting the last target for this many " +
+                 "seconds. Bridges the brief drop-outs from head jitter at a collider edge so the " +
+                 "highlight doesn't flicker and the context gesture still lands on it.")]
+        [SerializeField, Min(0f)] private float stickyGrace = 0.25f;
         [Tooltip("Layers the gaze ray may hit. Splat instance colliders live on the Default layer.")]
         [SerializeField] private LayerMask layerMask = ~0;
 
         const int k_maxHits = 16;
         readonly RaycastHit[] m_hits = new RaycastHit[k_maxHits];
+
+        // Sticky state: the last plant / instance the cast locked onto, and when. Lets the gaze hold a
+        // stable target across the brief frames the (now forgiving) cast still misses — see TryGetTarget.
+        Plant m_lastPlant;
+        GameObject m_lastInstance;
+        float m_lastHitTime = -999f;
 
         /// <summary>The head transform used, or Camera.main if none is wired.</summary>
         public Transform Head => head != null ? head : (Camera.main != null ? Camera.main.transform : null);
@@ -49,10 +63,16 @@ namespace Plants
             // would silently make the gaze hit nothing.
             float dist = maxRayDistance > 0f ? maxRayDistance : 12f;
             int mask = layerMask.value != 0 ? layerMask.value : ~0;
+            float radius = Mathf.Max(0f, gazeRadius);
 
-            int n = Physics.RaycastNonAlloc(h.position, h.forward, m_hits, dist,
-                                            mask, QueryTriggerInteraction.Collide);
-            if (n <= 0) return false;
+            // A sphere-cast (fat ray) is far more forgiving than the old thin ray: it catches the
+            // fitted convex colliders even when the gaze isn't dead-centre or the splat is wispy.
+            // radius 0 degrades to an ordinary thin ray.
+            int n = radius > 0f
+                ? Physics.SphereCastNonAlloc(h.position, radius, h.forward, m_hits, dist,
+                                             mask, QueryTriggerInteraction.Collide)
+                : Physics.RaycastNonAlloc(h.position, h.forward, m_hits, dist,
+                                          mask, QueryTriggerInteraction.Collide);
 
             float bestDist = float.MaxValue;
             for (int i = 0; i < n; i++)
@@ -70,7 +90,27 @@ namespace Plants
                 bestDist = m_hits[i].distance;
             }
 
-            return plant != null;
+            if (plant != null)
+            {
+                // Fresh hit — remember it as the sticky target and report it.
+                m_lastPlant = plant;
+                m_lastInstance = instance;
+                m_lastHitTime = Time.time;
+                return true;
+            }
+
+            // Missed this frame: keep reporting the last target for a short grace window so head
+            // jitter at a collider edge doesn't drop the highlight (and the context gesture still
+            // lands on it). The remembered instance must still be alive and active.
+            if (Time.time - m_lastHitTime <= stickyGrace &&
+                m_lastPlant != null && m_lastInstance != null && m_lastInstance.activeInHierarchy)
+            {
+                plant = m_lastPlant;
+                instance = m_lastInstance;
+                return true;
+            }
+
+            return false;
         }
     }
 }

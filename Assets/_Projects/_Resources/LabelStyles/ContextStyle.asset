@@ -26,3 +26,4 @@ MonoBehaviour:
   lineSpacing: 0
   paragraphSpacing: 0
   color: {r: 1, g: 1, b: 1, a: 1}
+  materialPreset: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}

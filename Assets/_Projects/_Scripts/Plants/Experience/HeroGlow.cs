@@ -36,6 +36,27 @@ namespace Plants
         [Tooltip("Strength of the floaty horizontal wobble (Perlin noise).")]
         [SerializeField, Min(0f)] private float wobble = 0.05f;
 
+        [Header("Hand Proximity")]
+        [Tooltip("Brighten the glow as a hand approaches, so the plant feels responsive before the " +
+                 "touch lands. Needs a HandProximity in the scene and a proximity collider supplied by " +
+                 "the owner (Plant.ShowGlow); with neither, the glow just stays at its base look.")]
+        [SerializeField] private bool brightenOnHandNear = true;
+        [Tooltip("Hand distance (m) to the collider at/under which the glow is at full proximity brightness.")]
+        [SerializeField, Min(0f)] private float nearDistance = 0.1f;
+        [Tooltip("Hand distance (m) beyond which there is no proximity brightening.")]
+        [SerializeField, Min(0f)] private float farDistance = 0.6f;
+        [Tooltip("Emission-rate multiplier at the nearest distance (1 = no change). Density is the " +
+                 "most immediate part of the brighten.")]
+        [SerializeField, Min(1f)] private float nearEmissionMultiplier = 2.6f;
+        [Tooltip("Brightness (intensity) multiplier at the nearest distance (1 = no change).")]
+        [SerializeField, Min(1f)] private float nearIntensityMultiplier = 1.7f;
+        [Tooltip("Seconds to ease the proximity response in/out (anti-jitter).")]
+        [SerializeField, Min(0f)] private float proximitySmoothing = 0.12f;
+
+        private Collider m_proximitySource; // collider the hand approaches (the plant's selection collider)
+        private bool m_shown;               // emission currently armed (Show called, not yet Hidden)
+        private float m_proximity;          // eased 0..1 hand-nearness
+
         private ParticleSystem m_ps;
         private ParticleSystemRenderer m_renderer;
         private Material m_mat;
@@ -145,6 +166,11 @@ namespace Plants
             }
         }
 
+        /// <summary>Supply the collider a hand approaches (the owning plant's selection collider) so
+        /// the glow can brighten as the hand nears. Null disables the proximity brighten for this glow
+        /// (e.g. the chair's sit invite, which is head-driven). Set before/around <see cref="Show"/>.</summary>
+        public void SetProximitySource(Collider c) => m_proximitySource = c;
+
         /// <summary>Position the ring at <paramref name="groundPos"/>, size it to
         /// <paramref name="radius"/>, tint it, and start the upward drift.</summary>
         public void Show(Vector3 groundPos, Color color, float radius)
@@ -152,6 +178,8 @@ namespace Plants
             EnsureSystem();
             if (m_ps == null) return;
 
+            m_shown = true;
+            m_proximity = 0f;   // start calm; Update ramps it as a hand approaches
             m_color = color;
             var go = m_ps.gameObject;
             go.transform.position = groundPos + Vector3.up * heightOffset;
@@ -175,12 +203,49 @@ namespace Plants
         /// <summary>Stop emitting; in-flight particles finish rising and fade out.</summary>
         public void Hide()
         {
+            m_shown = false;
+            m_proximity = 0f;
             if (m_ps == null) return;
             m_ps.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
 
+        /// <summary>
+        /// While shown, brighten the glow as a hand nears: query the nearest hand's distance to the
+        /// proximity collider (via <see cref="HandProximity"/>) and ramp emission density + colour
+        /// intensity from their base values up to the configured near multipliers. Eased and smoothed
+        /// so it feels like the plant responding to the approaching hand, not a hard switch. No-op when
+        /// hidden, when disabled, or when there's no HandProximity / proximity collider to measure.
+        /// </summary>
+        void Update()
+        {
+            if (!Application.isPlaying || !m_shown || m_ps == null || !brightenOnHandNear) return;
+
+            float target = 0f;
+            var hp = HandProximity.Instance;
+            if (hp != null && m_proximitySource != null && hp.TryNearestDistance(m_proximitySource, out float d))
+            {
+                float far = Mathf.Max(farDistance, nearDistance + 1e-3f);
+                target = Mathf.Clamp01(Mathf.InverseLerp(far, nearDistance, d));
+            }
+
+            float dur = Mathf.Max(proximitySmoothing, 1e-4f);
+            m_proximity = Mathf.MoveTowards(m_proximity, target, Time.deltaTime / dur);
+
+            float e = Mathf.SmoothStep(0f, 1f, m_proximity);
+
+            var emission = m_ps.emission;
+            emission.rateOverTime = emissionRate * Mathf.Lerp(1f, nearEmissionMultiplier, e);
+
+            var main = m_ps.main;
+            Color c = m_color * (intensity * Mathf.Lerp(1f, nearIntensityMultiplier, e));
+            c.a = 1f;
+            main.startColor = c;
+        }
+
         void OnDisable()
         {
+            m_shown = false;
+            m_proximity = 0f;
             if (m_ps != null) m_ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 

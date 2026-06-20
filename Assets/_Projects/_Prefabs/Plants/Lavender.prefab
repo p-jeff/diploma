@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
   plant: {fileID: 6598352944568966260}
+  gazeOnly: 0
   handLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -208,24 +209,44 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 2372.045
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 562.51
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 703.13
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2020228125542641485, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 2020228125542641485, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 824.01
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
       value: To "lay up in lavender" is to fold a thing away wrapped in the herb,
         safe from moths and time.
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
@@ -250,7 +271,7 @@ PrefabInstance:
     - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Resource
       value: 
-      objectReference: {fileID: 8300000, guid: 5e37d7fedac5bd94fa18dd4b8d0633eb, type: 3}
+      objectReference: {fileID: 8300000, guid: a0803542ce5f65c40a77c237ec557cb1, type: 3}
     - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2
@@ -293,19 +314,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1830
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 421.88
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3140797671614650397, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 681791347840ca84ea9e406ab2a0cba1, type: 3}
     - target: {fileID: 3235875077744434048, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 3235875077744434048, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 2617.86
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543956613794748753, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
@@ -325,11 +354,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 5161.6943
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 281.26
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 4479565408557461352, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
@@ -374,8 +403,32 @@ PrefabInstance:
         full of lavender \nAnd purple dreams he comes."
       objectReference: {fileID: 0}
     - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
@@ -387,6 +440,18 @@ PrefabInstance:
         beds and linen.
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
@@ -395,6 +460,18 @@ PrefabInstance:
       value: already in acient times it was know that lavender wine helpts to ease
         "pains of the side and the nerves, and extreme cold." (De Matedia medica
         - Dioscorides)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
@@ -416,6 +493,18 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 944.01
       objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -426,13 +515,41 @@ PrefabInstance:
         for years.
       objectReference: {fileID: 0}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 7417057368276200879, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: e05ad9ab57fd0df4396d4aa87a1f2b5b, type: 3}
+    - target: {fileID: 7432510427208812232, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7432510427208812232, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
     - target: {fileID: 8139457301710125091, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_LocalRotation.w
       value: 0
@@ -453,6 +570,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.x
       value: 180
       objectReference: {fileID: 0}
+    - target: {fileID: 8582845393027873350, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -461,6 +582,18 @@ PrefabInstance:
       propertyPath: m_text
       value: Lavender oil is also used in many aromatheraphies, especially to calm
         nerves, and in medical anxiety Treatment
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode

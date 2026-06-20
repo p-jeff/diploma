@@ -21,6 +21,14 @@ namespace _Projects.HandPose
         [SerializeField] private Vector3 rotationOffset;
         [SerializeField] private Vector3 scaleOffset;
 
+        [Tooltip("Apply positionOffset in world space (e.g. a +Y lift always floats straight up) " +
+                 "instead of along the target's local axes. Use for cues that should float above the " +
+                 "hand regardless of how the hand is tilted.")]
+        [SerializeField] private bool worldSpaceOffset;
+
+        private Vector3 PositionWithOffset()
+            => target.position + (worldSpaceOffset ? positionOffset : target.TransformDirection(positionOffset));
+
         public void SetTarget(Transform t) { if (t != null) target = t; }
 
         private void Start()
@@ -28,7 +36,7 @@ namespace _Projects.HandPose
             if (!runOnEnable || target == null) return;
 
             if (followPosition)
-                transform.position = target.position + target.TransformDirection(positionOffset);
+                transform.position = PositionWithOffset();
 
             if (followRotation)
                 transform.rotation = target.rotation * Quaternion.Euler(rotationOffset);
@@ -42,7 +50,7 @@ namespace _Projects.HandPose
             if (!runOnUpdate || target == null) return;
 
             if (followPosition)
-                transform.position = target.position + target.TransformDirection(positionOffset);
+                transform.position = PositionWithOffset();
 
             if (followRotation)
                 transform.rotation = target.rotation * Quaternion.Euler(rotationOffset);
