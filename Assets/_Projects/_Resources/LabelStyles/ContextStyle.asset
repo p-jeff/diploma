@@ -17,10 +17,10 @@ MonoBehaviour:
   alignment: 514
   autoSize: 1
   fontSize: 120
-  fontSizeMin: 60
+  fontSizeMin: 90
   fontSizeMax: 120
-  wrapWidth: 850
-  wrapHeight: 700
+  wrapWidth: 1200
+  wrapHeight: 1200
   characterSpacing: 0
   wordSpacing: 0
   lineSpacing: 0

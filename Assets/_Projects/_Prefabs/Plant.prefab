@@ -105,6 +105,8 @@ MonoBehaviour:
   parent: {fileID: 2958618882662025605}
   footprintOverride: {fileID: 0}
   count: 8
+  behindAnchorFraction: 0.35
+  behindConeAngle: 45
 --- !u!1 &3744211050822501132
 GameObject:
   m_ObjectHideFlags: 0
@@ -396,7 +398,7 @@ MonoBehaviour:
   radial: 0
   reveal: 0
   bandFraction: 0.4
-  invert: 0
+  invert: 1
   scatterAmount: 0.02
   scatterFrequency: 8
   scatterSeed: 0
