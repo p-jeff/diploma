@@ -36,6 +36,10 @@ namespace Plants
         [SerializeField] private GameObject groundMarker;
         [Tooltip("Hide the ground marker the moment the user sits (it has served its purpose).")]
         [SerializeField] private bool hideMarkerOnSit = true;
+        [Tooltip("Only show the take-a-seat invite (this marker AND the rising particles) once the " +
+                 "user has liked at least one plant, so the finale isn't offered before they've " +
+                 "engaged with the garden.")]
+        [SerializeField] private bool requireLikeBeforeInvite = true;
         [Tooltip("Give the ground marker a gentle breathing scale-pulse while waiting to be used (shader-agnostic).")]
         [SerializeField] private bool pulseMarker = true;
         [Tooltip("Pulse amplitude as a fraction of the marker's base scale (0.06 = ±6%).")]
@@ -67,12 +71,18 @@ namespace Plants
 
         private bool m_satDown;
         private bool m_glowShown;
+        private bool m_markerShown;
         private Vector3 m_markerBaseScale = Vector3.one;
         private Coroutine m_restartRoutine;
 
         void Awake()
         {
-            if (groundMarker != null) m_markerBaseScale = groundMarker.transform.localScale;
+            if (groundMarker != null)
+            {
+                m_markerBaseScale = groundMarker.transform.localScale;
+                groundMarker.SetActive(false); // hidden until the sit is invited (see Update)
+                m_markerShown = false;
+            }
             if (restartButton != null) restartButton.SetActive(false);
 
             // Same rising-particle cue the plants use; built at runtime, no prefab wiring.
@@ -100,18 +110,22 @@ namespace Plants
 
             if (!m_satDown)
             {
-                PulseMarker();
-
-                // Only arm during the free-explore phase: the garden is revealed and not yet
+                // Only invite during the free-explore phase: the garden is revealed and not yet
                 // flourished. This keeps a sit from firing during scene calibration or while the
-                // (replayed) title sequence is still running.
+                // (replayed) title sequence is still running. When requireLikeBeforeInvite is on,
+                // also hold the invite back until the user has liked at least one plant, so the
+                // finale isn't offered before they've engaged with the garden.
                 var em = ExperienceManager.Instance;
-                bool armed = em != null && em.CanSit;
+                bool invite = em != null && em.CanSit
+                              && (!requireLikeBeforeInvite || em.HasLikedAny);
 
-                // The rising invite particles emit only once sitting is actually available, so they
-                // read as "the garden is ready — take a seat" rather than being on the whole time.
-                SetGlow(armed);
-                if (!armed) return;
+                // The ground sign and the rising particles are the invite — both appear together
+                // only once a sit is actually available, rather than being shown the whole time.
+                SetMarker(invite);
+                SetGlow(invite);
+                if (!invite) return;
+
+                PulseMarker();
 
                 Transform h = GetHead();
                 if (h == null) return;
@@ -128,6 +142,16 @@ namespace Plants
             if (!pulseMarker || groundMarker == null) return;
             float s = 1f + Mathf.Sin(Time.time * pulseSpeed) * pulseAmount;
             groundMarker.transform.localScale = m_markerBaseScale * s;
+        }
+
+        /// <summary>Show/hide the ground invite marker (the "take a seat" sign). Restores the base
+        /// scale when hiding so a paused pulse never leaves it mid-stretch.</summary>
+        private void SetMarker(bool on)
+        {
+            if (groundMarker == null || m_markerShown == on) return;
+            m_markerShown = on;
+            if (!on) groundMarker.transform.localScale = m_markerBaseScale;
+            groundMarker.SetActive(on);
         }
 
         /// <summary>Start/stop the rising invite particles (the plant cue). They emit only while the
@@ -155,11 +179,7 @@ namespace Plants
 
             SetGlow(false); // the invite has been answered
 
-            if (hideMarkerOnSit && groundMarker != null)
-            {
-                groundMarker.transform.localScale = m_markerBaseScale; // undo any pulse offset
-                groundMarker.SetActive(false);
-            }
+            if (hideMarkerOnSit) SetMarker(false);
 
             if (ExperienceManager.Instance != null) ExperienceManager.Instance.Sit();
             onSit.Invoke();
@@ -193,13 +213,9 @@ namespace Plants
         {
             if (m_restartRoutine != null) { StopCoroutine(m_restartRoutine); m_restartRoutine = null; }
             m_satDown = false;
-            SetGlow(false); // re-armed on the next CanSit window
+            SetGlow(false);   // re-armed on the next invite window
+            SetMarker(false); // Update re-shows the sign once the sit is invited again next run
             if (restartButton != null) restartButton.SetActive(false);
-            if (groundMarker != null)
-            {
-                groundMarker.transform.localScale = m_markerBaseScale;
-                groundMarker.SetActive(true);
-            }
         }
 
         // ── Editor ────────────────────────────────────────────────────────────────────

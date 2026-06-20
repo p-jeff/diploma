@@ -172,6 +172,11 @@ namespace Plants
         /// can't fire during calibration or while the title sequence is (re)playing.</summary>
         public bool CanSit => m_gardenOpen && !m_flourished;
 
+        /// <summary>True once the user has committed to (liked) at least one plant this run. Reset to
+        /// false by <see cref="BeginGarden"/> / <see cref="ResetAll"/>. The chair gates its
+        /// "take a seat" invite on this so the finale isn't offered before the user has engaged.</summary>
+        public bool HasLikedAny => m_likedCount > 0;
+
         // Post-flourish gaze hover-highlight state.
         private GameObject m_gazeInstance;                 // splat instance currently highlighted
         private Plant m_gazePlant;                         // owning plant of the gazed instance
