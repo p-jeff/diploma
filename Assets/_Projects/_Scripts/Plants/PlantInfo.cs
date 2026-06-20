@@ -24,6 +24,14 @@ namespace Plants
                  "Each is repositioned above its paired instance and snapped to face the user on ShowContext.")]
         [SerializeField] private List<Transform> contextLabelRoots = new List<Transform>();
 
+        [Header("Styles")]
+        [Tooltip("Font + formatting applied to the poem label. Single source of truth — overrides any " +
+                 "per-instance authoring so the poem always uses the correct (multilingual) font.")]
+        [SerializeField] private LabelStyle poemStyle;
+
+        [Tooltip("Font + formatting applied to every context label, by the same single-source rule.")]
+        [SerializeField] private LabelStyle contextStyle;
+
         [Header("Fade")]
         [SerializeField] private float fadeDuration = 0.4f;
 
@@ -59,16 +67,13 @@ namespace Plants
             }
         }
 
-        /// <summary>Ensure a label's Canvas renders as a Meta compositor layer for crisp text
-        /// (see <see cref="LabelOverlayCanvas"/>). Used for both the poem and the context labels.
-        /// Runtime only — never spawns the overlay's hidden helper objects in the edit-mode scene.</summary>
+        /// <summary>No-op. The OVR compositor-layer overlay for crisp label text was removed
+        /// project-wide (per-frame render-texture re-render + TMP ForceMeshUpdate every frame, the
+        /// compositor layer-count limit, and ASW mis-reprojecting it all caused stutter/glitches).
+        /// Labels now render as plain world-space canvases; any overlay baked into a scene is stripped
+        /// on load by <see cref="OverlayCanvasStripper"/>. Kept as a no-op so call sites stay valid.</summary>
         private static void EnsureLabelOverlay(PlantLabel label)
         {
-            if (!Application.isPlaying || label == null) return;
-            var canvas = label.GetComponentInParent<Canvas>();
-            if (canvas == null) return;
-            if (canvas.GetComponent<LabelOverlayCanvas>() == null)
-                canvas.gameObject.AddComponent<LabelOverlayCanvas>();
         }
 
         // Placement mode + radius, mirrored from Plant via PositionPoem / PositionPoemCylinder
@@ -83,7 +88,7 @@ namespace Plants
         private float m_contextTopLift;
 
         // Canopy-fruit context placement: the anchor passed to PlaceContextAt is a fruit orb that
-        // is ALREADY up in the canopy, so the label floats just a small clearance above it — the
+        // is ALREADY up in the canopy, so the label hangs just a small clearance below it — the
         // collider top-lift (plant base → top) must NOT be added or the label shoots above the tree.
         // Set by Plant alongside the poem placement; independent of m_cylinder.
         private bool m_fruitContext;
@@ -183,7 +188,7 @@ namespace Plants
         /// </summary>
         public void SetContextTopLift(float lift) => m_contextTopLift = Mathf.Max(0f, lift);
 
-        /// <summary>Canopy-fruit mode: place context labels just above their fruit orb (no
+        /// <summary>Canopy-fruit mode: place context labels just below their fruit orb (no
         /// collider top-lift). Set by <see cref="Plant"/> when its context placement is CanopyFruit.</summary>
         public void SetFruitContext(bool fruit) => m_fruitContext = fruit;
 
@@ -191,7 +196,11 @@ namespace Plants
         public void SetData(PlantData data)
         {
             if (data == null) return;
-            if (poemLabel != null) poemLabel.SetContent(data.poem);
+            if (poemLabel != null)
+            {
+                if (poemStyle != null) poemLabel.SetStyle(poemStyle);
+                poemLabel.SetContent(data.poem);
+            }
 
             // Wire each label's Canvas to render as a crisp compositor layer (play mode only).
             EnsureLabelOverlay(poemLabel);
@@ -200,6 +209,7 @@ namespace Plants
             for (int i = 0; i < contextLabels.Count; i++)
             {
                 if (contextLabels[i] == null) continue;
+                if (contextStyle != null) contextLabels[i].SetStyle(contextStyle);
                 if (i < validCount)
                 {
                     contextLabels[i].SetContent(data.contextInfos[i]);
@@ -264,11 +274,11 @@ namespace Plants
             var placer = root.GetComponent<CylinderLabelPlacer>();
             if (m_fruitContext)
             {
-                // The anchor IS a fruit orb hanging in the canopy: float the label a small
-                // clearance above it, WITHOUT the collider top-lift (that's the plant base→top
+                // The anchor IS a fruit orb hanging in the canopy: hang the label a small
+                // clearance BELOW it, WITHOUT the collider top-lift (that's the plant base→top
                 // height, which would shoot the label clear above the whole tree).
                 if (placer != null) placer.Deactivate();
-                root.position = anchor.position + Vector3.up * heightOffset;
+                root.position = anchor.position - Vector3.up * heightOffset;
                 var look = root.GetComponent<LookAtTarget>();
                 if (look != null) look.Snap();
             }

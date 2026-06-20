@@ -34,7 +34,14 @@
       "mcp__hzos-dev-mcp__search_docs",
       "mcp__hzos-dev-mcp__fetch_meta_quest_doc",
       "WebSearch",
-      "Bash(python *)"
+      "Bash(python *)",
+      "PowerShell(Get-NetConnectionProfile *)",
+      "mcp__unity-mcp__Unity_Profiler_GetOverallGcAlloca_ac50c101",
+      "mcp__unity-mcp__Unity_Profiler_GetFrameRangeTopTimeSummary",
+      "mcp__unity-mcp__Unity_Profiler_GetFrameTopTimeSam_ccc85b2d",
+      "Read(//e/e/GitHub/diploma/**)",
+      "Read(//e/e/GitHub/diploma/ProfilerCaptures/**)",
+      "mcp__unity-mcp__Unity_ManageMenuItem"
     ]
   }
 }

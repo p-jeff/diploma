@@ -78,6 +78,8 @@ MonoBehaviour:
   rotateY: 1
   rotateZ: 0
   flipY: 0
+  snapOnEnable: 1
+  trackInUpdate: 0
 --- !u!1 &2335736638880682313
 GameObject:
   m_ObjectHideFlags: 0
@@ -424,6 +426,8 @@ MonoBehaviour:
   rotateY: 1
   rotateZ: 0
   flipY: 0
+  snapOnEnable: 1
+  trackInUpdate: 0
 --- !u!1 &4156531393919751863
 GameObject:
   m_ObjectHideFlags: 0
@@ -502,6 +506,8 @@ MonoBehaviour:
   rotateY: 1
   rotateZ: 0
   flipY: 0
+  snapOnEnable: 1
+  trackInUpdate: 0
 --- !u!1 &4762624007326207072
 GameObject:
   m_ObjectHideFlags: 0
@@ -701,19 +707,19 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  startAt: 0.1
-  startGaussianScale: 0.6
+  startAt: 0
+  startGaussianScale: 1
   startPositionScale: 1
-  startDesaturation: 0.5
+  startDesaturation: 0
   revealAxis: {x: 0, y: 0, z: 1}
-  radial: 0
+  radial: 1
   reveal: 1
   bandFraction: 0.4
   invert: 0
-  scatterAmount: 0.02
+  scatterAmount: 0.03
   scatterFrequency: 8
   scatterSeed: 0
-  duration: 3
+  duration: 1
   resetOnEnable: 1
   previewInEditMode: 1
 --- !u!1 &5152577897936107036
@@ -853,6 +859,117 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &6141308955712897110
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2191978881196415836}
+  - component: {fileID: 5736565944829655552}
+  - component: {fileID: 669629767241248503}
+  m_Layer: 0
+  m_Name: Gaussian_Daffodil
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2191978881196415836
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6141308955712897110}
+  serializedVersion: 2
+  m_LocalRotation: {x: 1, y: 0, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2987110778591700928}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5736565944829655552
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6141308955712897110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce0eaa90dbf24670a230447dc3ec09f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gsplat::Gsplat.GsplatRenderer
+  GsplatAsset: {fileID: 4599839170941234424, guid: d9ffa37fc0f7d4443960b6f4a6f733f6, type: 3}
+  SHDegree: 1
+  RenderOrder: 0
+  Brightness: 1
+  SplatDownscaleFactor: 0
+  GammaToLinear: 0
+  AsyncUpload: 0
+  RenderBeforeUploadComplete: 1
+  CutoutsUpdateBounds: 1
+  SortMode: 0
+  SortRefreshRate: 1
+  CutoutsRefreshRate: 1
+  m_assetGuid: d9ffa37fc0f7d4443960b6f4a6f733f6
+--- !u!114 &669629767241248503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6141308955712897110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88785e4b72a58634a941853c0bb94d3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gsplat.Animation.GsplatRevealAnimator
+  computeShader: {fileID: 7200000, guid: cfc026458bd50294689d81ae9b3b9f7e, type: 3}
+  progress: 0
+  curve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  startAt: 0
+  startGaussianScale: 1
+  startPositionScale: 1
+  startDesaturation: 0
+  revealAxis: {x: 0, y: 0, z: 1}
+  radial: 1
+  reveal: 1
+  bandFraction: 0.4
+  invert: 0
+  scatterAmount: 0.03
+  scatterFrequency: 8
+  scatterSeed: 0
+  duration: 1
+  resetOnEnable: 1
+  previewInEditMode: 1
 --- !u!1 &6981605019589627048
 GameObject:
   m_ObjectHideFlags: 0
@@ -862,6 +979,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2987110778591700928}
+  - component: {fileID: 4012403378996182970}
   m_Layer: 0
   m_Name: TitlePoppy
   m_TagString: Untagged
@@ -884,8 +1002,34 @@ Transform:
   m_Children:
   - {fileID: 8132085513478704524}
   - {fileID: 2755525930710351030}
+  - {fileID: 1029606035453805694}
+  - {fileID: 2191978881196415836}
   m_Father: {fileID: 4066699433946532942}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4012403378996182970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6981605019589627048}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74887aea44ee60043ad14bb5f605bee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.IdleSplatCycler
+  flowers:
+  - renderer: {fileID: 5722130531748142571}
+    animator: {fileID: 6952329443701276837}
+  - renderer: {fileID: 1771972367342498502}
+    animator: {fileID: 1324258027766031086}
+  - renderer: {fileID: 5736565944829655552}
+    animator: {fileID: 669629767241248503}
+  holdDuration: 5
+  morphDuration: 1
+  startIndex: 0
+  playOnEnable: 1
+  hueDriftDuringMorph: 0
 --- !u!1 &7516531525199862981
 GameObject:
   m_ObjectHideFlags: 0
@@ -939,14 +1083,14 @@ MonoBehaviour:
   poppyReveal: {fileID: 6952329443701276837}
   poppyFadeOutDuration: 1.2
   touchTrigger: {fileID: 4027364042722194308}
-  touchMeLabel: {fileID: 655422379900282349}
+  touchMeGroup: {fileID: 0}
   titleCard: {fileID: 7503558724852368936}
   titleFadeDuration: 1.2
   titleHoldDuration: 2.5
   poemText: {fileID: 8736000952711587044}
   poemVo: {fileID: 7757405343309971563}
-  poemFadeDuration: 1.5
-  poemTailHold: 1.5
+  poemFadeDuration: 1
+  poemTailHold: 0.5
   poemHoldNoVo: 12
   experienceManager: {fileID: 0}
   hideDuringTitle:
@@ -963,12 +1107,24 @@ MonoBehaviour:
   gardenFadeInDuration: 2
   gapAfterPoppy: 0.4
   gapTitleToPoem: 0.6
-  gapPoemToGarden: 0.5
+  gapPoemToGarden: 0.3
   fadePoppyInOnStart: 1
   poppyFadeInDuration: 1.5
   onSequenceStarted:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 4012403378996182970}
+        m_TargetAssemblyTypeName: Plants.IdleSplatCycler, Assembly-CSharp
+        m_MethodName: StopCycle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   onSequenceComplete:
     m_PersistentCalls:
       m_Calls: []
@@ -1109,3 +1265,114 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &9161097653629606813
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1029606035453805694}
+  - component: {fileID: 1771972367342498502}
+  - component: {fileID: 1324258027766031086}
+  m_Layer: 0
+  m_Name: Gaussian_Lavender
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1029606035453805694
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9161097653629606813}
+  serializedVersion: 2
+  m_LocalRotation: {x: 1, y: 0, z: 0, w: -0.00000004371139}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2987110778591700928}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1771972367342498502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9161097653629606813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce0eaa90dbf24670a230447dc3ec09f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gsplat::Gsplat.GsplatRenderer
+  GsplatAsset: {fileID: 4599839170941234424, guid: 66e8d48f77d9bba4f95b9b0ca2843162, type: 3}
+  SHDegree: 1
+  RenderOrder: 0
+  Brightness: 1
+  SplatDownscaleFactor: 0
+  GammaToLinear: 0
+  AsyncUpload: 0
+  RenderBeforeUploadComplete: 1
+  CutoutsUpdateBounds: 1
+  SortMode: 0
+  SortRefreshRate: 1
+  CutoutsRefreshRate: 1
+  m_assetGuid: 66e8d48f77d9bba4f95b9b0ca2843162
+--- !u!114 &1324258027766031086
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9161097653629606813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88785e4b72a58634a941853c0bb94d3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gsplat.Animation.GsplatRevealAnimator
+  computeShader: {fileID: 7200000, guid: cfc026458bd50294689d81ae9b3b9f7e, type: 3}
+  progress: 0
+  curve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  startAt: 0
+  startGaussianScale: 1
+  startPositionScale: 1
+  startDesaturation: 0
+  revealAxis: {x: 0, y: 0, z: 1}
+  radial: 1
+  reveal: 1
+  bandFraction: 0.4
+  invert: 0
+  scatterAmount: 0.03
+  scatterFrequency: 8
+  scatterSeed: 0
+  duration: 1
+  resetOnEnable: 1
+  previewInEditMode: 1

@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
   plant: {fileID: 6828847771282741544}
+  gazeOnly: 0
   handLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -307,6 +308,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 1651.94
       objectReference: {fileID: 0}
+    - target: {fileID: 3543956613794748753, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
       value: 2704.852
@@ -373,7 +378,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
-      value: ca8f54ec-f72c-4fa0-8b8d-ab9dffbc1765
+      value: b4b68d51-4cb1-4f1e-80dd-d9b19fea84cb
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
@@ -428,6 +433,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 7fb56e12650cd464ebbaf9af5a4a12e4, type: 3}
+    - target: {fileID: 8582845393027873350, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 

@@ -484,8 +484,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
+  m_sharedMaterial: {fileID: 228087625704533412, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -605,9 +605,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantLabel
   text: {fileID: 312476410402479588}
+  style: {fileID: 11400000, guid: f194747644a4f034da794b5273a1aaa4, type: 2}
   background: {fileID: 1087401606966052530}
   padding: {x: 80, y: 60}
   backgroundOpacity: 0.6
+  showBackground: 0
 --- !u!1 &3430052666076913879
 GameObject:
   m_ObjectHideFlags: 0
@@ -750,8 +752,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
+  m_sharedMaterial: {fileID: 228087625704533412, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -871,9 +873,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantLabel
   text: {fileID: 8939845366384921333}
+  style: {fileID: 11400000, guid: f194747644a4f034da794b5273a1aaa4, type: 2}
   background: {fileID: 9141790096864458053}
   padding: {x: 80, y: 60}
   backgroundOpacity: 0.6
+  showBackground: 0
 --- !u!1 &5509863185466031499
 GameObject:
   m_ObjectHideFlags: 0
@@ -925,9 +929,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantLabel
   text: {fileID: 1490332709112112894}
+  style: {fileID: 11400000, guid: f194747644a4f034da794b5273a1aaa4, type: 2}
   background: {fileID: 8920457383036620316}
   padding: {x: 80, y: 60}
   backgroundOpacity: 0.6
+  showBackground: 0
 --- !u!1 &5846491492279592626
 GameObject:
   m_ObjectHideFlags: 0
@@ -1018,6 +1024,8 @@ MonoBehaviour:
   - {fileID: 6727680726408343685}
   - {fileID: 4158093794258089880}
   - {fileID: 5393839971634849250}
+  poemStyle: {fileID: 11400000, guid: b74428e20d863ba4d972eb3cbd1c3f1f, type: 2}
+  contextStyle: {fileID: 11400000, guid: f194747644a4f034da794b5273a1aaa4, type: 2}
   fadeDuration: 0.4
 --- !u!1 &5928602299219846054
 GameObject:
@@ -1086,8 +1094,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
+  m_sharedMaterial: {fileID: 228087625704533412, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1402,9 +1410,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantLabel
   text: {fileID: 1499827378123579166}
+  style: {fileID: 11400000, guid: f194747644a4f034da794b5273a1aaa4, type: 2}
   background: {fileID: 1756314630189078963}
   padding: {x: 80, y: 60}
   backgroundOpacity: 0.6
+  showBackground: 0
 --- !u!1 &8207219703728210298
 GameObject:
   m_ObjectHideFlags: 0
@@ -1547,8 +1557,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
+  m_sharedMaterial: {fileID: 228087625704533412, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2483,6 +2493,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1963610776003273048}
     m_Modifications:
+    - target: {fileID: 2045432927044451788, guid: cc255a4bf26ee1646a7b57291cf991d6, type: 3}
+      propertyPath: style
+      value: 
+      objectReference: {fileID: 11400000, guid: b74428e20d863ba4d972eb3cbd1c3f1f, type: 2}
     - target: {fileID: 4037756088563373333, guid: cc255a4bf26ee1646a7b57291cf991d6, type: 3}
       propertyPath: m_Name
       value: PoemLabel
@@ -2570,11 +2584,11 @@ PrefabInstance:
     - target: {fileID: 8387693554102633673, guid: cc255a4bf26ee1646a7b57291cf991d6, type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 1e653fde75e9e4d6290db01e236b78c5, type: 2}
+      objectReference: {fileID: 11400000, guid: 7c9fa1dda84a7124ca8ffdecfbc58302, type: 2}
     - target: {fileID: 8387693554102633673, guid: cc255a4bf26ee1646a7b57291cf991d6, type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -8609647502687038751, guid: 1e653fde75e9e4d6290db01e236b78c5, type: 2}
+      objectReference: {fileID: -8609647502687038751, guid: 7c9fa1dda84a7124ca8ffdecfbc58302, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

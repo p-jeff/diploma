@@ -40,6 +40,15 @@ namespace Plants.Garden
         [Tooltip("Radius (m) around the user's head that nothing may spawn inside.")]
         [SerializeField, Min(0f)] private float userKeepOut = 0.6f;
 
+        [Header("Chair")]
+        [Tooltip("Chair / seat marker that plants keep clear of (the finale sit spot). If unset, the " +
+                 "scene's ChairSit is found automatically.")]
+        [SerializeField] private Transform chair;
+
+        [Tooltip("Radius (m) around the chair that nothing may spawn inside — leaves room to walk up " +
+                 "to it and sit down without a plant in the seat or your lap.")]
+        [SerializeField, Min(0f)] private float chairKeepOut = 0.9f;
+
         [Header("Placement search")]
         [Tooltip("Random darts thrown per placement. More = better spacing, slightly more cost.")]
         [SerializeField, Min(1)] private int candidatesPerPlacement = 32;
@@ -47,6 +56,18 @@ namespace Plants.Garden
         [Tooltip("Extra separation (m) the mesh-penetration test must clear between two footprints. " +
                  "0 = touching allowed; raise for more air.")]
         [SerializeField, Min(0f)] private float overlapMargin = 0.05f;
+
+        [Tooltip("Desired gap (m) between footprints. The spread aims for THIS spacing instead of " +
+                 "maximising distance, so plants stop flying to the boundary corners. Lower = denser garden.")]
+        [SerializeField, Min(0f)] private float targetSpacing = 0.9f;
+
+        [Tooltip("How strongly placements are pulled toward the boundary centre (0 = none). Keeps plants " +
+                 "off the edges so they — and their wider splat visuals — stay inside the collider.")]
+        [SerializeField, Min(0f)] private float centerBias = 0.15f;
+
+        [Tooltip("Extra inset (m) added to each plant's footprint radius when keeping it inside the " +
+                 "boundary, so the splat visual (wider than the collider) doesn't spill over the edge.")]
+        [SerializeField, Min(0f)] private float boundaryMargin = 0.15f;
 
         // ── Singleton ────────────────────────────────────────────────────────────
         public static GardenPlacer Instance { get; private set; }
@@ -111,6 +132,26 @@ namespace Plants.Garden
         /// <summary>Clear the whole registry (experience reset).</summary>
         public void Clear() => m_occupants.Clear();
 
+        // ── Placement bias ──────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Optional directional bias for a placement: keep the new pose in the region BEHIND an
+        /// <see cref="anchor"/> (e.g. the just-touched plant) as seen from the viewer's head, so a
+        /// scattered copy sits past that plant and frames it as a foreground anchor. Build one with
+        /// <see cref="Behind"/>; the default value (<c>active == false</c>) means "no bias".
+        /// </summary>
+        public struct BehindBias
+        {
+            public bool active;     // when false the placement is unconstrained
+            public Vector3 anchor;  // world position to sit behind (the touched plant)
+            public float coneDeg;   // half-angle of the cone, around the head→anchor axis, to stay within
+
+            /// <summary>A bias that pushes the placement behind <paramref name="anchorWorld"/>, within
+            /// a <paramref name="coneDeg"/>° half-angle cone of the viewer's line through it.</summary>
+            public static BehindBias Behind(Vector3 anchorWorld, float coneDeg = 45f)
+                => new BehindBias { active = true, anchor = anchorWorld, coneDeg = coneDeg };
+        }
+
         // ── Placement ──────────────────────────────────────────────────────────────
 
         /// <summary>
@@ -123,9 +164,13 @@ namespace Plants.Garden
         ///
         /// Returns false only if the boundary is missing — otherwise always yields a pose
         /// (the least-overlapping one if the garden is full, logging a one-time warning).
+        ///
+        /// Pass a <paramref name="bias"/> built with <see cref="BehindBias.Behind"/> to keep the pose
+        /// behind a plant from the viewer's head; if nothing clean fits there it silently falls back
+        /// to a normal, unconstrained placement.
         /// </summary>
         public bool TryFindRootPose(Transform root, Collider footprint, bool randomYaw,
-                                    out Pose rootPose, out Pose footprintPose)
+                                    out Pose rootPose, out Pose footprintPose, BehindBias bias = default)
         {
             rootPose = default;
             footprintPose = default;
@@ -139,6 +184,7 @@ namespace Plants.Garden
             }
 
             Bounds region = b.bounds;
+            Vector3 regionCenter = region.center;
 
             // Collider's pose relative to the root, so we can predict where the footprint
             // lands for any candidate root pose.
@@ -151,83 +197,153 @@ namespace Plants.Garden
 
             Transform head = ResolveHead();
             float userR2 = userKeepOut * userKeepOut;
+            Transform chairT = ResolveChair();
+            float chairR2 = chairKeepOut * chairKeepOut;
             float candRadius = FootprintRadius(footprint);
+
+            // Inset the sample region by the footprint radius (+ margin) so the WHOLE plant —
+            // collider and the wider splat visual — stays inside the boundary instead of its
+            // centre landing on the edge and the body spilling over. Collapse to the centre line
+            // if the boundary is too small for this footprint.
+            float inset = candRadius + boundaryMargin;
+            float minX = region.min.x + inset, maxX = region.max.x - inset;
+            float minZ = region.min.z + inset, maxZ = region.max.z - inset;
+            if (minX > maxX) minX = maxX = regionCenter.x;
+            if (minZ > maxZ) minZ = maxZ = regionCenter.z;
 
             // Preserve the root's authored orientation (gsplat roots carry a base rotation;
             // dropping it flips the visual upside down) and only add a spin around world-up.
             Quaternion baseRot = root.rotation;
 
             Pose bestRoot = default, bestFoot = default;
-            float bestClearance = float.NegativeInfinity;  // nearest-neighbour distance (higher = better)
+            float bestScore = float.NegativeInfinity;       // spacing/centre score (higher = better)
             float bestPenetration = float.PositiveInfinity; // overlap depth (lower = better) for fallback
             bool foundClean = false;
 
-            for (int c = 0; c < candidatesPerPlacement; c++)
+            // Behind-anchor framing: when asked, restrict candidates to the region BEHIND the anchor
+            // (the touched plant) as seen from the viewer's head, so a scattered copy sits past the
+            // plant. Degenerate (no head, or head sitting on the anchor) → silently disabled.
+            bool behindActive = false;
+            Vector3 viewDir = Vector3.forward;
+            float coneCos = -1f;
+            if (bias.active && head != null)
             {
-                Quaternion rot = randomYaw
-                    ? Quaternion.AngleAxis(Random.value * 360f, Vector3.up) * baseRot
-                    : baseRot;
-
-                float x = Mathf.Lerp(region.min.x, region.max.x, Random.value);
-                float z = Mathf.Lerp(region.min.z, region.max.z, Random.value);
-                Vector3 rootPos = new Vector3(x, rootY, z);
-
-                // Where the footprint collider would sit for this candidate.
-                Matrix4x4 colWorld = Matrix4x4.TRS(rootPos, rot, rootScale) * colInRoot;
-                Vector3 colPos = colWorld.GetColumn(3);
-                Quaternion colRot = colWorld.rotation;
-
-                // User keep-out (horizontal).
-                if (head != null)
+                Vector3 vd = bias.anchor - head.position; vd.y = 0f;
+                if (vd.sqrMagnitude > 0.0004f) // > ~2 cm of horizontal separation
                 {
-                    Vector3 d = colPos - head.position; d.y = 0f;
-                    if (d.sqrMagnitude < userR2) continue;
-                }
-
-                // Overlap + nearest-neighbour distance against the registry.
-                float maxPenetration = 0f;
-                float nearest = float.PositiveInfinity;
-                for (int i = 0; i < m_occupants.Count; i++)
-                {
-                    var o = m_occupants[i];
-                    if (o.shape == null) continue;
-
-                    Vector3 flat = colPos - o.position; flat.y = 0f;
-                    float dist = flat.magnitude;
-                    if (dist < nearest) nearest = dist;
-
-                    // Broad-phase: skip the exact test when footprints can't possibly touch.
-                    if (dist > o.radius + candRadius + overlapMargin) continue;
-
-                    if (Physics.ComputePenetration(
-                            footprint, colPos, colRot,
-                            o.shape, o.position, o.rotation,
-                            out _, out float pen))
-                    {
-                        float eff = pen + overlapMargin;
-                        if (eff > maxPenetration) maxPenetration = eff;
-                    }
-                }
-
-                if (maxPenetration <= 0f)
-                {
-                    // Clean: keep the candidate farthest from its nearest neighbour (even spread).
-                    if (nearest > bestClearance)
-                    {
-                        bestClearance = nearest;
-                        bestRoot = new Pose(rootPos, rot);
-                        bestFoot = new Pose(colPos, colRot);
-                        foundClean = true;
-                    }
-                }
-                else if (!foundClean && maxPenetration < bestPenetration)
-                {
-                    // No clean spot yet — remember the least-overlapping fallback.
-                    bestPenetration = maxPenetration;
-                    bestRoot = new Pose(rootPos, rot);
-                    bestFoot = new Pose(colPos, colRot);
+                    viewDir = vd.normalized;
+                    coneCos = Mathf.Cos(Mathf.Clamp(bias.coneDeg, 1f, 179f) * Mathf.Deg2Rad);
+                    behindActive = true;
                 }
             }
+
+            // One dart-throwing search pass. `requireBehind` additionally rejects candidates that
+            // aren't inside the view cone and past the anchor. Mutates the best-pose accumulators.
+            void Search(bool requireBehind)
+            {
+                bestScore = float.NegativeInfinity;
+                bestPenetration = float.PositiveInfinity;
+                foundClean = false;
+
+                for (int c = 0; c < candidatesPerPlacement; c++)
+                {
+                    Quaternion rot = randomYaw
+                        ? Quaternion.AngleAxis(Random.value * 360f, Vector3.up) * baseRot
+                        : baseRot;
+
+                    float x = Mathf.Lerp(minX, maxX, Random.value);
+                    float z = Mathf.Lerp(minZ, maxZ, Random.value);
+                    Vector3 rootPos = new Vector3(x, rootY, z);
+
+                    // Where the footprint collider would sit for this candidate.
+                    Matrix4x4 colWorld = Matrix4x4.TRS(rootPos, rot, rootScale) * colInRoot;
+                    Vector3 colPos = colWorld.GetColumn(3);
+                    Quaternion colRot = colWorld.rotation;
+
+                    // User keep-out (horizontal).
+                    if (head != null)
+                    {
+                        Vector3 d = colPos - head.position; d.y = 0f;
+                        if (d.sqrMagnitude < userR2) continue;
+                    }
+
+                    // Chair keep-out (horizontal) — leave the seat and its approach clear.
+                    if (chairT != null)
+                    {
+                        Vector3 d = colPos - chairT.position; d.y = 0f;
+                        if (d.sqrMagnitude < chairR2) continue;
+                    }
+
+                    // Behind-anchor gate: inside the view cone AND past the anchor along the view axis.
+                    if (requireBehind)
+                    {
+                        Vector3 toCand = colPos - head.position; toCand.y = 0f;
+                        float m = toCand.magnitude;
+                        if (m < 0.0001f) continue;
+                        if (Vector3.Dot(toCand / m, viewDir) < coneCos) continue;      // outside the cone
+                        Vector3 beyond = colPos - bias.anchor; beyond.y = 0f;
+                        if (Vector3.Dot(beyond, viewDir) < 0f) continue;               // not past the anchor
+                    }
+
+                    // Overlap + nearest-neighbour distance against the registry.
+                    float maxPenetration = 0f;
+                    float nearest = float.PositiveInfinity;
+                    for (int i = 0; i < m_occupants.Count; i++)
+                    {
+                        var o = m_occupants[i];
+                        if (o.shape == null) continue;
+
+                        Vector3 flat = colPos - o.position; flat.y = 0f;
+                        float dist = flat.magnitude;
+                        if (dist < nearest) nearest = dist;
+
+                        // Broad-phase: skip the exact test when footprints can't possibly touch.
+                        if (dist > o.radius + candRadius + overlapMargin) continue;
+
+                        if (Physics.ComputePenetration(
+                                footprint, colPos, colRot,
+                                o.shape, o.position, o.rotation,
+                                out _, out float pen))
+                        {
+                            float eff = pen + overlapMargin;
+                            if (eff > maxPenetration) maxPenetration = eff;
+                        }
+                    }
+
+                    if (maxPenetration <= 0f)
+                    {
+                        // Clean. Score for even-but-snug spread: reward reaching targetSpacing from the
+                        // nearest neighbour (saturated, so we don't chase ever-larger gaps into the
+                        // corners), then gently prefer candidates nearer the boundary centre so plants
+                        // pull inward off the edges instead of hugging them.
+                        float spacing = nearest == float.PositiveInfinity
+                            ? targetSpacing
+                            : Mathf.Min(nearest, targetSpacing);
+                        Vector3 fromCenter = colPos - regionCenter; fromCenter.y = 0f;
+                        float score = spacing - centerBias * fromCenter.magnitude;
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            bestRoot = new Pose(rootPos, rot);
+                            bestFoot = new Pose(colPos, colRot);
+                            foundClean = true;
+                        }
+                    }
+                    else if (!foundClean && maxPenetration < bestPenetration)
+                    {
+                        // No clean spot yet — remember the least-overlapping fallback.
+                        bestPenetration = maxPenetration;
+                        bestRoot = new Pose(rootPos, rot);
+                        bestFoot = new Pose(colPos, colRot);
+                    }
+                }
+            }
+
+            Search(behindActive);
+            // Nothing clean fit behind the anchor (e.g. it sits against the back edge) → fall back to a
+            // normal, unconstrained placement rather than forcing the copy to overlap behind it.
+            if (behindActive && !foundClean)
+                Search(false);
 
             if (!foundClean)
                 Debug.LogWarning($"[GardenPlacer] No clear spot for '{root.name}' " +
@@ -287,6 +403,21 @@ namespace Plants.Garden
             if (userHead != null) return userHead;
             var cam = Camera.main;
             return cam != null ? cam.transform : null;
+        }
+
+        /// <summary>Chair the seat keep-out is measured from: serialized field if set, else the scene's
+        /// <see cref="ChairSit"/>. Resolved lazily because the chair is placed at runtime during scene
+        /// setup; caching the Transform is safe (only its pose moves, the object persists).</summary>
+        private Transform ResolveChair()
+        {
+            if (chair != null) return chair;
+#if UNITY_2023_1_OR_NEWER
+            var cs = FindFirstObjectByType<ChairSit>(FindObjectsInactive.Include);
+#else
+            var cs = FindObjectOfType<ChairSit>(true);
+#endif
+            if (cs != null) chair = cs.transform;
+            return chair;
         }
 
         /// <summary>Expose the resolved boundary's floor Y (for callers that snap to ground).</summary>

@@ -2,21 +2,34 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Plays a particle-burst effect around a sprite whenever a hand pose is recognised.
+/// Plays a particle-burst + pop effect on a hand-pose cue whenever a hand pose is recognised.
+///
+/// The cue is one of (preferred first):
+///  • a world-space Canvas cue (the <c>Sprite.prefab</c>: UI Image + label + Bobber), driven through
+///    its <see cref="CanvasGroup"/>. Auto-resolved from the first CanvasGroup under this object if
+///    <see cref="targetCanvas"/> is left empty, so dropping the cue prefab under the pose object is enough.
+///  • a legacy world-space <see cref="SpriteRenderer"/> (<see cref="targetSprite"/>), used only when no
+///    Canvas cue is set or found.
+///
+/// The cue starts hidden and pops in (scale + fade) when the pose is recognised, holds, then pops out.
 ///
 /// Setup:
-///  1. Add this component to any GameObject (e.g. the SmallHeart prefab, or a dedicated FX object).
-///  2. Assign the Target Sprite whose bounds define the burst origin.
-///  3. (Optional) Assign your own Particle System; if left empty one is created automatically.
-///  4. Wire OnPoseSelected()  → SelectorUnityEventWrapper._whenSelected
-///     Wire OnPoseDeselected() → SelectorUnityEventWrapper._whenUnselected  (optional, for cooldown reset)
+///  1. Add this component to the cue's root (or any parent of the Canvas cue).
+///  2. Drop the Sprite.prefab cue under this object (auto-found), or assign Target Canvas / Target Sprite.
+///  3. Wire OnPoseSelected() → SelectorUnityEventWrapper._whenSelected
+///     Wire Cancel()         → SelectorUnityEventWrapper._whenUnselected  (optional, pops out early)
 /// </summary>
 public class HandPoseAnimation : MonoBehaviour
 {
     // ── References ─────────────────────────────────────────────────────────────
 
     [Header("Target")]
-    [Tooltip("The sprite whose world-space bounds the particles burst around.")]
+    [Tooltip("World-space Canvas cue (the Sprite.prefab root, via its CanvasGroup). Preferred over " +
+             "Target Sprite. If left empty, the first CanvasGroup found under this object is used.")]
+    [SerializeField] private CanvasGroup targetCanvas;
+
+    [Tooltip("Legacy: the SpriteRenderer whose world-space bounds the particles burst around. " +
+             "Used only when no Target Canvas is set or found.")]
     [SerializeField] private SpriteRenderer targetSprite;
 
     [Header("Particle System")]
@@ -77,7 +90,7 @@ public class HandPoseAnimation : MonoBehaviour
 
     private bool m_ready = true;
     private ParticleSystem m_ps;
-    private Vector3 m_spriteOriginalScale;
+    private Vector3 m_cueOriginalScale = Vector3.one;
     private Coroutine m_popRoutine;
 
     // ── Unity lifecycle ────────────────────────────────────────────────────────
@@ -87,11 +100,31 @@ public class HandPoseAnimation : MonoBehaviour
         m_ps = burstParticles != null ? burstParticles : BuildParticleSystem();
         ApplySettings();
 
-        if (targetSprite != null)
+        // Prefer the new Canvas cue; fall back to the first CanvasGroup parked under this object
+        // (the Sprite.prefab instance), so no per-instance reference wiring is required.
+        if (targetCanvas == null) targetCanvas = GetComponentInChildren<CanvasGroup>(true);
+
+        var cue = CueTransform;
+        if (cue != null)
         {
-            m_spriteOriginalScale = targetSprite.transform.localScale;
-            targetSprite.enabled = false;
+            m_cueOriginalScale = cue.localScale;
+            SetCueVisible(false);   // hidden until the pose is recognised
         }
+    }
+
+    // ── Cue abstraction (Canvas cue preferred, legacy SpriteRenderer fallback) ──
+
+    private Transform CueTransform =>
+        targetCanvas != null ? targetCanvas.transform :
+        (targetSprite != null ? targetSprite.transform : null);
+
+    private bool HasCue => CueTransform != null;
+
+    /// <summary>Show/hide the cue: CanvasGroup alpha for the Canvas cue, renderer enable for the sprite.</summary>
+    private void SetCueVisible(bool on)
+    {
+        if (targetCanvas != null) targetCanvas.alpha = on ? 1f : 0f;
+        else if (targetSprite != null) targetSprite.enabled = on;
     }
 
     // ── Public API (wire these to UnityEvents) ─────────────────────────────────
@@ -102,7 +135,7 @@ public class HandPoseAnimation : MonoBehaviour
         if (!m_ready) return;
         if (!gameObject.activeInHierarchy) return;
 
-        PositionAtSprite();
+        PositionAtCue();
         m_ps.Emit(burstCount);
 
         if (cooldownSeconds > 0f)
@@ -114,7 +147,7 @@ public class HandPoseAnimation : MonoBehaviour
     /// <summary>Cancels the current pop sequence and pops out immediately. Wire to _whenUnselected if needed.</summary>
     public void Cancel()
     {
-        if (targetSprite == null) return;
+        if (!HasCue) return;
         if (m_popRoutine != null)
         {
             StopCoroutine(m_popRoutine);
@@ -126,53 +159,62 @@ public class HandPoseAnimation : MonoBehaviour
 
     private void StartPop()
     {
-        if (targetSprite == null) return;
+        if (!HasCue) return;
         if (m_popRoutine != null) StopCoroutine(m_popRoutine);
         m_popRoutine = StartCoroutine(PopSequence());
     }
 
     private IEnumerator PopSequence()
     {
-        targetSprite.transform.localScale = Vector3.zero;
-        targetSprite.enabled = true;
+        var cue = CueTransform;
+        if (cue == null) yield break;
+
+        cue.localScale = Vector3.zero;
+        SetCueVisible(true);
 
         yield return ScaleTo(popInCurve, popInDuration);
         yield return new WaitForSeconds(holdDuration);
         yield return ScaleTo(popOutCurve, popOutDuration);
 
-        targetSprite.enabled = false;
+        SetCueVisible(false);
         m_popRoutine = null;
     }
 
     private IEnumerator PopOutRoutine()
     {
         yield return ScaleTo(popOutCurve, popOutDuration);
-        targetSprite.enabled = false;
+        SetCueVisible(false);
         m_popRoutine = null;
     }
 
     private IEnumerator ScaleTo(AnimationCurve curve, float dur)
     {
+        var cue = CueTransform;
+        if (cue == null) yield break;
+
         dur = Mathf.Max(0.0001f, dur);
         float t = 0f;
         while (t < dur)
         {
             t += Time.deltaTime;
-            targetSprite.transform.localScale = m_spriteOriginalScale * curve.Evaluate(Mathf.Clamp01(t / dur));
+            cue.localScale = m_cueOriginalScale * curve.Evaluate(Mathf.Clamp01(t / dur));
             yield return null;
         }
-        targetSprite.transform.localScale = m_spriteOriginalScale * curve.Evaluate(1f);
+        cue.localScale = m_cueOriginalScale * curve.Evaluate(1f);
     }
 
     // ── Internals ──────────────────────────────────────────────────────────────
 
-    private void PositionAtSprite()
+    private void PositionAtCue()
     {
-        if (targetSprite == null) return;
+        var cue = CueTransform;
+        if (cue == null) return;
 
-        // Move the particle system to the sprite's world centre so the burst
-        // appears centred on it regardless of where this script lives.
-        m_ps.transform.position = targetSprite.bounds.center;
+        // Move the particle system to the cue's world centre so the burst appears centred on it.
+        // The legacy sprite gives a tight visual centre via its bounds; the Canvas cue uses its transform.
+        m_ps.transform.position = (targetCanvas == null && targetSprite != null)
+            ? targetSprite.bounds.center
+            : cue.position;
     }
 
     private IEnumerator Cooldown()

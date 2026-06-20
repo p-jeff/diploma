@@ -126,9 +126,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantLabel
   text: {fileID: 8387693554102633673}
+  style: {fileID: 11400000, guid: f194747644a4f034da794b5273a1aaa4, type: 2}
   background: {fileID: 1794321729218983377}
   padding: {x: 80, y: 60}
   backgroundOpacity: 0.6
+  showBackground: 0
 --- !u!1 &4214043685051175563
 GameObject:
   m_ObjectHideFlags: 0

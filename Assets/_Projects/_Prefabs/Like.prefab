@@ -52,11 +52,12 @@ MonoBehaviour:
   runOnEnable: 1
   runOnUpdate: 1
   followPosition: 1
-  followRotation: 1
+  followRotation: 0
   followScale: 0
   positionOffset: {x: 0, y: 0.1, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
   scaleOffset: {x: 0, y: 0, z: 0}
+  worldSpaceOffset: 1
 --- !u!114 &3967473718266300107
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,6 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 986608f6d5c3d5f44a4bea7e81488b5d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandPoseAnimation
+  targetCanvas: {fileID: 0}
   targetSprite: {fileID: 3529294520671910836}
   burstParticles: {fileID: 0}
   burstCount: 24
@@ -268,10 +270,8 @@ MonoBehaviour:
   rotateY: 1
   rotateZ: 1
   flipY: 1
-  rotationSpeed: 5
-  deadzoneAngle: 2
-  runOnStart: 1
-  runOnUpdate: 1
+  snapOnEnable: 1
+  trackInUpdate: 1
 --- !u!1001 &6314595715036503555
 PrefabInstance:
   m_ObjectHideFlags: 0

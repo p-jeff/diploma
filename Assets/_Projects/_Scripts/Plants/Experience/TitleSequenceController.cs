@@ -13,8 +13,8 @@ namespace Plants
     ///
     /// Flow (see <see cref="Begin"/>):
     ///   1. A standalone "title" Gaussian splat (the poppy) sits on the floor with a floating
-    ///      "Touch Me" label. The garden (ExperienceManager + its plants) is held hidden.
-    ///   2. Touching the poppy hides the label, fades the poppy out, then shows the title card
+    ///      "Touch Me" sprite prompt. The garden (ExperienceManager + its plants) is held hidden.
+    ///   2. Touching the poppy hides the prompt, fades the poppy out, then shows the title card
     ///      ("An ode to curiosity"), holds it, and fades it out.
     ///   3. The Wünschelrute poem text fades in while its VO plays; once the VO finishes the poem
     ///      fades out.
@@ -43,8 +43,9 @@ namespace Plants
         [Tooltip("PlantTouchTrigger on the poppy's touch zone (no plant assigned). Begin() subscribes " +
                  "to its hand-touch event. Auto-found under the title poppy if left unset.")]
         [SerializeField] private PlantTouchTrigger touchTrigger;
-        [Tooltip("\"Touch Me\" label, faded in on Start and out when touched.")]
-        [SerializeField] private TMP_Text touchMeLabel;
+        [Tooltip("\"Touch Me\" prompt (the sprite canvas). Its CanvasGroup alpha is faded in on Start " +
+                 "and out when touched.")]
+        [SerializeField] private CanvasGroup touchMeGroup;
 
         [Header("Title card")]
         [Tooltip("Title card text, e.g. \"An ode to curiosity\". Alpha-faded.")]
@@ -107,6 +108,23 @@ namespace Plants
 
         void Awake()
         {
+            // SPECTATOR (Mac client): the garden is rendered purely from replicated host state, there
+            // is no local intro, and there are no hands to advance it. Running the normal gating here
+            // would hide the garden (ExperienceManager + plants) and then never reveal it — the touch
+            // that drives RevealGarden() never comes — leaving the spectator stuck on the title.
+            // Disabling this component via SpectatorModeController.componentsToDisable does NOT help:
+            // Awake runs on every component of an active GameObject regardless of the enabled flag. So
+            // skip the whole sequence here: hide the title visuals, leave the garden visible, opt out.
+            if (Plants.Net.SpectatorState.IsSpectator)
+            {
+                if (titlePoppy != null) titlePoppy.SetActive(false); // also stops the IdleSplatCycler under it
+                SetGroupAlpha(touchMeGroup, 0f);
+                SetTextAlpha(titleCard, 0f);
+                SetTextAlpha(poemText, 0f);
+                enabled = false;
+                return;
+            }
+
             // Gate the garden in Awake — runs before ANY Start(), so the ExperienceManager's own
             // Start() never fires until we re-enable it at the end.
             if (experienceManager != null) experienceManager.SetActive(false);
@@ -121,6 +139,16 @@ namespace Plants
 
         void Start()
         {
+            ArmTitle();
+        }
+
+        /// <summary>
+        /// Put the title into its opening state: clear the card/poem text, (re)show the title poppy
+        /// with its reveal/fade-in, and fade the "Touch Me" label in. Called on Start() and again by
+        /// <see cref="Replay"/> for an in-place restart.
+        /// </summary>
+        private void ArmTitle()
+        {
             if (titleCard != null) SetTextAlpha(titleCard, 0f);
             if (poemText != null) SetTextAlpha(poemText, 0f);
 
@@ -131,12 +159,12 @@ namespace Plants
             else if (fadePoppyInOnStart && titlePoppy != null)
                 StartCoroutine(FadeRenderers(titlePoppy.transform, k_hiddenOpacity, 1f, poppyFadeInDuration));
 
-            // Fade the "Touch Me" label in.
-            if (touchMeLabel != null)
+            // Fade the "Touch Me" prompt in.
+            if (touchMeGroup != null)
             {
-                SetTextAlpha(touchMeLabel, 0f);
-                SnapBillboard(touchMeLabel);
-                StartCoroutine(FadeText(touchMeLabel, 0f, 1f, titleFadeDuration));
+                SetGroupAlpha(touchMeGroup, 0f);
+                SnapBillboard(touchMeGroup);
+                StartCoroutine(FadeCanvasGroup(touchMeGroup, 0f, 1f, titleFadeDuration));
             }
         }
 
@@ -153,8 +181,8 @@ namespace Plants
 
         private IEnumerator SequenceRoutine()
         {
-            // 1. Dismiss the label and fade the poppy away.
-            if (touchMeLabel != null) StartCoroutine(FadeText(touchMeLabel, touchMeLabel.alpha, 0f, titleFadeDuration));
+            // 1. Dismiss the prompt and fade the poppy away.
+            if (touchMeGroup != null) StartCoroutine(FadeCanvasGroup(touchMeGroup, touchMeGroup.alpha, 0f, titleFadeDuration));
 
             if (poppyReveal != null) poppyReveal.PlayReverse();
             if (titlePoppy != null)
@@ -207,16 +235,49 @@ namespace Plants
 
         private IEnumerator RevealGarden()
         {
-            // Enabling the manager runs its Start(), which deactivates every batched plant and
-            // re-activates its starting batch — so the first plants come up dormant exactly as in
-            // normal play. We only fade their opacity in on top (inactive renderers included, so the
-            // fade is armed no matter when the manager activates them — no full-opacity flash).
+            // On the FIRST reveal the manager is still disabled (gated in Awake): enabling it runs
+            // its Awake + Start, and Start calls BeginGarden() — batch 0 comes up dormant. On a
+            // RESTART the manager is already enabled (its Start ran once, and Unity never re-runs
+            // Start), so we open the garden explicitly via BeginGarden(). Either way the garden ends
+            // up freshly opened to batch 0; we only fade its opacity in on top (inactive renderers
+            // included, so the fade is armed no matter when the plants activate — no full-opacity flash).
+            bool wasInactive = experienceManager != null && !experienceManager.activeSelf;
             if (experienceManager != null) experienceManager.SetActive(true);
 
-            yield return null; // let the manager's Start() run before we fade
+            yield return null; // let the manager's Awake/Start run on first activation
+
+            if (!wasInactive && ExperienceManager.Instance != null)
+                ExperienceManager.Instance.BeginGarden();
 
             if (gardenFadeRoot != null)
                 yield return FadeRenderers(gardenFadeRoot, k_hiddenOpacity, 1f, gardenFadeInDuration);
+        }
+
+        // ── Restart (replay in place) ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Restart the whole experience in place, back to the title sequence. Soft-resets the garden
+        /// (un-likes every plant, destroys the spreads, closes the garden via
+        /// <see cref="ExperienceManager.ResetAll"/>), re-gates the garden objects, and re-arms the
+        /// title from the top. The ExperienceManager GameObject is intentionally left enabled — its
+        /// Start() already ran, and <see cref="RevealGarden"/> re-opens the garden with BeginGarden().
+        /// Wired to the chair's restart button (see <c>ChairSit.RestartExperience</c>).
+        /// </summary>
+        [ContextMenu("Restart (replay title)")]
+        public void Replay()
+        {
+            StopAllCoroutines();
+
+            if (ExperienceManager.Instance != null) ExperienceManager.Instance.ResetAll();
+
+            // ResetAll already deactivated the roster plants; re-hide any other objects in the list.
+            foreach (var go in hideDuringTitle)
+                if (go != null) go.SetActive(false);
+
+            m_started = false;
+            m_done = false;
+
+            ArmTitle();
         }
 
         // ── Fades ──────────────────────────────────────────────────────────────────
@@ -274,12 +335,36 @@ namespace Plants
             if (text != null) text.alpha = a;
         }
 
+        /// <summary>Lerp a <see cref="CanvasGroup"/>'s alpha — used for the "Touch Me" sprite prompt,
+        /// which is a world-space canvas rather than a single TMP label.</summary>
+        private IEnumerator FadeCanvasGroup(CanvasGroup group, float from, float to, float duration)
+        {
+            if (group == null) yield break;
+            if (!group.gameObject.activeSelf) group.gameObject.SetActive(true);
+
+            float dur = Mathf.Max(duration, 0.0001f);
+            float elapsed = 0f;
+            group.alpha = from;
+            while (elapsed < dur)
+            {
+                elapsed += Time.deltaTime;
+                group.alpha = Mathf.Lerp(from, to, elapsed / dur);
+                yield return null;
+            }
+            group.alpha = to;
+        }
+
+        private static void SetGroupAlpha(CanvasGroup group, float a)
+        {
+            if (group != null) group.alpha = a;
+        }
+
         /// <summary>Re-aim a label's billboard (LookAtTarget on its canvas) at the viewer right before
         /// it appears, so it faces wherever the user is now rather than where they were at scene start.</summary>
-        private static void SnapBillboard(TMP_Text text)
+        private static void SnapBillboard(Component component)
         {
-            if (text == null) return;
-            var look = text.GetComponentInParent<LookAtTarget>(true);
+            if (component == null) return;
+            var look = component.GetComponentInParent<LookAtTarget>(true);
             if (look != null) look.Snap();
         }
 
@@ -294,7 +379,7 @@ namespace Plants
             if (m_done) return;
             StopAllCoroutines();
             m_started = true;
-            if (touchMeLabel != null) SetTextAlpha(touchMeLabel, 0f);
+            if (touchMeGroup != null) SetGroupAlpha(touchMeGroup, 0f);
             if (titleCard != null) SetTextAlpha(titleCard, 0f);
             if (poemText != null) SetTextAlpha(poemText, 0f);
             if (titlePoppy != null) titlePoppy.SetActive(false);

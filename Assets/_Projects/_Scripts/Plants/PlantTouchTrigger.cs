@@ -53,7 +53,10 @@ namespace Plants
             onTriggerEnter.Invoke();
 
             if (plant == null) return;
-            if (ExperienceManager.Instance != null) ExperienceManager.Instance.Select(plant);
+            // Pass this trigger's transform so the manager can tell a touch on one of the plant's
+            // spread preview instances (→ grow that instance's context) from a touch on the hero
+            // body (→ select the plant). PlantManager has no per-instance step, so it just selects.
+            if (ExperienceManager.Instance != null) ExperienceManager.Instance.Touch(plant, transform);
             else if (PlantManager.Instance != null) PlantManager.Instance.Select(plant);
             else plant.Show(); // fallback if no manager in scene
 

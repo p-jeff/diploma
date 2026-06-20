@@ -28,23 +28,33 @@ namespace Plants
         [Header("Unlock Batches")]
         [Tooltip("The garden roster, grouped into unlock batches. Batch 0 is always active at start; " +
                  "each subsequent batch unlocks on a like. This list IS the roster — the flourish and " +
-                 "the story distribution walk it in order (batch 0 first). For the vertical slice, put " +
-                 "the start heroes in batch 0 and the rest in batch 1, set Flourish After Likes = 1, and " +
-                 "turn on Bloom Whole Roster On Flourish.")]
+                 "the story distribution walk it in order (batch 0 first). Liking progressively unlocks " +
+                 "the next batch as the user explores; the flourish itself is now triggered by SITTING " +
+                 "in the chair (see Sit()), not by a like count. Turn on Bloom Whole Roster On Flourish " +
+                 "so sitting bursts the WHOLE roster into bloom.")]
         [SerializeField] private List<UnlockBatch> unlockBatches = new List<UnlockBatch>();
 
         [Header("Flourish")]
-        [Tooltip("Number of likes needed to trigger the garden flourish. Set to 1 for the vertical " +
-                 "slice (the first like bursts the whole garden into bloom).")]
-        [SerializeField] private int flourishAfterLikes = 8;
         [Tooltip("OFF (staged garden): the flourish blooms only the plants the user kept, and hides " +
                  "the rest. ON (vertical slice): the flourish blooms the WHOLE roster — every plant in " +
                  "the batches, activating any not yet unlocked so they rise from the ground.")]
         [SerializeField] private bool bloomWholeRosterOnFlourish = false;
-        [Tooltip("Additional instances spawned per liked species during flourish.")]
-        [SerializeField] private int flourishInstancesPerSpecies = 4;
+        [Tooltip("Additional instances spawned per liked species during flourish. Fewer = fewer splat " +
+                 "instances to depth-sort each frame (a major GPU cost in the bloomed garden).")]
+        [SerializeField] private int flourishInstancesPerSpecies = 2;
         [Tooltip("Seconds between each liked species flourishing.")]
         [SerializeField] private float flourishSpeciesStagger = 1f;
+        [Tooltip("Garden-wide cap on how many heavy gsplat reveal-builds may BEGIN per frame. Each " +
+                 "newly-revealed instance does an O(n) morph-buffer build (CPU + GPU uploads) its " +
+                 "first active frame; without a cap, overlapping flourish cascades pile many into one " +
+                 "frame — the flourish stutter. 1 = smoothest; raise only if reveals feel too slow to " +
+                 "populate the garden.")]
+        [SerializeField, Min(1)] private int revealBuildsPerFrame = 1;
+        [Tooltip("GPU sort throttle: sort each gsplat's gaussians once every N frames instead of every " +
+                 "frame — the flourished garden's single biggest GPU cost (~72%). A >10° head turn still " +
+                 "forces a re-sort (GsplatSettings.CameraRotationRefreshTreshold) so it stays correct " +
+                 "while looking around. 0 = off (every frame); 3 is a good start.")]
+        [SerializeField, Min(0)] private int gsplatSortRefreshRate = 3;
 
         [Header("Head")]
         [Tooltip("Head/centre-eye transform used for proximity reveal. Falls back to Camera.main if unset.")]
@@ -67,10 +77,6 @@ namespace Plants
 
         [Header("Timing")]
         [SerializeField, Min(0f)] private float likeEnableDelay = 0f;
-
-        [Header("Proximity Reveal")]
-        [Tooltip("Horizontal distance (m) from the head at which an ungrown context instance auto-reveals when you step close. 0 = off (gesture-only).")]
-        [SerializeField, Min(0f)] private float revealRadius = 0.9f;
 
         [Header("Post-Flourish Gaze Explore")]
         [Tooltip("Raycaster used post-flourish to find the splat instance you're looking at " +
@@ -99,7 +105,7 @@ namespace Plants
         [Header("Debug")]
         [Tooltip("Which round the 'Debug Jump To Round' / '+ Flourish' helpers fast-forward to: " +
                  "the number of plants to auto-like. Each like unlocks the next batch, exactly as in " +
-                 "normal play. Capped at the total number of plants and at flourishAfterLikes.")]
+                 "normal play. Capped at the total number of plants.")]
         [SerializeField, Min(1)] private int debugJumpRound = 4;
 
         // ── Singleton ────────────────────────────────────────────────────────────
@@ -111,6 +117,16 @@ namespace Plants
             if (Instance != null && Instance != this)
                 Debug.LogWarning($"[ExperienceManager] Multiple instances; '{name}' overriding existing.", this);
             Instance = this;
+
+            // Garden-wide reveal-build throttle (anti-flourish-stutter): cap how many heavy gsplat
+            // morph builds may begin per frame. Read here so it applies for the whole session.
+            RevealBudget.PerFrame = revealBuildsPerFrame;
+
+            // Garden-wide GPU sort throttle (cuts the flourished garden's biggest GPU cost): sort
+            // gsplats every N frames instead of every frame, pushed to every renderer in the scene.
+            // Runtime scatter clones pick it up in PlantInstanceScatterer.Spawn.
+            GsplatSortThrottle.RefreshRate = (uint)Mathf.Max(0, gsplatSortRefreshRate);
+            GsplatSortThrottle.ApplyToScene();
 
             // Auto-add EnvironmentMoment if not present (required for 180° environments).
             if (GetComponent<EnvironmentMoment>() == null)
@@ -127,6 +143,16 @@ namespace Plants
             if (Instance == this) Instance = null;
         }
 
+        void OnValidate()
+        {
+            if (revealBuildsPerFrame < 1) revealBuildsPerFrame = 1;
+            RevealBudget.PerFrame = revealBuildsPerFrame;   // live-tune while playing
+
+            if (gsplatSortRefreshRate < 0) gsplatSortRefreshRate = 0;
+            GsplatSortThrottle.RefreshRate = (uint)gsplatSortRefreshRate;
+            if (Application.isPlaying) GsplatSortThrottle.ApplyToScene();   // live-tune while playing
+        }
+
         // ── Private state ─────────────────────────────────────────────────────────
 
         private Plant m_selected;
@@ -134,6 +160,30 @@ namespace Plants
         private int m_unlockedBatches;
         private bool m_flourished;
         private Plant m_exploringPlant;
+        private bool m_listenersWired;
+        private bool m_gardenOpen;
+
+        /// <summary>True once the garden has bloomed (the user sat down). The post-flourish gaze
+        /// explore is active while this is set.</summary>
+        public bool IsFlourished => m_flourished;
+
+        /// <summary>True only during the free-explore phase: the garden is open (revealed) and the
+        /// user has not yet sat down to flourish. The chair gates its sit detection on this so it
+        /// can't fire during calibration or while the title sequence is (re)playing.</summary>
+        public bool CanSit => m_gardenOpen && !m_flourished;
+
+        /// <summary>True once the user has committed to (liked) at least one plant this run. Reset to
+        /// false by <see cref="BeginGarden"/> / <see cref="ResetAll"/>. The chair gates its
+        /// "take a seat" invite on this so the finale isn't offered before the user has engaged.</summary>
+        public bool HasLikedAny => m_likedCount > 0;
+
+        /// <summary>Vertical slice only: once the user likes their first plant, all hand-touch is
+        /// retired (both context-reveal-by-touch and hero selection) — the experience then proceeds
+        /// gesture/sit-driven, and the post-flourish bloom is explored by gaze. Gaze never routes
+        /// through <see cref="Touch"/>, so it stays live. Gated on the vertical-slice marker
+        /// (<see cref="bloomWholeRosterOnFlourish"/>); the staged garden keeps touch because its
+        /// progression depends on liking several plants in turn, so it never locks.</summary>
+        private bool TouchLockedByFirstLike => bloomWholeRosterOnFlourish && m_likedCount >= 1;
 
         // Post-flourish gaze hover-highlight state.
         private GameObject m_gazeInstance;                 // splat instance currently highlighted
@@ -148,6 +198,37 @@ namespace Plants
 
         void Start()
         {
+            WireGestureListeners();
+            BeginGarden();
+        }
+
+        /// <summary>Subscribe the like / context gesture wrappers once. Guarded so a restart
+        /// (which never destroys this component) can't double-subscribe.</summary>
+        private void WireGestureListeners()
+        {
+            if (m_listenersWired) return;
+            m_listenersWired = true;
+
+            // Wire gesture wrappers.
+            foreach (var w in likeGestureWrappers)
+                if (w != null) w.WhenSelected.AddListener(LikeSelected);
+
+            // Context gesture grows the nearest ungrown preview of the selected plant
+            // (touching a preview is the primary reveal now; this hand-pose gesture is the
+            // manual fallback — no gaze targeting).
+            foreach (var w in contextGestureWrappers)
+                if (w != null) w.WhenSelected.AddListener(GrowNearestContext);
+        }
+
+        /// <summary>
+        /// Open the garden to its initial state: deactivate every batch, re-activate batch 0
+        /// (the starting heroes) dormant, reset progression counters, show the touch prompt and
+        /// disable the gesture selectors. Idempotent — safe to call on a cold start AND on a
+        /// restart (Unity's Start() only runs once per component lifetime, so the title sequence
+        /// calls this explicitly each time it reveals the garden).
+        /// </summary>
+        public void BeginGarden()
+        {
             // Deactivate every plant in all batches, then activate only batch 0.
             foreach (var batch in unlockBatches)
             {
@@ -157,7 +238,11 @@ namespace Plants
             }
 
             // Batch 0 is the starting set (the heroes in the vertical slice); the rest stay hidden
-            // until unlocked (staged garden) or until the whole-roster flourish reveals them.
+            // until unlocked by a like (staged garden) or until the sit-triggered whole-roster
+            // flourish reveals them.
+            m_selected = null;
+            m_likedCount = 0;
+            m_flourished = false;
             m_unlockedBatches = 0;
             ActivateBatch(0);
             m_unlockedBatches = 1;
@@ -169,18 +254,11 @@ namespace Plants
                 if (firstPlant != null) touchPrompt.Show(firstPlant.transform);
             }
 
-            // Wire gesture wrappers.
-            foreach (var w in likeGestureWrappers)
-                if (w != null) w.WhenSelected.AddListener(LikeSelected);
-
-            // Context gesture grows the nearest ungrown preview of the selected plant
-            // (proximity / stepping close is the primary reveal; this is the manual
-            // fallback — no gaze targeting).
-            foreach (var w in contextGestureWrappers)
-                if (w != null) w.WhenSelected.AddListener(GrowNearestContext);
-
             // Both selector lists start disabled.
             SetSelectorsActive(false);
+
+            // The garden is now open for free exploration — the chair's sit detection may arm.
+            m_gardenOpen = true;
         }
 
         /// <summary>Head/centre-eye transform: serialized field if set, else Camera.main.</summary>
@@ -191,7 +269,7 @@ namespace Plants
             return cam != null ? cam.transform : null;
         }
 
-        // ── Per-frame proximity reveal ──────────────────────────────────────────
+        // ── Per-frame update ─────────────────────────────────────────────────────
 
         void Update()
         {
@@ -199,37 +277,57 @@ namespace Plants
 
             // Post-flourish the experience is in explore mode: hover-highlight the splat instance
             // the user is gazing at; the context gesture then asks that plant to speak again.
+            // Pre-flourish, most plants grow a context when the user TOUCHES a spread preview
+            // instance (see Touch) — but canopy-fruit TREES hang their orbs too high to touch, so
+            // those are explored by gaze even before the bloom (see UpdateFruitGaze).
             if (m_flourished)
-            {
                 UpdateGazeHighlight();
-                return;
-            }
-
-            if (m_selected == null || revealRadius <= 0f) return;
-
-            var ungrown = m_selected.GetUngrownInstances();
-            if (ungrown == null || ungrown.Count == 0) return;
-
-            Transform h = GetHead();
-            if (h == null) return;
-
-            // Grow any ungrown instance the user has physically stepped close to
-            // (horizontal distance from the head). This is the primary "ask" — no
-            // gesture needed for the first reveal.
-            Vector3 hp = h.position;
-            float r2 = revealRadius * revealRadius;
-            for (int i = 0; i < ungrown.Count; i++)
-            {
-                var go = ungrown[i];
-                if (go == null) continue;
-                Vector3 d = go.transform.position - hp;
-                d.y = 0f;
-                if (d.sqrMagnitude <= r2)
-                    GrowInstanceWithContext(m_selected, go);
-            }
+            else
+                UpdateFruitGaze();
         }
 
         // ── Public API ────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Entry point for every hand touch on a plant collider (routed from <see cref="PlantTouchTrigger"/>).
+        /// During the regular pre-flourish steps, touching one of the SELECTED plant's spread preview
+        /// instances grows THAT instance's context — the primary "ask", replacing the old step-close
+        /// proximity reveal. Any other touch (a different plant's hero body, or the selected plant's own
+        /// body) routes to <see cref="Select"/> as before. Post-flourish, exploration is gaze-driven, so
+        /// hero touches fall through to Select (which no-ops while flourished).
+        /// </summary>
+        public void Touch(Plant plant, Transform touched)
+        {
+            if (plant == null) return;
+
+            // Vertical slice: hand-touch is one-shot — after the first like the experience is
+            // gaze/gesture/sit-driven, so retire ALL further touch (context reveal + selection).
+            // See TouchLockedByFirstLike; gaze never routes here, so it remains live.
+            if (TouchLockedByFirstLike) return;
+
+            // Touch a spread preview of the active plant → grow that instance's own context.
+            if (!m_flourished && plant == m_selected && !plant.IsLiked && touched != null)
+            {
+                var instance = plant.FindSpawnedInstance(touched);
+                if (instance != null)
+                {
+                    // Hold context reveals until the poem VO finishes (same gate as the like
+                    // gesture): touching a preview while the plant is still narrating does nothing,
+                    // so the reading is never cut short.
+                    if (PoemPlaying(plant)) return;
+                    GrowInstanceWithContext(plant, instance);
+                    return;
+                }
+            }
+
+            // Otherwise it's a hero-body touch: select (or switch to) this plant.
+            Select(plant);
+        }
+
+        /// <summary>True while <paramref name="p"/>'s poem VO is still narrating. Context reveals are
+        /// held until it finishes so the reading isn't cut short (mirrors the like-gesture gate).</summary>
+        private static bool PoemPlaying(Plant p) =>
+            p != null && p.AudioSource != null && p.AudioSource.isPlaying;
 
         /// <summary>
         /// Called by PlantTouchTrigger. Guards: null, inactive, already liked,
@@ -256,13 +354,20 @@ namespace Plants
 
             p.Show();
 
-            // Trigger 180° environment if the plant has one.
-            if (p.Data != null && p.Data.environmentPainting != null && moment != null)
+            // Trigger 180° environment if the plant has one (parallax layers preferred, single
+            // environmentPainting as fallback).
+            if (p.Data != null && moment != null)
             {
-                Transform h = GetHead();
-                Vector3 center = h != null ? h.position : p.transform.position;
-                Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
-                moment.Trigger(p.Data.environmentPainting, center, forward, p.AudioSource);
+                var layers = p.Data.environmentLayers;
+                bool hasLayers = layers != null && layers.Count > 0;
+                if (hasLayers || p.Data.environmentPainting != null)
+                {
+                    Transform h = GetHead();
+                    Vector3 center = h != null ? h.position : p.transform.position;
+                    Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
+                    if (hasLayers) moment.Trigger(layers, center, forward, p.AudioSource);
+                    else moment.Trigger(p.Data.environmentPainting, center, forward, p.AudioSource);
+                }
             }
 
             m_selected = p;
@@ -300,12 +405,18 @@ namespace Plants
 
             plant.PlaySfx(contextSfx, sfxVolume);   // a context label is growing in
 
-            // 180° painting for this plant's own context (by spawn index).
-            int idx = plant.IndexOfSpawned(go);
+            // 180° environment for this plant's own context (by interaction order — GrowInstance
+            // above already assigned this instance its context index, so this returns the same one).
+            // Parallax layers preferred, single environmentPainting as fallback.
+            int idx = plant.ContextIndexFor(go);
             var data = plant.Data;
-            Texture2D tex = (data != null && idx >= 0 && idx < data.contextInfos.Count)
-                ? data.contextInfos[idx].environmentPainting : null;
-            if (tex == null) return;
+            PlantLabelContent ctx = (data != null && idx >= 0 && idx < data.contextInfos.Count)
+                ? data.contextInfos[idx] : null;
+            if (ctx == null) return;
+
+            var layers = ctx.environmentLayers;
+            bool hasLayers = layers != null && layers.Count > 0;
+            if (!hasLayers && ctx.environmentPainting == null) return;
 
             var moment = GetMoment();
             if (moment == null) return;
@@ -313,13 +424,14 @@ namespace Plants
             Transform h = GetHead();
             Vector3 center = h != null ? h.position : go.transform.position;
             Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
-            moment.Trigger(tex, center, forward, plant.AudioSource);
+            if (hasLayers) moment.Trigger(layers, center, forward, plant.AudioSource);
+            else moment.Trigger(ctx.environmentPainting, center, forward, plant.AudioSource);
         }
 
         /// <summary>
         /// Context gesture (no gaze): grow the ungrown preview of the selected plant that
-        /// is nearest the head. Proximity (stepping close) is the primary reveal; this is
-        /// the manual fallback to summon the closest one without walking right up to it.
+        /// is nearest the head. Touching a preview is the primary reveal now; this is the
+        /// manual fallback to summon the closest one without walking up to touch it.
         /// </summary>
         public void GrowNearestContext()
         {
@@ -327,6 +439,16 @@ namespace Plants
             // finished garden (asks the plant you're GAZING at to speak) instead of growing previews.
             if (m_flourished) { ExploreGazed(); return; }
             if (m_selected == null) return;
+            if (PoemPlaying(m_selected)) return;   // wait for the poem to finish before growing a context
+
+            // Canopy-fruit trees hang their orbs too high to touch, so the gesture grows the fruit
+            // you're GAZING at. Fall back to the nearest ungrown instance if the gaze isn't on one of
+            // this tree's fruits this frame.
+            if (m_selected.IsFruitMode)
+            {
+                var gazed = GazedFruitOf(m_selected);
+                if (gazed != null) { GrowInstanceWithContext(m_selected, gazed); return; }
+            }
 
             var ungrown = m_selected.GetUngrownInstances();
             if (ungrown == null || ungrown.Count == 0) return;
@@ -344,6 +466,22 @@ namespace Plants
             }
 
             if (nearest != null) GrowInstanceWithContext(m_selected, nearest);
+        }
+
+        /// <summary>The selected canopy-fruit tree's orb currently under the gaze (a fresh ray first,
+        /// else the last orb the per-frame fruit gaze highlighted), or null. Lets the pre-flourish
+        /// context gesture grow the looked-at fruit instead of the nearest one.</summary>
+        private GameObject GazedFruitOf(Plant tree)
+        {
+            if (tree == null) return null;
+            if (gazeTargeter != null && gazeTargeter.TryGetTarget(out var p, out var go)
+                && p == tree && go != null && go.GetComponent<ContextFruit>() != null)
+                return go;
+            // Sticky fallback: the last orb the per-frame fruit gaze highlighted (only ever set to
+            // one of the selected tree's own fruits).
+            if (m_gazeInstance != null && m_gazeInstance.GetComponent<ContextFruit>() != null)
+                return m_gazeInstance;
+            return null;
         }
 
         // ── Explore (post-flourish, gaze-driven) ──────────────────────────────────────
@@ -382,8 +520,8 @@ namespace Plants
 
         /// <summary>
         /// Per-frame (post-flourish): raycast from the centre-eye and brighten the single splat
-        /// instance under the gaze, restoring the previously highlighted one. The brightness lever
-        /// is <see cref="GsplatRenderer.Brightness"/>, which the renderer re-applies every frame.
+        /// instance under the gaze, plus drive the yellow "you can ask" hand cue. The brightness
+        /// lever is <see cref="GsplatRenderer.Brightness"/>, which the renderer re-applies every frame.
         /// </summary>
         private void UpdateGazeHighlight()
         {
@@ -401,6 +539,43 @@ namespace Plants
                 else HandReadyCue.Instance.Hide();
             }
 
+            SetGazeHighlight(instance);
+        }
+
+        /// <summary>
+        /// Per-frame (PRE-flourish): canopy-fruit trees hang their contexts as orbs too high in the
+        /// canopy to comfortably touch, so they are explored by GAZE even before the bloom. Brighten
+        /// the fruit the user is looking at — but only one of the SELECTED tree's own orbs, so the
+        /// gaze never lights up a different plant's hero body. The context gesture then grows that
+        /// gazed fruit (see <see cref="GrowNearestContext"/>). Deliberately does NOT touch the hand
+        /// cue: pre-flourish the green "keep" cue owns it, and the orb's brightness boost is the only
+        /// feedback needed here.
+        /// </summary>
+        private void UpdateFruitGaze()
+        {
+            if (m_selected == null || !m_selected.IsFruitMode) { SetGazeHighlight(null); return; }
+
+            GameObject instance = null;
+            Plant plant = null;
+            if (gazeTargeter != null) gazeTargeter.TryGetTarget(out plant, out instance);
+
+            // Accept only this tree's own canopy orbs (ignore hero bodies / other plants).
+            if (plant != m_selected || instance == null || instance.GetComponent<ContextFruit>() == null)
+            {
+                SetGazeHighlight(null);
+                return;
+            }
+
+            SetGazeHighlight(instance);
+        }
+
+        /// <summary>
+        /// Brighten <paramref name="instance"/> (a splat clone or a canopy orb) as the single gazed
+        /// target, restoring whatever was highlighted before. Shared by the post-flourish explore
+        /// highlight and the pre-flourish fruit gaze; the caller owns any hand-cue change.
+        /// </summary>
+        private void SetGazeHighlight(GameObject instance)
+        {
             if (instance == m_gazeInstance) return;   // highlighted instance unchanged this frame
 
             ClearGazeHighlight();
@@ -474,14 +649,67 @@ namespace Plants
 
             m_likedCount++;
 
-            // Like-driven progression: committing to a plant reveals the next batch. The flourish
-            // ends the experience, so it takes priority over a normal unlock. In the vertical slice
-            // flourishAfterLikes = 1, so the first like flourishes (and Bloom Whole Roster On Flourish
-            // bursts the whole garden into bloom — see StartFlourish/FlourishRoutine).
-            if (m_likedCount >= flourishAfterLikes)
-                StartFlourish();
-            else
-                UnlockNextBatch();
+            // Like-driven progression: committing to a plant reveals the next batch as the user
+            // explores. There is no longer a "max like" that ends the experience — the garden
+            // flourishes only when the user sits down in the chair (see Sit()).
+            UnlockNextBatch();
+        }
+
+        // ── Sit-to-flourish ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// The user took a seat in the chair. This is the finale trigger: it bursts the garden
+        /// into bloom (the whole roster when Bloom Whole Roster On Flourish is on) and switches the
+        /// experience into post-flourish gaze-explore mode. Idempotent — only the first sit blooms.
+        /// Wired from <c>ChairSit</c>'s head-enter event.
+        /// </summary>
+        public void Sit()
+        {
+            if (m_flourished) return;
+            StartFlourish();
+        }
+
+        // ── Soft reset (restart) ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Tear the experience back down to "before the garden" for an in-place restart: stop all
+        /// flourish/explore coroutines, drop the post-flourish gaze + replay state, restore every
+        /// roster plant to pristine (un-liked, spread destroyed) and deactivate it, and clear all
+        /// progression counters. Leaves the garden CLOSED — the title sequence re-opens it via
+        /// <see cref="BeginGarden"/> when it finishes replaying. The gesture listeners stay wired
+        /// (this component is never destroyed), so nothing is double-subscribed.
+        /// </summary>
+        public void ResetAll()
+        {
+            StopAllCoroutines();
+            m_enableSelectorsRoutine = null;
+
+            // Drop any post-flourish gaze highlight / in-progress explore replay.
+            ClearGazeHighlight();
+            if (m_exploringPlant != null) { m_exploringPlant.EndReplay(); m_exploringPlant = null; }
+            m_gazePlant = null;
+
+            // Interrupt any live 180° environment moment.
+            var moment = GetMoment();
+            if (moment != null) moment.Interrupt();
+
+            HandReadyCue.Instance?.Hide();
+            if (touchPrompt != null) touchPrompt.Hide();
+            SetSelectorsActive(false);
+
+            // Restore every roster plant to pristine, then deactivate it (BeginGarden re-opens batch 0).
+            foreach (var p in AllRosterPlants())
+            {
+                if (p == null) continue;
+                p.ResetState();
+                p.gameObject.SetActive(false);
+            }
+
+            m_selected = null;
+            m_likedCount = 0;
+            m_unlockedBatches = 0;
+            m_flourished = false;
+            m_gardenOpen = false;
         }
 
         // ── Batch unlocking ───────────────────────────────────────────────────────
@@ -507,6 +735,7 @@ namespace Plants
         private void StartFlourish()
         {
             m_flourished = true;
+            m_gardenOpen = false;   // explore phase over; the chair won't re-trigger
 
             // Staged garden only: hide the active, un-liked plants so the finale shows just the
             // kept ones. When blooming the whole roster (vertical slice) we KEEP them — they bloom.
@@ -690,7 +919,7 @@ namespace Plants
                 if (p == null) break;
 
                 // Drive the real like path: counts the like, retires/keeps the right selectors,
-                // and unlocks the next batch (or flourishes once flourishAfterLikes is hit).
+                // and unlocks the next batch.
                 m_selected = p;
                 LikeSelected();
                 committed++;
@@ -713,14 +942,13 @@ namespace Plants
         public void DebugLike() => LikeSelected();
 
         /// <summary>Clamp the configured debug round to something sane: at least 1, never more than
-        /// the like threshold or the total plant count (so we don't loop past what exists).</summary>
+        /// the total plant count (so we don't loop past what exists).</summary>
         private int DebugRoundTarget()
         {
             int total = 0;
             foreach (var batch in unlockBatches)
                 if (batch?.plants != null) total += batch.plants.Count;
             int target = Mathf.Max(1, debugJumpRound);
-            if (flourishAfterLikes > 0) target = Mathf.Min(target, flourishAfterLikes);
             if (total > 0) target = Mathf.Min(target, total);
             return target;
         }
@@ -758,5 +986,13 @@ namespace Plants
         /// <summary>Explore the gazed liked plant (post-flourish) without the gesture.</summary>
         [ContextMenu("Debug Explore Gazed")]
         public void DebugExploreGazed() => ExploreGazed();
+
+        /// <summary>Sit down (trigger the finale flourish) from the inspector — headset-free testing.</summary>
+        [ContextMenu("Debug Sit")]
+        public void DebugSit() => Sit();
+
+        /// <summary>Soft-reset the experience (as the restart button does) — headset-free testing.</summary>
+        [ContextMenu("Debug Reset All")]
+        public void DebugResetAll() => ResetAll();
     }
 }

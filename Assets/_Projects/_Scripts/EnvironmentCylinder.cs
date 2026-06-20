@@ -29,16 +29,76 @@ namespace Plants
         private MeshRenderer m_meshRenderer;
         private Material m_material;
         private MaterialPropertyBlock m_propertyBlock;
+        private bool m_initialized;
+        // Texture aspect ratio (width/height); 0 = unknown → fall back to the serialized `height`.
+        private float m_aspect;
+        // When true, keep hard edges (rely on the texture's own alpha) instead of fading the sides.
+        private bool m_hardEdges;
 
         static readonly int s_baseColorId = Shader.PropertyToID("_BaseColor");
         static readonly int s_baseMapId   = Shader.PropertyToID("_BaseMap");
 
+        /// <summary>
+        /// Cylinder height derived from the texture's aspect ratio so the image is never distorted:
+        /// the arc's surface width (radius × arc) divided by the texture's width/height. Falls back
+        /// to the serialized <see cref="height"/> when no texture aspect is known yet.
+        /// </summary>
+        private float EffectiveHeight
+        {
+            get
+            {
+                if (m_aspect > 0.0001f)
+                {
+                    float arcLen = Mathf.Max(radius, 0.1f) * Mathf.Max(arcDeg, 1f) * Mathf.Deg2Rad;
+                    return Mathf.Max(arcLen / m_aspect, 0.1f);
+                }
+                return Mathf.Max(height, 0.1f);
+            }
+        }
+
         void Awake()
         {
             Debug.Log("[EnvironmentCylinder] Awake on '" + gameObject.name + "'", this);
+            EnsureInitialized();
+        }
+
+        /// <summary>Idempotently build the mesh + material. Safe to call before Awake (e.g. right
+        /// after AddComponent on an inactive GameObject) so Configure() can run at any time.</summary>
+        private void EnsureInitialized()
+        {
+            if (m_initialized) return;
             CacheComponents();
             GenerateMesh();
             CreateMaterial();
+            m_initialized = true;
+        }
+
+        /// <summary>
+        /// Configure this cylinder as one parallax layer: assign its painting, set its radius and
+        /// physical width in metres (regenerating the mesh — height follows the texture aspect so it
+        /// never distorts), choose hard vs faded side edges, and pin its transparent draw order via
+        /// an explicit <paramref name="renderQueue"/>. Because the width is a real-world size wrapped
+        /// onto the radius, a larger radius makes the same painting subtend a smaller angle — radius
+        /// reads as true distance. Concentric cylinders share the same bounds centre (the head), so
+        /// URP's per-object transparent sort can't order them — and would even treat them as the
+        /// nearest object — hence the pinned queue; keep it below the gsplat plants' queue (3000) so
+        /// the diorama renders behind them. Zero radius/width fall back to sane defaults (3.5 m, a
+        /// full 180° wrap) so an uninitialised inspector list element can't collapse the layer.
+        /// </summary>
+        public void Configure(Texture2D tex, float layerRadius, float layerWidth, bool hardEdges, int renderQueue)
+        {
+            EnsureInitialized();
+            radius = layerRadius > 0f ? layerRadius : 3.5f;
+            // Physical width (m) → arc angle at this radius. 0 = wrap a full 180°.
+            float w = layerWidth > 0f ? layerWidth : Mathf.PI * radius;
+            arcDeg = Mathf.Clamp(w / radius * Mathf.Rad2Deg, 1f, 360f);
+            m_hardEdges = hardEdges;
+            m_aspect = (tex != null && tex.height > 0) ? (float)tex.width / tex.height : 0f;
+            GenerateMesh();
+            SetTexture(tex);
+
+            if (m_material != null)
+                m_material.renderQueue = renderQueue;
         }
 
         private void CacheComponents()
@@ -55,7 +115,7 @@ namespace Plants
         {
             int seg = Mathf.Max(segments, 3);
             float rad = Mathf.Max(radius, 0.1f);
-            float h   = Mathf.Max(height, 0.1f);
+            float h   = EffectiveHeight;
             float arcRad = arcDeg * Mathf.Deg2Rad;
 
             int vertRows = seg + 1;
@@ -108,14 +168,19 @@ namespace Plants
             mesh.uv = uvs;
             mesh.triangles = tris;
 
-            // Vertex alpha gradient: fade to transparent at the left/right edges.
+            // Vertex alpha gradient: fade to transparent at the left/right edges (unless this layer
+            // wants hard edges and relies on its own texture alpha — e.g. a cutout sprite).
             Color32[] colors = new Color32[vertCount];
             for (int i = 0; i <= seg; i++)
             {
-                float t = (float)i / seg;
-                float edgeFade = 1f - Mathf.Abs(t - 0.5f) * 2f; // 0 at edges, 1 at center
-                edgeFade = Mathf.SmoothStep(0f, 1f, edgeFade);
-                byte a = (byte)(edgeFade * 255);
+                byte a = 255;
+                if (!m_hardEdges)
+                {
+                    float t = (float)i / seg;
+                    float edgeFade = 1f - Mathf.Abs(t - 0.5f) * 2f; // 0 at edges, 1 at center
+                    edgeFade = Mathf.SmoothStep(0f, 1f, edgeFade);
+                    a = (byte)(edgeFade * 255);
+                }
                 colors[i * 2]     = new Color32(255, 255, 255, a);
                 colors[i * 2 + 1] = new Color32(255, 255, 255, a);
             }
@@ -186,11 +251,13 @@ namespace Plants
             }
         }
 
-        /// <summary>Position the cylinder with the bottom edge on the floor (y=0), facing a direction.
-        /// The passed Y value is ignored; height determines the vertical placement.</summary>
-        public void PositionAt(Vector3 centerXZ, Vector3 forwardDir)
+        /// <summary>Position the cylinder with its bottom edge on the floor (y=0), facing a direction.
+        /// The passed Y is ignored; height determines the vertical placement. <paramref name="verticalOffset"/>
+        /// raises (+) or lowers (−) the whole layer in metres — use it to sit the visible art on the
+        /// floor when the texture has empty space at the bottom.</summary>
+        public void PositionAt(Vector3 centerXZ, Vector3 forwardDir, float verticalOffset = 0f)
         {
-            transform.position = new Vector3(centerXZ.x, height * 0.5f, centerXZ.z);
+            transform.position = new Vector3(centerXZ.x, EffectiveHeight * 0.5f + verticalOffset, centerXZ.z);
             if (forwardDir.sqrMagnitude > 0.001f)
                 transform.rotation = Quaternion.LookRotation(forwardDir, Vector3.up);
         }

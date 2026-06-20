@@ -35,6 +35,7 @@ Transform:
   - {fileID: 8139457301710125091}
   - {fileID: 7377026809623573906}
   - {fileID: 1562061600297071670}
+  - {fileID: 3212250414286008368}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5109087311396199045
@@ -67,14 +68,29 @@ MonoBehaviour:
   poemPlacement: 0
   cylinderRadius: 0.5
   cylinderHeightOffset: 1
+  manualPoemHeight: 0
+  manualPoemHeightValue: 1
+  contextMode: 0
+  canopyBottom: 0.5
+  canopyTop: 0.85
+  canopyInset: 0.15
+  fruitOrbRadius: 0.09
+  fruitColliderRadius: 0.16
+  fruitColor: {r: 1, g: 0.78, b: 0.32, a: 1}
+  fruitSplat: {fileID: 0}
+  fruitSplatScale: 1
+  fruitSplatEuler: {x: 90, y: 0, z: 0}
+  fruitRing: {fileID: 0}
   idleDesat: 0.5
   glowColor: {r: 0.45, g: 0.85, b: 1, a: 1}
   glowRadius: 0.6
   glow: {fileID: 0}
+  touchMePrompt: {fileID: 0}
   sproutDuration: 1.2
   sproutStartScale: 0.05
   sproutMaxStartDelay: 0.25
   instanceFadeOutDuration: 1.5
+  replayHoldDuration: 12
 --- !u!114 &8746944161505301897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,6 +107,8 @@ MonoBehaviour:
   parent: {fileID: 2958618882662025605}
   footprintOverride: {fileID: 0}
   count: 8
+  behindAnchorFraction: 0.35
+  behindConeAngle: 45
 --- !u!1 &3744211050822501132
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,6 +296,81 @@ MonoBehaviour:
   directivityPattern: 0
   directSoundEnabled: 1
   mediumAbsorption: 1
+--- !u!1 &3887132472329873915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8325670685452774835}
+  - component: {fileID: 3527013946885889003}
+  - component: {fileID: 5448421572466226296}
+  m_Layer: 0
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8325670685452774835
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3887132472329873915}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3212250414286008368}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &3527013946885889003
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3887132472329873915}
+  m_CullTransparentMesh: 1
+--- !u!114 &5448421572466226296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3887132472329873915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: a9ce55c9b0abeae4887c7a845b30dbb9, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7090744165580052200
 GameObject:
   m_ObjectHideFlags: 0
@@ -378,20 +471,14 @@ MonoBehaviour:
   startGaussianScale: 0.6
   startPositionScale: 1
   startDesaturation: 0.5
-  revealAxis: {x: 0, y: 0, z: 1}
+  revealAxis: {x: 0, y: 1, z: 0}
   radial: 0
   reveal: 0
   bandFraction: 0.4
-  invert: 0
+  invert: 1
   scatterAmount: 0.02
   scatterFrequency: 8
   scatterSeed: 0
-  sparkleStrength: 1
-  sparkleSizeAmount: 0.15
-  sparkleAlphaAmount: 0.25
-  sparkleSpeed: 1.5
-  sparkleSparsity: 0.6
-  sparkleSeed: 0
   duration: 4
   resetOnEnable: 1
   previewInEditMode: 1
@@ -490,6 +577,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
   plant: {fileID: 5109087311396199045}
+  gazeOnly: 0
   handLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -497,6 +585,121 @@ MonoBehaviour:
   onTriggerEnter:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &8460816810260483331
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3212250414286008368}
+  - component: {fileID: 3041987725968723240}
+  - component: {fileID: 3803878475386809864}
+  - component: {fileID: 6842571999183973249}
+  - component: {fileID: 3697719855218209684}
+  m_Layer: 0
+  m_Name: Touch Me Prompt
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &3212250414286008368
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460816810260483331}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
+  m_ConstrainProportionsScale: 1
+  m_Children:
+  - {fileID: 8325670685452774835}
+  m_Father: {fileID: 2958618882662025605}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0.9}
+  m_SizeDelta: {x: 256, y: 256}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!223 &3041987725968723240
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460816810260483331}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 0
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
+--- !u!225 &3803878475386809864
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460816810260483331}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
+--- !u!114 &6842571999183973249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460816810260483331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d16f5d980f19494c94d8e14af3562c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LookAtTarget
+  target: {fileID: 0}
+  rotateX: 0
+  rotateY: 1
+  rotateZ: 0
+  flipY: 1
+  snapOnEnable: 1
+  trackInUpdate: 1
+--- !u!114 &3697719855218209684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460816810260483331}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddbc2cffc6c95d547aaf20f68f6f1d7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.TouchMePrompt
+  height: 0.9
+  showDistance: 1.6
+  hideMargin: 0.4
+  fadeDuration: 0.35
+  bobAmplitude: 0.03
+  bobPeriod: 2
+  wiggleAngle: 7
+  scalePulse: 0.05
+  beckonPeriod: 1.4
 --- !u!1001 &6378674679340817041
 PrefabInstance:
   m_ObjectHideFlags: 0

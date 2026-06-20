@@ -5,9 +5,9 @@ Status: `parked` (not planned) · `discuss` (bring up next session) · `planned`
 
 ### Planned / ToDos
 
-### Plancement Algo takes in account all plants — `planned`
-The Spread / Placement algorithm should take all already grown plants into account while placing new plants, with specific margins for different plants and sizes, to fully Auto-grow the garden. 
-This is however reliant on more specific colliders for each gaussian, for which i do not have all the meshed yet. So this is blocked.
+### Plancement Algo takes in account all plants — `done`
+The Spread / Placement algorithm should take all already grown plants into account while placing new plants, with specific margins for different plants and sizes, to fully Auto-grow the garden.
+~~Reliant on more specific colliders for each gaussian~~ — unblocked once the final collider meshes were wired. Implemented as the `GardenPlacer` engine (shared no-overlap registry, true mesh-shape spread, edge inset, user/chair keep-outs, and behind-anchor framing). See `GardenPlacement.md`.
 
 
 ## New ideas

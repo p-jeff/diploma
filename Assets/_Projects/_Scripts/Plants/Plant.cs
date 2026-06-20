@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Gsplat;
 using Gsplat.Animation;
+using Mirror;
 using Plants.Garden;
+using Plants.Net;
 using UnityEngine;
 
 namespace Plants
@@ -135,12 +137,35 @@ namespace Plants
                  "so the gaze snaps onto the tiny orb easily.")]
         [SerializeField, Min(0.01f)] private float fruitColliderRadius = 0.16f;
 
-        [Tooltip("Canopy Fruit only: orb glow colour.")]
+        [Tooltip("Canopy Fruit only: orb glow colour (used only when no Fruit Splat is assigned).")]
         [SerializeField] private Color fruitColor = new Color(1f, 0.78f, 0.32f, 1f);
+
+        [Tooltip("Canopy Fruit only: OPTIONAL gsplat shown as each fruit instead of the glowing orb " +
+                 "(e.g. a decimated date/pear scan). Leave empty to keep the orb. The .ply's native " +
+                 "size is arbitrary, so tune Fruit Splat Scale until the fruit reads right.")]
+        [SerializeField] private GsplatAsset fruitSplat;
+
+        [Tooltip("Canopy Fruit only: uniform local scale applied to the Fruit Splat clone. Tune to " +
+                 "fruit size (start ~1, shrink/grow until the splat matches a real date/pear).")]
+        [SerializeField, Min(0.0001f)] private float fruitSplatScale = 1f;
+
+        [Tooltip("Canopy Fruit only: local rotation (Euler degrees) of the Fruit Splat so it sits " +
+                 "upright. Scans often import on their side — 90 about X is the usual fix.")]
+        [SerializeField] private Vector3 fruitSplatEuler = new Vector3(90f, 0f, 0f);
+
+        [Tooltip("Canopy Fruit only: OPTIONAL placement circle. Point this at a child FruitRing and " +
+                 "move/scale that circle in the Scene view to choose exactly where fruits hang. " +
+                 "Empty = auto-spread fruits across the canopy AABB band (Canopy Bottom/Top/Inset).")]
+        [SerializeField] private FruitRing fruitRing;
 
         // Orb glow intensities (dormant preview vs ripe/revealed). Tuned in code; tweak if needed.
         private const float k_fruitDormantIntensity = 0.22f;
         private const float k_fruitRipeIntensity = 1.4f;
+
+        // Fruit-splat dormant/ripe levels map to GsplatRenderer.Brightness (1 = normal), so they
+        // use a different scale than the additive-orb _Intensity above.
+        private const float k_fruitSplatDormantBrightness = 0.4f;
+        private const float k_fruitSplatRipeBrightness = 1.0f;
 
         [Header("Dormant Look")]
         [Tooltip("Desaturation of the unselected plant body (0 = full colour, 1 = grey). 0.5 = half grey / half colour. Cleared to full colour on select.")]
@@ -153,6 +178,9 @@ namespace Plants
         [SerializeField, Min(0f)] private float glowRadius = 0.6f;
         [Tooltip("Ground-glow disc component. Auto-created if not assigned.")]
         [SerializeField] private HeroGlow glow;
+        [Tooltip("Floating \"touch me\" hand sprite shown above this plant when the viewer is near. " +
+                 "Auto-created if not assigned; rides the same touchable lifecycle as the glow.")]
+        [SerializeField] private TouchMePrompt touchMePrompt;
 
         [Header("Grow-In (Sprout)")]
         [Tooltip("Seconds for a newly unlocked plant to sprout up from the ground into its dormant state.")]
@@ -167,6 +195,14 @@ namespace Plants
 
         // Instances that have been individually grown via GrowInstance().
         private readonly HashSet<GameObject> m_grown = new HashSet<GameObject>();
+
+        // Per-instance context assignment in INTERACTION order (not spawn position): the first
+        // instance the user grows/gazes is bound to this plant's context 0, the next to context 1,
+        // and so on (wrapping at the context count). Keyed by instance so re-touching the same one
+        // always shows the same context. Cleared when the spread is dropped (deselect/reset), so a
+        // fresh engagement with this plant restarts its story at context 0.
+        private readonly Dictionary<GameObject, int> m_contextOrder = new Dictionary<GameObject, int>();
+        private int m_nextContextOrder;
 
 
         [Tooltip("Seconds over which un-grown instances fade out when CompleteSpecies() is called.")]
@@ -202,9 +238,119 @@ namespace Plants
             return -1;
         }
 
+        /// <summary>
+        /// If <paramref name="t"/> (e.g. a touched collider) sits anywhere under one of this plant's
+        /// spawned preview/flourish instances, return that instance's root (the object held in the
+        /// spawned list); otherwise null. Lets a hand touch on a scattered copy's collider map back to
+        /// the specific instance whose context should grow. The hero body is never a spawned instance,
+        /// so touching it returns null (and the caller routes that to selection instead).
+        /// </summary>
+        public GameObject FindSpawnedInstance(Transform t)
+        {
+            for (Transform cur = t; cur != null; cur = cur.parent)
+            {
+                var go = cur.gameObject;
+                for (int i = 0; i < m_spawnedInstances.Count; i++)
+                    if (m_spawnedInstances[i] == go) return go;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// The context index bound to <paramref name="instance"/>, assigned in the ORDER the user
+        /// first interacts with instances rather than by spawn position: the first instance grown/
+        /// gazed gets context 0, the next context 1, and so on (wrapping at this plant's context
+        /// count). The assignment is remembered, so re-touching the same instance always shows the
+        /// same context. Returns -1 only for a null instance.
+        /// </summary>
+        public int ContextIndexFor(GameObject instance)
+        {
+            if (instance == null) return -1;
+            if (m_contextOrder.TryGetValue(instance, out int idx)) return idx;
+            int n = Mathf.Max(1, OwnContextCount());
+            idx = m_nextContextOrder % n;
+            m_nextContextOrder++;
+            m_contextOrder[instance] = idx;
+            return idx;
+        }
+
         private Coroutine m_showRoutine;
         private Coroutine m_sproutRoutine;
         private Coroutine m_replayRoutine;
+
+        // Sprout pose restore: the plant shrinks synchronously at the start of a sprout, so if the
+        // sprout is interrupted by deactivation (e.g. the title hides the garden mid-sprout) we must
+        // restore the full pose on disable — otherwise the next enable would re-capture the shrunk
+        // scale/position as "full" and the plant would stay tiny/sunk forever.
+        private bool m_sprouting;
+        private Vector3 m_sproutRestorePos;
+        private Vector3 m_sproutRestoreScale = Vector3.one;
+        private bool m_sproutRestoreColliderEnabled = true;
+
+        // ── Networking (spectator replication) ──────────────────────────────────────
+        // On the HOST, runtime-spawned instances (scatter clones, canopy fruit orbs) are tagged with
+        // a NetPlant so the spectator client can recreate them. Hero bodies carry an authored NetPlant.
+
+        private NetPlant m_net;
+
+        /// <summary>This plant's network species id (its authored hero NetPlant id), or 0 if none.</summary>
+        public ushort SpeciesId
+        {
+            get
+            {
+                if (m_net == null) m_net = GetComponent<NetPlant>();
+                return m_net != null ? m_net.id : (ushort)0;
+            }
+        }
+
+        /// <summary>The object the scatterer clones — exposed so the spectator client can clone the
+        /// same source to recreate a scatter instance the host spawned.</summary>
+        public GameObject ScatterCloneSource => scatterer != null ? scatterer.Source : null;
+
+        /// <summary>Build a dormant canopy fruit orb wired to this plant. Used by both the host's
+        /// <see cref="SpawnFruit"/> and the spectator client (which then sets ripe + pose from the
+        /// snapshot via NetPlant.Apply).</summary>
+        public GameObject BuildFruitOrb()
+        {
+            var go = new GameObject(name + "_Fruit");
+            var fruit = go.AddComponent<ContextFruit>();
+            bool useSplat = fruitSplat != null;
+
+            // Mirror the plant body's gsplat colour pipeline onto the fruit so it doesn't read
+            // washed-out / dark from mismatched gamma. Defaults if the body has no renderer.
+            bool gamma = false;
+            int sh = 3;
+            if (useSplat)
+            {
+                var body = m_splatRenderers.Count > 0 ? m_splatRenderers[0] : null;
+                if (body != null) { gamma = body.GammaToLinear; sh = body.SHDegree; }
+            }
+
+            fruit.Init(this, fruitColliderRadius,
+                       useSplat ? k_fruitSplatDormantBrightness : k_fruitDormantIntensity,
+                       useSplat ? k_fruitSplatRipeBrightness : k_fruitRipeIntensity,
+                       fruitSplat, fruitSplatScale, Quaternion.Euler(fruitSplatEuler), gamma, sh,
+                       fruitOrbRadius, fruitColor);
+            return go;
+        }
+
+        /// <summary>Host only: tag a freshly-spawned instance with a NetPlant so it replicates to
+        /// spectators. No-op unless a host server is running (so single-player / spectator never tags).</summary>
+        private void TagNetInstance(GameObject go, NetKind kind)
+        {
+            if (go == null || !NetworkServer.active) return;
+            var np = go.GetComponent<NetPlant>();
+            if (np == null) np = go.AddComponent<NetPlant>();
+            np.Configure(NetPlantRegistry.NextDynamicId(), kind, SpeciesId);
+        }
+
+        /// <summary>Host only: tag a batch of scatter clones for replication.</summary>
+        private void TagScatterClones(List<GameObject> clones)
+        {
+            if (clones == null || !NetworkServer.active) return;
+            foreach (var go in clones)
+                TagNetInstance(go, NetKind.ScatterClone);
+        }
 
         // ── Dormant look ───────────────────────────────────────────────────────────
         // While active, unselected and un-liked, the plant body reads desaturated.
@@ -227,6 +373,10 @@ namespace Plants
 
             if (glow == null) glow = GetComponent<HeroGlow>();
             if (glow == null) glow = gameObject.AddComponent<HeroGlow>();
+
+            // The prompt is authored on the "Touch Me Prompt" child of the base Plant.prefab (its
+            // settings live with its visual). A bare Plant without that child simply has no prompt.
+            if (touchMePrompt == null) touchMePrompt = GetComponentInChildren<TouchMePrompt>(true);
         }
 
         private void CacheSplatRenderers()
@@ -242,6 +392,11 @@ namespace Plants
 
         void OnEnable()
         {
+            // Spectator: this plant is a passive shell — its pose + reveal are driven entirely by
+            // NetPlant.Apply from the host. Don't self-animate (sprout), reserve garden footprints,
+            // or show the touch glow, all of which would fight the replicated state.
+            if (Application.isPlaying && SpectatorState.IsSpectator) return;
+
             // A freshly activated (unselected) plant is dormant (desaturated).
             if (!m_liked) m_idle = true;
 
@@ -266,6 +421,12 @@ namespace Plants
 
         void OnDisable()
         {
+            // A sprout shrinks the plant synchronously before it animates back up. If we're disabled
+            // mid-sprout (Unity stops the coroutine without running its cleanup), restore the full
+            // pose AND the pre-sprout collider state so a later re-enable doesn't mistake the shrunk
+            // transform for the authored one (tiny/sunk) or leave the collider disabled (untouchable).
+            RestoreSproutPose();
+
             // Free this plant's footprint when it leaves the garden (deselected/reset).
             // Liked plants stay active, so they remain registered for the session.
             if (GardenPlacer.Instance != null) GardenPlacer.Instance.Remove(this);
@@ -290,6 +451,7 @@ namespace Plants
         public void PlaceInGarden()
         {
             if (selectionCollider == null) return;
+            if (SpectatorState.IsSpectator) return;   // spectator never runs garden placement
             var placer = GardenPlacer.GetOrCreate();
             placer.Remove(this);
             placer.ApplyAndRegister(transform, selectionCollider, placeRandomYaw, this);
@@ -298,6 +460,7 @@ namespace Plants
         void Update()
         {
             if (!Application.isPlaying) return;
+            if (SpectatorState.IsSpectator) return;   // spectator: look is driven by replicated reveal
             if (!m_idle) return;
 
             // Dormant plants render desaturated until touched. Static — no sparkle.
@@ -341,13 +504,21 @@ namespace Plants
         /// <summary>Show the touch glow under this plant (invites interaction).</summary>
         private void ShowGlow()
         {
-            if (glow != null) glow.Show(GroundCenter, glowColor, glowRadius);
+            if (glow != null)
+            {
+                // Let the glow brighten as a hand approaches this plant's body (HandProximity).
+                glow.SetProximitySource(selectionCollider);
+                glow.Show(GroundCenter, glowColor, glowRadius);
+            }
+            // Arm the proximity "touch me" sprite on the same lifecycle (it appears only when near).
+            if (touchMePrompt != null) touchMePrompt.Arm(GroundCenter);
         }
 
         /// <summary>Fade the touch glow out.</summary>
         private void HideGlow()
         {
             if (glow != null) glow.Hide();
+            if (touchMePrompt != null) touchMePrompt.Disarm();
         }
 
         // ── Grow-in (sprout) ─────────────────────────────────────────────────────────
@@ -359,28 +530,66 @@ namespace Plants
 
         static readonly int s_opacityMulId = Shader.PropertyToID("_GsplatOpacityMul");
 
+        /// <summary>Undo an in-flight sprout's synchronous shrink + collider-disable: restore the
+        /// authored pose and the pre-sprout collider state. No-op when not sprouting. Called on a
+        /// mid-sprout deactivation (OnDisable) and before a restart sprout (StartSprout) so an
+        /// interrupted sprout never leaves the plant tiny/sunk or its collider stuck disabled
+        /// (which would re-capture as "off" on the next sprout and make the plant untouchable).</summary>
+        private void RestoreSproutPose()
+        {
+            if (!m_sprouting) return;
+            transform.position = m_sproutRestorePos;
+            transform.localScale = m_sproutRestoreScale;
+            if (selectionCollider != null) selectionCollider.enabled = m_sproutRestoreColliderEnabled;
+            m_sprouting = false;
+        }
+
         private void StartSprout()
         {
+            // If a previous sprout is still mid-flight, restore the full pose + pre-sprout collider
+            // state first so the new sprout re-captures the authored scale/position/collider rather
+            // than a half-shrunk, collider-disabled transform.
+            RestoreSproutPose();
             if (m_sproutRoutine != null) StopCoroutine(m_sproutRoutine);
             m_sproutRoutine = StartCoroutine(SproutIn());
         }
 
         private IEnumerator SproutIn()
         {
-            // Stagger a batch organically.
-            if (sproutMaxStartDelay > 0f)
-                yield return new WaitForSeconds(Random.Range(0f, sproutMaxStartDelay));
+            // Shrink + hide BEFORE the first yield so it runs synchronously inside OnEnable, before
+            // this plant renders a single frame. The authored editor scale is 1 (full size) so the
+            // plant can be placed in-editor; without this the plant would flash at full size for one
+            // frame before the pop-in animates it up from sproutStartScale.
 
             // Keep the reveal at its dormant resting state so the touch reveal stays intact.
             ResetAnimation();
 
             // No touching a half-sprouted plant; the footprint was already reserved at full pose.
-            bool colliderWas = selectionCollider != null && selectionCollider.enabled;
+            // Remember the pre-sprout collider state in a MEMBER (not a local) so an interrupted
+            // sprout can restore it — a local would be lost on interruption and the next sprout would
+            // re-capture the disabled state, leaving the plant permanently untouchable.
+            m_sproutRestoreColliderEnabled = selectionCollider != null && selectionCollider.enabled;
             if (selectionCollider != null) selectionCollider.enabled = false;
 
             Vector3 origPos = transform.position;
             Vector3 origScale = transform.localScale;
             Vector3 ground = GroundCenter;
+
+            // Remember the full pose so an interrupted sprout (deactivation) can restore it; without
+            // this a re-enable would re-capture the shrunk transform as "full" and stay tiny.
+            m_sproutRestorePos = origPos;
+            m_sproutRestoreScale = origScale;
+            m_sprouting = true;
+
+            // Drop straight to the sprout start pose (about the ground point) and hide the splats.
+            float startScale = Mathf.Clamp(sproutStartScale, 0.01f, 1f);
+            transform.localScale = origScale * startScale;
+            transform.position = ground + (origPos - ground) * startScale;
+            SetSplatOpacity(0.002f);
+
+            // Stagger a batch organically — already shrunk + hidden, so no full-size flash while we wait.
+            if (sproutMaxStartDelay > 0f)
+                yield return new WaitForSeconds(Random.Range(0f, sproutMaxStartDelay));
 
             float dur = Mathf.Max(sproutDuration, 0.0001f);
             float t = 0f;
@@ -388,7 +597,7 @@ namespace Plants
             {
                 t += Time.deltaTime;
                 float e = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / dur));
-                float f = Mathf.Lerp(Mathf.Clamp(sproutStartScale, 0.01f, 1f), 1f, e);
+                float f = Mathf.Lerp(startScale, 1f, e);
 
                 // Scale the whole plant about the ground point so the base stays put and it rises.
                 transform.localScale = origScale * f;
@@ -402,8 +611,9 @@ namespace Plants
             transform.localScale = origScale;
             transform.position = origPos;
             SetSplatOpacity(1f);
+            m_sprouting = false; // completed cleanly — no restore needed on a later disable
 
-            if (selectionCollider != null) selectionCollider.enabled = colliderWas;
+            if (selectionCollider != null) selectionCollider.enabled = m_sproutRestoreColliderEnabled;
 
             // Now it's a touchable dormant plant: invite the touch.
             if (!m_liked) ShowGlow();
@@ -506,7 +716,7 @@ namespace Plants
         {
             if (info == null || selectionCollider == null) return;
 
-            // Tell the labels whether contexts hang as canopy fruit (placed just above their orb,
+            // Tell the labels whether contexts hang as canopy fruit (placed just below their orb,
             // no collider top-lift) or float above scattered instances (the default).
             info.SetFruitContext(IsFruitMode);
 
@@ -655,8 +865,9 @@ namespace Plants
         }
 
         /// <summary>True when this plant hangs its contexts as canopy fruit (1 hero body + N orbs)
-        /// instead of scattering one splat clone per context.</summary>
-        private bool IsFruitMode => contextMode == ContextPlacementMode.CanopyFruit;
+        /// instead of scattering one splat clone per context. Public so the experience can route the
+        /// pre-flourish gaze/gesture to a tree's high-hanging orbs (which can't be touched).</summary>
+        public bool IsFruitMode => contextMode == ContextPlacementMode.CanopyFruit;
 
         /// <summary>Spawn the on-select preview: N instances (N = context blocks), each
         /// activated and parked greyscale (reveal not played yet). In Canopy Fruit mode this
@@ -675,15 +886,34 @@ namespace Plants
             if (scatterer == null) return;
 
             var spawned = scatterer.Spawn(n, SpawnedPositions());
+            TagScatterClones(spawned);
+            m_spawnedInstances.AddRange(spawned);   // list is correct immediately (copies still inactive)
+
+            // Activate + park-grey the previews over successive frames rather than all at once: each
+            // one's first active frame does the heavy gsplat morph build, so waking N together hitches
+            // the select. The garden-wide RevealBudget caps builds per frame (same gate the flourish
+            // cascade uses), and the copies stay inactive/invisible until their slot — no flash.
+            StartCoroutine(ActivatePreviewInstances(spawned));
+        }
+
+        /// <summary>Activate the spawned preview copies one global build-slot at a time
+        /// (see <see cref="RevealBudget"/>), parking each at its grey resting state. They stay
+        /// inactive — invisible — until their slot, so there is no full-detail flash and no select
+        /// hitch from many gsplat morph builds landing on one frame.</summary>
+        private IEnumerator ActivatePreviewInstances(List<GameObject> spawned)
+        {
             foreach (var go in spawned)
             {
                 if (go == null) continue;
+
+                while (!RevealBudget.TryConsume())
+                    yield return null;
+
                 go.SetActive(true);
                 var animators = go.GetComponentsInChildren<GsplatRevealAnimator>(true);
                 foreach (var a in animators)
                     if (a != null) a.ResetToStart();
             }
-            m_spawnedInstances.AddRange(spawned);
         }
 
         /// <summary>
@@ -698,15 +928,18 @@ namespace Plants
             var points = SampleCanopyPoints(count);
             for (int i = 0; i < points.Count; i++)
             {
-                var go = new GameObject(name + "_Fruit_" + i);
+                var go = BuildFruitOrb();
+                go.name = name + "_Fruit_" + i;
                 go.transform.SetParent(transform, true); // follows the plant (e.g. scene-lock moves)
                 go.transform.position = points[i];
 
-                var fruit = go.AddComponent<ContextFruit>();
-                fruit.Init(this, fruitOrbRadius, fruitColliderRadius, fruitColor,
-                           k_fruitDormantIntensity, k_fruitRipeIntensity);
-                if (ripe) fruit.Ripen();
+                if (ripe)
+                {
+                    var fruit = go.GetComponent<ContextFruit>();
+                    if (fruit != null) fruit.Ripen();
+                }
 
+                TagNetInstance(go, NetKind.FruitOrb);
                 m_spawnedInstances.Add(go);
             }
         }
@@ -719,6 +952,9 @@ namespace Plants
         /// </summary>
         private List<Vector3> SampleCanopyPoints(int count)
         {
+            // Authored layout: spread fruits evenly within a single circle the user placed/scaled.
+            if (fruitRing != null) return SampleRingPoints(count, fruitRing);
+
             var result = new List<Vector3>(Mathf.Max(0, count));
             if (count <= 0) return result;
 
@@ -746,6 +982,43 @@ namespace Plants
                         b.center.x + Random.Range(-ix, ix),
                         Random.Range(yMin, yMax),
                         b.center.z + Random.Range(-iz, iz));
+
+                    float nearest = result.Count == 0 ? 1f : float.MaxValue;
+                    for (int j = 0; j < result.Count; j++)
+                        nearest = Mathf.Min(nearest, (result[j] - p).sqrMagnitude);
+
+                    if (nearest > bestScore) { bestScore = nearest; best = p; }
+                }
+                result.Add(best);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Spread <paramref name="count"/> points evenly within the disc of <paramref name="ring"/>
+        /// (its world centre, plane and radius), using the same best-candidate spread as the AABB
+        /// sampler. Lets the fruit layout be authored by moving/scaling one circle instead of
+        /// auto-sampling the canopy box. Points are coplanar on the ring's plane.
+        /// </summary>
+        private List<Vector3> SampleRingPoints(int count, FruitRing ring)
+        {
+            var result = new List<Vector3>(Mathf.Max(0, count));
+            if (count <= 0) return result;
+
+            Vector3 c = ring.Center;
+            float r = Mathf.Max(0f, ring.WorldRadius);
+            ring.GetPlaneBasis(out var u, out var v);
+
+            const int candidates = 16;
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 best = c;
+                float bestScore = -1f;
+                for (int k = 0; k < candidates; k++)
+                {
+                    float ang = Random.value * Mathf.PI * 2f;
+                    float rad = r * Mathf.Sqrt(Random.value);   // sqrt => uniform over the disc area
+                    Vector3 p = c + (u * Mathf.Cos(ang) + v * Mathf.Sin(ang)) * rad;
 
                     float nearest = result.Count == 0 ? 1f : float.MaxValue;
                     for (int j = 0; j < result.Count; j++)
@@ -817,6 +1090,15 @@ namespace Plants
                 if (m_spawnedInstances[i] != null) Destroy(m_spawnedInstances[i]);
             m_spawnedInstances.Clear();
             m_grown.Clear();
+            ClearContextOrder();
+        }
+
+        /// <summary>Forget the interaction-order context assignment so the next time this plant is
+        /// engaged its story restarts at context 0 (the first instance grown → context 0 again).</summary>
+        private void ClearContextOrder()
+        {
+            m_contextOrder.Clear();
+            m_nextContextOrder = 0;
         }
 
         /// <summary>
@@ -878,6 +1160,7 @@ namespace Plants
                 if (extra > 0)
                 {
                     var more = scatterer.Spawn(extra, SpawnedPositions());
+                    TagScatterClones(more);
                     m_spawnedInstances.AddRange(more);
                     StartCoroutine(RevealLikedInstances(more));
                 }
@@ -915,6 +1198,14 @@ namespace Plants
                 var go = instances[i];
                 if (go == null) continue;
 
+                // Garden-wide reveal-build throttle: wait for a slot before waking this instance.
+                // Each clone does its heavy gsplat morph build (O(n) CPU + buffer uploads) the first
+                // frame it is active, so overlapping flourish cascades waking many clones on one
+                // frame are what spiked the frame (~46 ms). The clone stays inactive — invisible, no
+                // full-detail flash — until its turn, so only frame pacing changes, not the look.
+                while (!RevealBudget.TryConsume())
+                    yield return null;
+
                 go.SetActive(true);
 
                 // Park greyscale then play the reveal wave, same frame so there's
@@ -951,6 +1242,7 @@ namespace Plants
                 if (m_spawnedInstances[i] != null) Destroy(m_spawnedInstances[i]);
             m_spawnedInstances.Clear();
             m_grown.Clear();
+            ClearContextOrder();
 
             // Hide the manually placed fallback copies that a previous like activated.
             for (int i = 0; i < likedInstances.Count; i++)
@@ -1000,7 +1292,7 @@ namespace Plants
             if (!m_spawnedInstances.Contains(instance)) return false;
             if (m_grown.Contains(instance)) return false;
 
-            int idx = m_spawnedInstances.IndexOf(instance);
+            int idx = ContextIndexFor(instance);
 
             var animators = instance.GetComponentsInChildren<GsplatRevealAnimator>(true);
             foreach (var a in animators)
@@ -1102,6 +1394,7 @@ namespace Plants
             if (scatterer != null && count > 0)
             {
                 var more = scatterer.Spawn(count, SpawnedPositions());
+                TagScatterClones(more);
                 m_spawnedInstances.AddRange(more);
 
                 // Re-enable each clone's fitted collider so the post-flourish gaze ray can hit it.
@@ -1180,6 +1473,7 @@ namespace Plants
             if (scatterer != null && spawnCount > 0)
             {
                 var more = scatterer.Spawn(spawnCount, SpawnedPositions());
+                TagScatterClones(more);
                 m_spawnedInstances.AddRange(more);
 
                 // Enable each clone's collider so the post-flourish gaze ray can hit it.
@@ -1241,9 +1535,9 @@ namespace Plants
             // Float ONLY the gazed instance's own context above it (spawn index mod context count,
             // so decorative copies map back onto a real context). One context, not the group.
             int n = OwnContextCount();
-            int idx = gazedInstance != null ? m_spawnedInstances.IndexOf(gazedInstance) : -1;
+            int idx = ContextIndexFor(gazedInstance);
             if (n > 0 && idx >= 0)
-                info.PlaceContextAt(idx % n, gazedInstance.transform, contextHeightOffset);
+                info.PlaceContextAt(idx, gazedInstance.transform, contextHeightOffset);
 
             // No audio: asking post-flourish shows the poem text + the one context to read.
             if (audioSource != null) audioSource.Stop();

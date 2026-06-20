@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Projects/_Scenes/Boot.unity
+    guid: cdcc3884614d01744a19011c9ab1deec
+  - enabled: 1
+    path: Assets/_Projects/_Scenes/VerticalSlice.unity
+    guid: 654ea9a2294e1f547a1161143efdfba5
+  - enabled: 1
     path: Assets/_Projects/_Scenes/Interaction Prototype.unity
     guid: 360f64700ccdd6f4ebe3c381023b8acb
   m_configObjects:

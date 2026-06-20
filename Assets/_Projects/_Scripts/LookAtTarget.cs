@@ -17,6 +17,12 @@ public class LookAtTarget : MonoBehaviour
     public bool rotateZ = false;
     public bool flipY = true;
 
+    [Header("When to aim")]
+    [Tooltip("Snap to face the target each time the object is enabled.")]
+    public bool snapOnEnable = true;
+    [Tooltip("Re-aim every frame so the object tracks the viewer continuously. Off = snap only (calmer in the headset).")]
+    public bool trackInUpdate = false;
+
     // Lazily resolved fallback when target is not manually wired.
     private Transform m_resolvedTarget;
 
@@ -31,12 +37,24 @@ public class LookAtTarget : MonoBehaviour
     }
 
     // Snap to face the target whenever the object becomes enabled (incl. SetActive(true) at
-    // runtime), then leave it fixed — no per-frame tracking.
-    void OnEnable() => Snap();
+    // runtime), then leave it fixed unless trackInUpdate keeps it tracking per-frame.
+    void OnEnable()
+    {
+        if (snapOnEnable) Snap();
+    }
 
     // Fallback for objects already active at scene load, in case Camera.main isn't
     // resolvable yet during OnEnable.
-    void Start() => Snap();
+    void Start()
+    {
+        if (snapOnEnable) Snap();
+    }
+
+    // Optional continuous tracking: re-aim every frame so the object follows the viewer.
+    void Update()
+    {
+        if (trackInUpdate) Snap();
+    }
 
     /// <summary>Immediately aim at the target, ignoring smoothing. Use when an object is
     /// repositioned at runtime and must billboard right away.</summary>

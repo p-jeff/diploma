@@ -73,6 +73,10 @@ namespace Plants
 
         void Start()
         {
+            // Spectator: plants are passive shells driven by the host's replicated state — don't run
+            // the round flow (which would toggle plants active/inactive and fight the snapshot).
+            if (Plants.Net.SpectatorState.IsSpectator) return;
+
             if (autoDisableAllOnStart) DisableAllPlants();
             BeginRound(0);
             if (_likeOnStart) EnableLike();
