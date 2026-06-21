@@ -183,10 +183,8 @@ namespace Plants
         [SerializeField] private TouchMePrompt touchMePrompt;
 
         [Header("Grow-In (Sprout)")]
-        [Tooltip("Seconds for a newly unlocked plant to sprout up from the ground into its dormant state.")]
+        [Tooltip("Seconds for a newly unlocked plant to fade in (per-splat) into its dormant state.")]
         [SerializeField, Min(0f)] private float sproutDuration = 1.2f;
-        [Tooltip("Scale the plant starts at when it sprouts (relative to full), growing up from the ground.")]
-        [SerializeField, Range(0.01f, 1f)] private float sproutStartScale = 0.05f;
         [Tooltip("Max random delay before a plant begins its sprout, so a batch of plants stagger organically.")]
         [SerializeField, Min(0f)] private float sproutMaxStartDelay = 0.25f;
 
@@ -278,12 +276,13 @@ namespace Plants
         private Coroutine m_sproutRoutine;
         private Coroutine m_replayRoutine;
 
-        // Sprout pose restore: the plant shrinks synchronously at the start of a sprout, so if the
-        // sprout is interrupted by deactivation (e.g. the title hides the garden mid-sprout) we must
-        // restore the full pose on disable — otherwise the next enable would re-capture the shrunk
-        // scale/position as "full" and the plant would stay tiny/sunk forever.
+        // Sprout interrupt restore: a sprout synchronously collapses the plant's scale (a 1-frame hide,
+        // see SproutIn) and disables the selection collider. If the sprout is interrupted by
+        // deactivation (e.g. the title hides the garden mid-sprout) we must restore the authored scale
+        // AND the pre-sprout collider state on disable — otherwise the next enable would re-capture the
+        // collapsed scale as "full" (tiny forever) or the disabled collider as "pre-sprout" (permanently
+        // untouchable).
         private bool m_sprouting;
-        private Vector3 m_sproutRestorePos;
         private Vector3 m_sproutRestoreScale = Vector3.one;
         private bool m_sproutRestoreColliderEnabled = true;
 
@@ -421,10 +420,10 @@ namespace Plants
 
         void OnDisable()
         {
-            // A sprout shrinks the plant synchronously before it animates back up. If we're disabled
-            // mid-sprout (Unity stops the coroutine without running its cleanup), restore the full
-            // pose AND the pre-sprout collider state so a later re-enable doesn't mistake the shrunk
-            // transform for the authored one (tiny/sunk) or leave the collider disabled (untouchable).
+            // A sprout collapses the plant's scale synchronously (a 1-frame hide). If we're disabled
+            // mid-sprout (Unity stops the coroutine without running its cleanup), restore the authored
+            // scale AND the pre-sprout collider state so a later re-enable doesn't mistake the collapsed
+            // transform for the authored one (tiny forever) or leave the collider disabled (untouchable).
             RestoreSproutPose();
 
             // Free this plant's footprint when it leaves the garden (deselected/reset).
@@ -522,23 +521,29 @@ namespace Plants
         }
 
         // ── Grow-in (sprout) ─────────────────────────────────────────────────────────
-        // A newly unlocked plant grows up out of the ground into its dormant state instead of
-        // popping in. This is a transform + opacity animation layered on the dormant bud: the
-        // reveal morph is deliberately LEFT at progress 0 (the half-grey, sparkling resting
-        // state), so the touch reveal still plays 0→1 later. Scaling is about the ground point
-        // (GroundCenter) so the base stays planted and the plant rises from it.
+        // A newly unlocked plant FADES IN (per-splat opacity via _GsplatOpacityMul 0.002→1) at its
+        // authored full pose — no visible size animation. The reveal morph is deliberately LEFT at
+        // progress 0 (the dormant resting state), so the touch reveal still plays 0→1 later.
+        // The plant's scale is collapsed for the FIRST frame only (then snapped back while still
+        // invisible) because the GsplatRenderer builds its MaterialPropertyBlock lazily in its own
+        // Update — so SetSplatOpacity is a no-op on frame 0 and the renderer would otherwise draw the
+        // full shared cloud at full opacity for that one frame. transform.localScale applies
+        // immediately, so it hides that frame; the opacity guard takes over once the PB exists.
+
+        // Near-zero scale used to hide a sprouting plant for the one frame before its splat
+        // PropertyBlock exists. Snapped back to the authored scale (still at ~0 opacity) before the fade.
+        const float k_sproutHideScale = 0.0008f;
 
         static readonly int s_opacityMulId = Shader.PropertyToID("_GsplatOpacityMul");
 
-        /// <summary>Undo an in-flight sprout's synchronous shrink + collider-disable: restore the
-        /// authored pose and the pre-sprout collider state. No-op when not sprouting. Called on a
+        /// <summary>Undo an in-flight sprout's synchronous scale-collapse + collider-disable: restore
+        /// the authored scale and the pre-sprout collider state. No-op when not sprouting. Called on a
         /// mid-sprout deactivation (OnDisable) and before a restart sprout (StartSprout) so an
-        /// interrupted sprout never leaves the plant tiny/sunk or its collider stuck disabled
-        /// (which would re-capture as "off" on the next sprout and make the plant untouchable).</summary>
+        /// interrupted sprout never leaves the plant collapsed (tiny forever) or its collider stuck
+        /// disabled (re-captured as "off" on the next sprout → untouchable).</summary>
         private void RestoreSproutPose()
         {
             if (!m_sprouting) return;
-            transform.position = m_sproutRestorePos;
             transform.localScale = m_sproutRestoreScale;
             if (selectionCollider != null) selectionCollider.enabled = m_sproutRestoreColliderEnabled;
             m_sprouting = false;
@@ -556,60 +561,53 @@ namespace Plants
 
         private IEnumerator SproutIn()
         {
-            // Shrink + hide BEFORE the first yield so it runs synchronously inside OnEnable, before
-            // this plant renders a single frame. The authored editor scale is 1 (full size) so the
-            // plant can be placed in-editor; without this the plant would flash at full size for one
-            // frame before the pop-in animates it up from sproutStartScale.
-
-            // Keep the reveal at its dormant resting state so the touch reveal stays intact.
+            // Keep the reveal morph parked at progress 0 (dormant resting state) so the touch reveal
+            // still plays 0→1 later; only the per-splat opacity multiplier animates the entrance.
             ResetAnimation();
 
-            // No touching a half-sprouted plant; the footprint was already reserved at full pose.
+            // Hide BEFORE the first render, synchronously inside OnEnable. SetSplatOpacity is a no-op
+            // on frame 0 (the GsplatRenderer hasn't built its PropertyBlock yet — it does so lazily in
+            // its own Update), so collapse the scale, which DOES apply immediately, to suppress the
+            // one-frame full-cloud draw. This is an instant hide, not a grow: the scale snaps back to
+            // full later while opacity is still ~0, so no size change is ever visible.
+            Vector3 origScale = transform.localScale;
+            m_sproutRestoreScale = origScale;
+            transform.localScale = origScale * k_sproutHideScale;
+            SetSplatOpacity(0.002f); // effective once the PB exists (re-asserted below)
+
+            // No touching a half-faded plant; the footprint was already reserved at full pose.
             // Remember the pre-sprout collider state in a MEMBER (not a local) so an interrupted
             // sprout can restore it — a local would be lost on interruption and the next sprout would
             // re-capture the disabled state, leaving the plant permanently untouchable.
             m_sproutRestoreColliderEnabled = selectionCollider != null && selectionCollider.enabled;
             if (selectionCollider != null) selectionCollider.enabled = false;
-
-            Vector3 origPos = transform.position;
-            Vector3 origScale = transform.localScale;
-            Vector3 ground = GroundCenter;
-
-            // Remember the full pose so an interrupted sprout (deactivation) can restore it; without
-            // this a re-enable would re-capture the shrunk transform as "full" and stay tiny.
-            m_sproutRestorePos = origPos;
-            m_sproutRestoreScale = origScale;
             m_sprouting = true;
 
-            // Drop straight to the sprout start pose (about the ground point) and hide the splats.
-            float startScale = Mathf.Clamp(sproutStartScale, 0.01f, 1f);
-            transform.localScale = origScale * startScale;
-            transform.position = ground + (origPos - ground) * startScale;
-            SetSplatOpacity(0.002f);
+            // Stagger a batch organically. Re-assert the opacity each frame (it only "takes" once the
+            // renderer has built its PB) and guarantee at least one frame passes so the PB exists
+            // before we un-hide — otherwise the snap-back-to-full-scale frame could itself flash.
+            float wait = sproutMaxStartDelay > 0f ? Random.Range(0f, sproutMaxStartDelay) : 0f;
+            float waited = 0f;
+            do
+            {
+                waited += Time.deltaTime;
+                SetSplatOpacity(0.002f);
+                yield return null;
+            } while (waited < wait);
 
-            // Stagger a batch organically — already shrunk + hidden, so no full-size flash while we wait.
-            if (sproutMaxStartDelay > 0f)
-                yield return new WaitForSeconds(Random.Range(0f, sproutMaxStartDelay));
-
+            // PB now exists and opacity is ~0. Snap back to the authored full pose (still invisible)
+            // and fade the splats in via per-splat opacity — full size throughout, no scale-up.
+            transform.localScale = origScale;
             float dur = Mathf.Max(sproutDuration, 0.0001f);
             float t = 0f;
             while (t < dur)
             {
                 t += Time.deltaTime;
                 float e = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / dur));
-                float f = Mathf.Lerp(startScale, 1f, e);
-
-                // Scale the whole plant about the ground point so the base stays put and it rises.
-                transform.localScale = origScale * f;
-                transform.position = ground + (origPos - ground) * f;
-
                 SetSplatOpacity(Mathf.Lerp(0.002f, 1f, e));
                 yield return null;
             }
 
-            // Land exactly on the authored pose, fully opaque.
-            transform.localScale = origScale;
-            transform.position = origPos;
             SetSplatOpacity(1f);
             m_sprouting = false; // completed cleanly — no restore needed on a later disable
 

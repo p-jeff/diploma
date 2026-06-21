@@ -10,7 +10,7 @@ and a 180° environment painting, then like to commit the species and unlock the
 batch. After 8 liked species, the garden "flourishes."
 
 Interaction polish layered on top of that core loop:
-- **Sprout grow-in** — a newly unlocked plant grows up out of the ground into its dormant
+- **Sprout fade-in** — a newly unlocked plant fades in per-splat (opacity) into its dormant
   state instead of `SetActive` popping in (`Plant.SproutIn`).
 - **Keep-available hand cue** — when a plant's poem finishes and the *keep* gesture unlocks,
   **both hands** get a soft green silhouette outline (+ optional motes) so the user knows the
@@ -59,7 +59,7 @@ Interaction polish layered on top of that core loop:
 Notes:
 - There is no "Liked-pending" or "Completed" state. After `LikeCommit()` the plant stays in the scene with all its grown instances.
 - `CompleteSpecies()` (ungrown fade-out) exists on `Plant` but is NOT invoked by `ExperienceManager` in normal flow.
-- **Idle is entered via a sprout**, not a pop: on `OnEnable` an un-liked plant in play mode runs `SproutIn()` (transform-scale up from the ground + opacity fade) and only shows its touch glow once grown. The reveal morph stays at `progress 0` throughout, so Idle is the usual half-grey dormant bud and the touch reveal still plays out in full.
+- **Idle is entered via a sprout**, not a pop: on `OnEnable` an un-liked plant in play mode runs `SproutIn()` (per-splat opacity fade `_GsplatOpacityMul` 0.002→1 at the authored full pose; a synchronous 1-frame `localScale` collapse hides the activation frame because the GsplatRenderer builds its PropertyBlock lazily in its own Update) and only shows its touch glow once grown. The reveal morph stays at `progress 0` throughout, so Idle is the usual half-grey dormant bud and the touch reveal still plays out in full.
 - **Flourished is explorable (gaze)**: post-flourish the context gesture calls `ExploreGazed()`, which raycasts from the centre-eye and `Replay(instance)`s the liked plant whose splat instance you're looking at — showing the poem + the **one** context bound to that instance (not the whole species' group). Liked plants keep their `info` object active (`LikeCommit`), so the labels can be recalled. The looked-at instance brightens as a hover cue (single instance, not the whole species).
 
 ## Flow
@@ -98,12 +98,13 @@ Touch trigger ─▶ PlantTouchTrigger.OnTriggerEnter
 Batch activation (start + UnlockNextBatch): plant GameObject SetActive(true)
   └─▶ Plant.OnEnable (play mode, un-liked, has selectionCollider)
        ├─ register footprint at FULL pose (GardenPlacer)  ← reserve before sprouting
-       └─ SproutIn(): random 0..sproutMaxStartDelay stagger
-                      → ResetAnimation() (morph stays at progress 0)
+       └─ SproutIn(): collapse localScale (1-frame hide — PB not built yet so opacity is a no-op on
+                        frame 0) + SetSplatOpacity(0.002); morph stays at progress 0
                       → disable selectionCollider for the duration
-                      → ease scale sproutStartScale→1 about GroundCenter (rises from ground)
-                        + lerp _GsplatOpacityMul 0.002→1
-                      → restore exact pose, re-enable collider, ShowGlow()
+                      → random 0..sproutMaxStartDelay stagger (re-assert opacity each frame, ≥1 frame)
+                      → snap localScale back to full (still ~0 opacity), then lerp _GsplatOpacityMul
+                        0.002→1 over sproutDuration: the splats FADE IN at full pose — NO size animation
+                      → re-enable collider, ShowGlow()
 
 ExperienceManager.Update (per frame, while plant selected + revealRadius > 0)
   └─ for each ungrown instance of m_selected:
@@ -157,14 +158,14 @@ Garden Flourish (after flourishAfterLikes likes):
        └─ FlourishRoutine:
             ├─ flourishing = bloomWholeRosterOnFlourish ? AllRosterPlants() : LikedPlants()
             └─ for each plant (batch order):
-                 ├─ if whole-roster: SetActive(true) (rise from ground) + plant.BloomForGarden(N)
+                 ├─ if whole-roster: SetActive(true) (sprout fade-in) + plant.BloomForGarden(N)
                  └─ else:            plant.Flourish(N)
                  wait flourishSpeciesStagger
                └─ onGardenFlourish.Invoke()
 
   • Experience.unity:    flourishAfterLikes=8, bloomWholeRosterOnFlourish=false → only liked plants bloom.
   • VerticalSlice.unity: flourishAfterLikes=1, bloomWholeRosterOnFlourish=true  → first like blooms the
-                         whole roster (batch 0 heroes first, then batch 1 rises). See VerticalSliceScene.md.
+                         whole roster (batch 0 heroes first, then batch 1 fades in). See VerticalSliceScene.md.
 ```
 
 ### Context content is per-plant (no global story)
@@ -290,8 +291,9 @@ gazing at a plant post-flourish, `Hide` when the gaze leaves**) — no per-plant
 - Tune `likedStaggerDelay` (default 0.35s; gap between instance reveals on like + flourish)
 - Tune `contextHeightOffset` (default 0.6m; clearance above each instance's collider top where its label floats in Above placement — cylinder placement uses it as height above the instance origin)
 - Tune `glowColor` / `glowRadius` (touch-glow disc shown while plant is idle/touchable)
-- **Grow-In (Sprout)**: `sproutDuration` (1.2s), `sproutStartScale` (0.05), `sproutMaxStartDelay`
-  (0.25s) — the rise-from-ground when this plant's batch unlocks. Liked plants and edit mode never sprout.
+- **Grow-In (Sprout)**: `sproutDuration` (1.2s), `sproutMaxStartDelay` (0.25s) — the per-splat
+  fade-in (reveal morph rest floor 0→startAt, no transform scale-up) when this plant's batch unlocks.
+  Liked plants and edit mode never sprout.
 
 ### PlantInfo (per plant's label object)
 
@@ -332,7 +334,7 @@ Verify bounds are set (not null) for all plants so scatter is non-degenerate.
 | `Plant.replayHoldDuration` | 12 | Post-flourish ask: seconds the poem text + grown context labels stay up to read before fading (no audio plays). |
 | `HandReadyCue.contextColor` | yellow | Colour of the post-flourish "you can ask for context" hand outline (separate from the green keep cue). |
 | `ExperienceManager.flourishAfterLikes` | 8 (1 in VerticalSlice) | Like threshold that triggers flourish. |
-| `ExperienceManager.bloomWholeRosterOnFlourish` | false (true in VerticalSlice) | OFF = flourish blooms only liked plants (staged garden). ON = flourish blooms the whole roster (every plant in the batches, activating not-yet-unlocked ones so they rise from the ground). Replaced the old `presentationMode`. |
+| `ExperienceManager.bloomWholeRosterOnFlourish` | false (true in VerticalSlice) | OFF = flourish blooms only liked plants (staged garden). ON = flourish blooms the whole roster (every plant in the batches, activating not-yet-unlocked ones so they sprout/fade in). Replaced the old `presentationMode`. |
 | `ExperienceManager.flourishInstancesPerSpecies` | 4 (2 in VerticalSlice) | Extra splat copies spawned per species during flourish (the bloom density). |
 | `ExperienceManager.flourishSpeciesStagger` | 1.0 | Seconds between each species' flourish reveal. |
 | `Plant.instanceFadeOutDuration` | 1.5 | Fade duration when `CompleteSpecies()` destroys ungrown instances (available but currently unused in normal flow). |
@@ -344,8 +346,7 @@ Verify bounds are set (not null) for all plants so scatter is non-degenerate.
 | `Plant.fruitOrbRadius` | 0.09 (0.10 on trees) | Canopy Fruit only: visual radius (m) of each glowing orb. |
 | `Plant.fruitColliderRadius` | 0.16 (0.18 on trees) | Canopy Fruit only: gaze-collider radius (m) per orb (larger than the visual so the gaze snaps on). |
 | `Plant.fruitColor` | warm amber | Canopy Fruit only: orb glow colour. |
-| `Plant.sproutDuration` | 1.2 | Seconds for a newly unlocked plant to grow up from the ground into its dormant state. |
-| `Plant.sproutStartScale` | 0.05 | Scale (relative to full) the plant starts the sprout at. |
+| `Plant.sproutDuration` | 1.2 | Seconds for a newly unlocked plant to fade in (per-splat) into its dormant state. |
 | `Plant.sproutMaxStartDelay` | 0.25 | Max random pre-sprout delay (s) so a batch staggers organically. |
 | `HandReadyCue.outlineWidth` | 0.003 | Thickness (m) of the green line (keep thin; independent of the gap). |
 | `HandReadyCue.outlineOffset` | 0.006 | Standoff gap (m) of passthrough between the real hand edge and the line. |
