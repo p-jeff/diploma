@@ -48,11 +48,27 @@ namespace Plants
         [SerializeField] private CanvasGroup touchMeGroup;
 
         [Header("Title card")]
-        [Tooltip("Title card text, e.g. \"An ode to curiosity\". Alpha-faded.")]
-        [SerializeField] private TMP_Text titleCard;
         [SerializeField, Min(0f)] private float titleFadeDuration = 1.2f;
         [Tooltip("Seconds the title card stays fully visible before fading out.")]
         [SerializeField, Min(0f)] private float titleHoldDuration = 2.5f;
+
+        [Header("3D title card (mesh + rose Gaussian)")]
+        [Tooltip("Parent of the 3D title (the AOTC mesh + the rose Gaussian). Toggled active around the " +
+                 "title beat and re-hidden on Replay. Auto-found by name \"3D_TitleCard\" under this " +
+                 "object if left unset.")]
+        [SerializeField] private GameObject titleCardRoot;
+        [Tooltip("The 3D title mesh (e.g. AOTC_v1). It has no Animator, so it is \"animated in\" by fading " +
+                 "its material's _BaseColor alpha 0->1 (the material is converted to transparent) and back " +
+                 "out on hide — no scale animation.")]
+        [SerializeField] private Transform titleMesh;
+        [Tooltip("Seconds for the title mesh to fade in (and to fade out).")]
+        [SerializeField, Min(0f)] private float titleMeshFadeDuration = 1.1f;
+        [Tooltip("Reveal animator on the rose Gaussian. After the mesh has grown in, this blooms the rose " +
+                 "(Play + opacity fade) before the sequence continues to the poem; reversed on hide. " +
+                 "Auto-found on the \"Gaussian\" child of the title card if left unset.")]
+        [SerializeField] private GsplatRevealAnimator titleRoseReveal;
+        [Tooltip("Pause after the mesh settles before the rose Gaussian begins its reveal.")]
+        [SerializeField, Min(0f)] private float gapMeshToRose = 0.35f;
 
         [Header("Poem")]
         [Tooltip("Wünschelrute poem text. Alpha-faded in alongside the VO.")]
@@ -101,8 +117,17 @@ namespace Plants
         static readonly int s_opacityMulId = Shader.PropertyToID("_GsplatOpacityMul");
         const float k_hiddenOpacity = 0.002f;
 
+        // URP/Lit main colour — the title mesh fades by lerping its alpha (material is transparent).
+        static readonly int s_baseColorId = Shader.PropertyToID("_BaseColor");
+
         private bool m_started;
         private bool m_done;
+
+        // The title mesh's renderers + base colour, cached in Awake so we can fade its _BaseColor alpha
+        // (the mesh's material is transparent) instead of scaling it.
+        private MeshRenderer[] m_titleMeshRenderers;
+        private Color m_titleMeshBaseColor = Color.white;
+        private MaterialPropertyBlock m_titleMeshMpb;
 
         // ── Lifecycle ──────────────────────────────────────────────────────────────
 
@@ -115,11 +140,18 @@ namespace Plants
             // Disabling this component via SpectatorModeController.componentsToDisable does NOT help:
             // Awake runs on every component of an active GameObject regardless of the enabled flag. So
             // skip the whole sequence here: hide the title visuals, leave the garden visible, opt out.
+
+            // Resolve the 3D title card (mesh + rose) and cache the mesh renderers + base colour so
+            // Show/HideTitleCard can fade its alpha. Done before the spectator early-out so the
+            // spectator branch can hide the title card too.
+            AutoFindTitleCard();
+            CacheTitleMeshRenderers();
+
             if (Plants.Net.SpectatorState.IsSpectator)
             {
                 if (titlePoppy != null) titlePoppy.SetActive(false); // also stops the IdleSplatCycler under it
+                if (titleCardRoot != null) titleCardRoot.SetActive(false);
                 SetGroupAlpha(touchMeGroup, 0f);
-                SetTextAlpha(titleCard, 0f);
                 SetTextAlpha(poemText, 0f);
                 enabled = false;
                 return;
@@ -149,8 +181,17 @@ namespace Plants
         /// </summary>
         private void ArmTitle()
         {
-            if (titleCard != null) SetTextAlpha(titleCard, 0f);
             if (poemText != null) SetTextAlpha(poemText, 0f);
+
+            // Park the 3D title card hidden (mesh faded fully transparent, rose parked at its hidden
+            // resting state + opacity floored) until the poppy is touched and ShowTitleCard runs.
+            if (titleCardRoot != null && !titleCardRoot.activeSelf) titleCardRoot.SetActive(true);
+            SetMeshAlpha(0f);
+            if (titleRoseReveal != null)
+            {
+                titleRoseReveal.ResetToStart();
+                ParkRenderersHidden(titleRoseReveal.transform);
+            }
 
             if (titlePoppy != null && !titlePoppy.activeSelf) titlePoppy.SetActive(true);
 
@@ -191,14 +232,9 @@ namespace Plants
 
             if (gapAfterPoppy > 0f) yield return new WaitForSeconds(gapAfterPoppy);
 
-            // 2. Title card.
-            if (titleCard != null)
-            {
-                SnapBillboard(titleCard);
-                yield return FadeText(titleCard, 0f, 1f, titleFadeDuration);
-                if (titleHoldDuration > 0f) yield return new WaitForSeconds(titleHoldDuration);
-                yield return FadeText(titleCard, 1f, 0f, titleFadeDuration);
-            }
+            // 2. 3D title card: grow the mesh in, then bloom the rose Gaussian, hold, then clear it.
+            yield return ShowTitleCard();
+            yield return HideTitleCard();
 
             if (gapTitleToPoem > 0f) yield return new WaitForSeconds(gapTitleToPoem);
 
@@ -229,6 +265,123 @@ namespace Plants
 
             m_done = true;
             onSequenceComplete.Invoke();
+        }
+
+        // ── 3D title card (mesh + rose Gaussian) ──────────────────────────────────────
+
+        /// <summary>Resolve the title card refs from the conventional child names if they were left
+        /// unset, so the prefab works even before the references are wired.</summary>
+        private void AutoFindTitleCard()
+        {
+            Transform card = titleCardRoot != null ? titleCardRoot.transform : transform.Find("3D_TitleCard");
+            if (card == null) return;
+            if (titleCardRoot == null) titleCardRoot = card.gameObject;
+            if (titleMesh == null)
+            {
+                var m = card.Find("AOTC_v1");
+                if (m != null) titleMesh = m;
+            }
+            if (titleRoseReveal == null)
+            {
+                var g = card.Find("Gaussian");
+                if (g != null) titleRoseReveal = g.GetComponent<GsplatRevealAnimator>();
+            }
+        }
+
+        /// <summary>Bring the 3D title in: fade the mesh's alpha 0->1, then bloom the rose Gaussian
+        /// (assemble + opacity fade-in), and hold.</summary>
+        private IEnumerator ShowTitleCard()
+        {
+            if (titleCardRoot != null && !titleCardRoot.activeSelf) titleCardRoot.SetActive(true);
+
+            // Mesh fades in (alpha 0 -> 1) — no scale animation.
+            yield return FadeMesh(0f, 1f, titleMeshFadeDuration);
+
+            if (gapMeshToRose > 0f) yield return new WaitForSeconds(gapMeshToRose);
+
+            // ...then reveal the rose Gaussian. Play() drives the geometric assemble while the opacity
+            // fade lifts it off the hidden floor (composing cleanly regardless of the animator's startAt).
+            // Wait for the bloom to finish so the rose is fully formed before we move on to the poem.
+            if (titleRoseReveal != null)
+            {
+                titleRoseReveal.Play();
+                StartCoroutine(FadeRenderers(titleRoseReveal.transform, k_hiddenOpacity, 1f, titleFadeDuration));
+                float waited = 0f, timeout = titleRoseReveal.duration + 1f;
+                while (!titleRoseReveal.IsDone && waited < timeout) { waited += Time.deltaTime; yield return null; }
+            }
+
+            if (titleHoldDuration > 0f) yield return new WaitForSeconds(titleHoldDuration);
+        }
+
+        /// <summary>Clear the 3D title before the poem: dissolve the rose and fade the mesh away.</summary>
+        private IEnumerator HideTitleCard()
+        {
+            Coroutine roseFade = null;
+            if (titleRoseReveal != null)
+            {
+                titleRoseReveal.PlayReverse();
+                roseFade = StartCoroutine(FadeRenderers(titleRoseReveal.transform, 1f, k_hiddenOpacity, titleFadeDuration));
+            }
+
+            yield return FadeMesh(1f, 0f, titleMeshFadeDuration);
+
+            if (roseFade != null) yield return roseFade;
+
+            if (titleCardRoot != null) titleCardRoot.SetActive(false);
+        }
+
+        /// <summary>Cache the title mesh's renderers + its material base colour, so the fade can drive
+        /// _BaseColor alpha without permanently editing the shared material.</summary>
+        private void CacheTitleMeshRenderers()
+        {
+            if (titleMesh == null) { m_titleMeshRenderers = null; return; }
+            m_titleMeshRenderers = titleMesh.GetComponentsInChildren<MeshRenderer>(true);
+            foreach (var r in m_titleMeshRenderers)
+            {
+                var mat = r != null ? r.sharedMaterial : null;
+                if (mat != null && mat.HasProperty(s_baseColorId)) { m_titleMeshBaseColor = mat.GetColor(s_baseColorId); break; }
+            }
+        }
+
+        /// <summary>Set the title mesh's _BaseColor alpha (its RGB is preserved) via a property block, so
+        /// the fade is per-instance and never touches the shared material asset.</summary>
+        private void SetMeshAlpha(float a)
+        {
+            if (m_titleMeshRenderers == null) return;
+            m_titleMeshMpb ??= new MaterialPropertyBlock();
+            Color c = m_titleMeshBaseColor; c.a = a;
+            foreach (var r in m_titleMeshRenderers)
+            {
+                if (r == null) continue;
+                r.GetPropertyBlock(m_titleMeshMpb);
+                m_titleMeshMpb.SetColor(s_baseColorId, c);
+                r.SetPropertyBlock(m_titleMeshMpb);
+            }
+        }
+
+        /// <summary>Fade the title mesh's alpha — the "animate in/out" for the 3D title (it has no
+        /// Animator; its material is transparent, so alpha IS the reveal). No scale animation.</summary>
+        private IEnumerator FadeMesh(float from, float to, float duration)
+        {
+            if (m_titleMeshRenderers == null || m_titleMeshRenderers.Length == 0) yield break;
+            float dur = Mathf.Max(duration, 0.0001f);
+            float elapsed = 0f;
+            SetMeshAlpha(from);
+            while (elapsed < dur)
+            {
+                elapsed += Time.deltaTime;
+                SetMeshAlpha(Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, elapsed / dur)));
+                yield return null;
+            }
+            SetMeshAlpha(to);
+        }
+
+        /// <summary>Snap every GsplatRenderer under <paramref name="root"/> to the hidden opacity floor,
+        /// so the rose doesn't flash before its reveal.</summary>
+        private void ParkRenderersHidden(Transform root)
+        {
+            if (root == null) return;
+            ApplyOpacity(root.GetComponentsInChildren<GsplatRenderer>(true), k_hiddenOpacity);
         }
 
         // ── Garden reveal ────────────────────────────────────────────────────────────
@@ -380,9 +533,9 @@ namespace Plants
             StopAllCoroutines();
             m_started = true;
             if (touchMeGroup != null) SetGroupAlpha(touchMeGroup, 0f);
-            if (titleCard != null) SetTextAlpha(titleCard, 0f);
             if (poemText != null) SetTextAlpha(poemText, 0f);
             if (titlePoppy != null) titlePoppy.SetActive(false);
+            if (titleCardRoot != null) titleCardRoot.SetActive(false);
             StartCoroutine(RevealGardenThenComplete());
         }
 
