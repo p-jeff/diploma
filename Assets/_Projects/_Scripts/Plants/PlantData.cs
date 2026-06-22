@@ -28,6 +28,12 @@ namespace Plants
                  "this radius)")]
         public float width = 0f;
 
+        [Tooltip("Per-column HEIGHT override in METRES. 0 (default) = height follows the texture's " +
+                 "aspect ratio so the image is never distorted. >0 = force this column to this exact " +
+                 "height regardless of the image aspect (the painting stretches vertically to fit). " +
+                 "Use this to make individual columns taller/shorter than their neighbours.")]
+        public float heightOverride = 0f;
+
         [Tooltip("Off (default) = the left/right edges fade softly into transparency, good for a " +
                  "backdrop blending into passthrough. On = keep hard edges and rely on the texture's " +
                  "own alpha — good for cutout sprites.")]
@@ -58,6 +64,11 @@ namespace Plants
         [Tooltip("Parallax diorama layers shown when this context instance is grown. " +
                  "If empty, falls back to the single environmentPainting above.")]
         public List<EnvironmentLayer> environmentLayers = new List<EnvironmentLayer>();
+
+        [Tooltip("Vertical offset (metres) for THIS context's whole diorama — raises (+) / lowers (−) " +
+                 "every layer at once so the art lines up with the ground. Overrides " +
+                 "EnvironmentMoment's default. Per-layer EnvironmentLayer.verticalOffset still adds on top.")]
+        public float environmentVerticalOffset = 0f;
     }
 
     [CreateAssetMenu(menuName = "Plants/Plant Data", fileName = "PlantData")]
@@ -76,6 +87,11 @@ namespace Plants
         [Tooltip("Parallax diorama layers shown when this species is selected. " +
                  "If empty, falls back to the single environmentPainting above.")]
         public List<EnvironmentLayer> environmentLayers = new List<EnvironmentLayer>();
+
+        [Tooltip("Vertical offset (metres) for this species' whole diorama — raises (+) / lowers (−) " +
+                 "every layer at once so the art lines up with the ground. Overrides " +
+                 "EnvironmentMoment's default. Per-layer EnvironmentLayer.verticalOffset still adds on top.")]
+        public float environmentVerticalOffset = 0f;
 
         [Header("Sprites")]
         [Tooltip("The single poem: text sprite + its background.")]

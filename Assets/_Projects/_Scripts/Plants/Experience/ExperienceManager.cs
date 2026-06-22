@@ -365,8 +365,9 @@ namespace Plants
                     Transform h = GetHead();
                     Vector3 center = h != null ? h.position : p.transform.position;
                     Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
-                    if (hasLayers) moment.Trigger(layers, center, forward, p.AudioSource);
-                    else moment.Trigger(p.Data.environmentPainting, center, forward, p.AudioSource);
+                    float vOff = p.Data.environmentVerticalOffset;
+                    if (hasLayers) moment.Trigger(layers, center, forward, p.AudioSource, vOff);
+                    else moment.Trigger(p.Data.environmentPainting, center, forward, p.AudioSource, vOff);
                 }
             }
 
@@ -424,8 +425,9 @@ namespace Plants
             Transform h = GetHead();
             Vector3 center = h != null ? h.position : go.transform.position;
             Vector3 forward = h != null ? Vector3.ProjectOnPlane(h.forward, Vector3.up).normalized : Vector3.forward;
-            if (hasLayers) moment.Trigger(layers, center, forward, plant.AudioSource);
-            else moment.Trigger(ctx.environmentPainting, center, forward, plant.AudioSource);
+            float vOff = ctx.environmentVerticalOffset;
+            if (hasLayers) moment.Trigger(layers, center, forward, plant.AudioSource, vOff);
+            else moment.Trigger(ctx.environmentPainting, center, forward, plant.AudioSource, vOff);
         }
 
         /// <summary>

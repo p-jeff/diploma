@@ -30,8 +30,13 @@ namespace Plants
         private Material m_material;
         private MaterialPropertyBlock m_propertyBlock;
         private bool m_initialized;
+        // The mesh WE generated — tracked so a regenerate frees the previous one (no leak when
+        // Configure is called repeatedly) without ever touching a mesh we didn't create.
+        private Mesh m_generatedMesh;
         // Texture aspect ratio (width/height); 0 = unknown → fall back to the serialized `height`.
         private float m_aspect;
+        // Per-column explicit height in metres; >0 overrides the aspect-derived height. 0 = follow aspect.
+        private float m_heightOverride;
         // When true, keep hard edges (rely on the texture's own alpha) instead of fading the sides.
         private bool m_hardEdges;
 
@@ -39,14 +44,18 @@ namespace Plants
         static readonly int s_baseMapId   = Shader.PropertyToID("_BaseMap");
 
         /// <summary>
-        /// Cylinder height derived from the texture's aspect ratio so the image is never distorted:
-        /// the arc's surface width (radius × arc) divided by the texture's width/height. Falls back
-        /// to the serialized <see cref="height"/> when no texture aspect is known yet.
+        /// Cylinder height in metres. An explicit per-column <see cref="m_heightOverride"/> (>0) wins
+        /// outright — set it to make a column taller/shorter than its neighbours (the painting stretches
+        /// to fit). Otherwise the height is derived from the texture's aspect ratio so the image is never
+        /// distorted: the arc's surface width (radius × arc) divided by the texture's width/height. Falls
+        /// back to the serialized <see cref="height"/> when no override and no texture aspect are known.
         /// </summary>
         private float EffectiveHeight
         {
             get
             {
+                if (m_heightOverride > 0.0001f)
+                    return m_heightOverride;
                 if (m_aspect > 0.0001f)
                 {
                     float arcLen = Mathf.Max(radius, 0.1f) * Mathf.Max(arcDeg, 1f) * Mathf.Deg2Rad;
@@ -55,6 +64,13 @@ namespace Plants
                 return Mathf.Max(height, 0.1f);
             }
         }
+
+        /// <summary>The column's current height in metres (override, aspect-derived, or fallback).
+        /// Used by floor/ceiling caps to auto-size to the top of the tallest column.</summary>
+        public float Height => EffectiveHeight;
+
+        /// <summary>This column's radius in metres. Caps read it to auto-size their disc.</summary>
+        public float Radius => radius;
 
         void Awake()
         {
@@ -84,14 +100,18 @@ namespace Plants
         /// nearest object — hence the pinned queue; keep it below the gsplat plants' queue (3000) so
         /// the diorama renders behind them. Zero radius/width fall back to sane defaults (3.5 m, a
         /// full 180° wrap) so an uninitialised inspector list element can't collapse the layer.
+        /// <paramref name="heightOverride"/> (>0) forces an exact column height in metres (the image
+        /// stretches to fit) so individual columns can be taller/shorter than their neighbours; 0 keeps
+        /// the aspect-correct height.
         /// </summary>
-        public void Configure(Texture2D tex, float layerRadius, float layerWidth, bool hardEdges, int renderQueue)
+        public void Configure(Texture2D tex, float layerRadius, float layerWidth, float heightOverride, bool hardEdges, int renderQueue)
         {
             EnsureInitialized();
             radius = layerRadius > 0f ? layerRadius : 3.5f;
             // Physical width (m) → arc angle at this radius. 0 = wrap a full 180°.
             float w = layerWidth > 0f ? layerWidth : Mathf.PI * radius;
             arcDeg = Mathf.Clamp(w / radius * Mathf.Rad2Deg, 1f, 360f);
+            m_heightOverride = heightOverride;
             m_hardEdges = hardEdges;
             m_aspect = (tex != null && tex.height > 0) ? (float)tex.width / tex.height : 0f;
             GenerateMesh();
@@ -191,6 +211,14 @@ namespace Plants
 
             if (m_meshFilter != null)
                 m_meshFilter.sharedMesh = mesh;
+
+            // Free the previously generated mesh (if any) now that the new one is assigned.
+            if (m_generatedMesh != null)
+            {
+                if (Application.isPlaying) Destroy(m_generatedMesh);
+                else DestroyImmediate(m_generatedMesh);
+            }
+            m_generatedMesh = mesh;
         }
 
         private void CreateMaterial()
@@ -270,6 +298,13 @@ namespace Plants
                     Destroy(m_material);
                 else
                     DestroyImmediate(m_material);
+            }
+            if (m_generatedMesh != null)
+            {
+                if (Application.isPlaying)
+                    Destroy(m_generatedMesh);
+                else
+                    DestroyImmediate(m_generatedMesh);
             }
         }
 

@@ -1,9 +1,9 @@
 # 180° Environment Cylinder — System Overview
 
-**Status:** Implemented (2026-06-12); parallax multi-layer added (2026-06-19, not yet headset-verified)
+**Status:** Implemented (2026-06-12); parallax multi-layer added (2026-06-19); per-column height override + live tuner + per-plant vertical offset added (2026-06-22, not yet headset-verified). NOTE: floor/ceiling colour caps were prototyped then **removed 2026-06-22** (unused).
 **Source:** `IDEAS.md → Plan_180Environments.md`
-**Scripts:** `EnvironmentCylinder.cs`, `EnvironmentMoment.cs`
-**Data fields:** `PlantData.environmentLayers` (parallax stack, preferred) + `PlantData.environmentPainting` (legacy single, fallback); both also exist per-context on `PlantLabelContent`. Set on `.asset` files.
+**Scripts:** `EnvironmentCylinder.cs`, `EnvironmentMoment.cs`, `EnvironmentTuner.cs` (+ `Editor/EnvironmentTunerEditor.cs`)
+**Data fields:** `PlantData.environmentLayers` (parallax stack, preferred) + `PlantData.environmentPainting` (legacy single, fallback) + `PlantData.environmentVerticalOffset` (per-plant diorama height); all three also exist per-context on `PlantLabelContent`. Set on `.asset` files.
 
 ---
 
@@ -11,10 +11,12 @@
 
 When a plant is **selected** (touched), if its `PlantData` has an environment defined, a parallax stack of half-cylinders fades in around the user's head. Each `EnvironmentLayer` is its own painting/sprite wrapped on a cylinder at its own `radius`, so head movement reveals depth. The stack is centred at the user's head height and faces their horizontal gaze direction.
 
-### Parallax layers
-- **Data:** `PlantData.environmentLayers` is a `List<EnvironmentLayer>`; each layer = `{ texture, radius, width, hardEdges, verticalOffset }`.
-- **Per-layer height nudge:** each layer's `verticalOffset` (metres) is added on top of `EnvironmentMoment.verticalOffset` (final Y = global + per-layer). Use it to raise/lower one band so layers overlap on the Y axis instead of all sitting flush on the floor.
-- **Size in metres → radius is distance:** `width` is the painting's real-world width in metres, wrapped onto the cylinder at `radius` (arc angle = `width / radius`). Height is **derived from the texture's aspect ratio** (`width / aspect`), so the image is never distorted. Because the size is physical, increasing `radius` makes a same-`width` painting subtend a smaller angle — i.e. **radius reads as true distance** (farther = smaller on screen). There is deliberately **no** height knob — that's what makes distortion impossible. All layers keep their bottom edge on the floor (plus `verticalOffset`).
+### Parallax layers (a.k.a. "columns")
+- **Data:** `PlantData.environmentLayers` is a `List<EnvironmentLayer>`; each layer = `{ texture, radius, width, heightOverride, hardEdges, verticalOffset }`.
+- **Per-layer height nudge:** each layer's `verticalOffset` (metres) is added on top of the moment's vertical offset (final Y = moment offset + per-layer). Use it to raise/lower one band so layers overlap on the Y axis instead of all sitting flush on the floor.
+- **Per-plant vertical offset (`environmentVerticalOffset`, 2026-06-22):** the whole-diorama vertical offset now lives **on `PlantData`** (and per-context on `PlantLabelContent`), not as a single value on the Experience Manager. `ExperienceManager` passes it into `EnvironmentMoment.Trigger(..., momentVerticalOffset)`; the moment's serialized `verticalOffset` is now only a **fallback default** when a caller passes none. This lets each plant/context sit its art on the ground independently.
+- **Size in metres → radius is distance:** `width` is the painting's real-world width in metres, wrapped onto the cylinder at `radius` (arc angle = `width / radius`). Because the size is physical, increasing `radius` makes a same-`width` painting subtend a smaller angle — i.e. **radius reads as true distance** (farther = smaller on screen). All layers keep their bottom edge on the floor (plus `verticalOffset`).
+- **Per-column height (`heightOverride`, added 2026-06-22):** `0` (default) keeps the original behaviour — height is **derived from the texture's aspect ratio** (`width / aspect`) so the image is never distorted. Set it `> 0` to force that one column to an exact height in metres **independently of its width** (the painting stretches vertically to fit). This is what lets individual columns be taller/shorter than their neighbours. Threaded through `EnvironmentCylinder.Configure(... heightOverride ...)` and `EnvironmentCylinder.EffectiveHeight` (override wins, else aspect, else the serialized fallback).
 - **Inspector trap guard:** Unity zero-fills fields on inspector-added list elements (it skips C# field initializers). So `Configure` treats `radius <= 0` as 3.5 m and `width <= 0` as a full 180° wrap at that radius, and `hardEdges` defaults to `false` (= soft fade), meaning a freshly-added, untouched layer still renders sensibly.
 - **Authoring:** order doesn't matter — `EnvironmentMoment` auto-sorts far→near (largest `radius` first) and pins each layer's `material.renderQueue = baseRenderQueue + order` (default `baseRenderQueue = 2900`) so concentric transparent cylinders blend deterministically. This is **below the gsplat plants' queue (Transparent/3000)**, so the diorama renders *behind* the plants and labels. The pin is essential: every cylinder is centred on the head, so its bounds centre is ~at the camera — URP's per-object transparent sort would treat it as the nearest object and draw it on top of everything. Raise `baseRenderQueue` above 3000 only if you want a layer in front of the plants.
 - **Edges:** `hardEdges = false` (default) softly fades the left/right edges into transparency — good for a backdrop blending into passthrough. `hardEdges = true` keeps the edges and relies on the texture's own alpha — good for cutout sprites.
@@ -55,7 +57,8 @@ Procedural mesh + material. Attached to a child GameObject under EnvironmentMome
 - `SetTexture(Texture2D tex)` — assign the painting
 - `SetAlpha(float a)` — drive opacity (0–1) via MPB
 - `PositionAt(Vector3 center, Vector3 forward)` — place with the bottom edge on the floor, face gaze direction
-- `Configure(Texture2D tex, float radius, float width, bool hardEdges, int renderQueue)` — set this cylinder up as one parallax layer: derives the arc angle from `width / radius` and regenerates the mesh (height auto-derived from the texture aspect), sets hard/soft edges, and pins `material.renderQueue` to the passed value (default base 2900, below the gsplat queue)
+- `Configure(Texture2D tex, float radius, float width, float heightOverride, bool hardEdges, int renderQueue)` — set this cylinder up as one parallax layer: derives the arc angle from `width / radius` and regenerates the mesh (height = `heightOverride` if `> 0`, else auto-derived from the texture aspect), sets hard/soft edges, and pins `material.renderQueue` to the passed value (default base 2900, below the gsplat queue)
+- `Height` / `Radius` (getters) — current column height (override/aspect/fallback) and radius (public API)
 
 ### `EnvironmentMoment.cs`
 Orchestrator. Sits on the same GameObject as `ExperienceManager` (auto-added in `Awake` if missing). **Now also serialized on the `Experience Manager` GO in `VerticalSlice.unity`** so its tuning knobs (esp. `verticalOffset`) are editable in the Inspector — `ExperienceManager.Awake` finds the existing one instead of adding a duplicate.
@@ -70,12 +73,25 @@ Orchestrator. Sits on the same GameObject as `ExperienceManager` (auto-added in 
 - `defaultRadius` (3.5m, used by the single-texture legacy path)
 
 **Placement:**
-- `verticalOffset` (0m) — raises (+) / lowers (−) **every** layer at once. Layers default to bottom-on-floor; use this to line the visible art up with the ground when a texture has empty space at its bottom.
+- `verticalOffset` (0m) — **fallback default only.** The per-moment offset normally comes from the plant (`PlantData.environmentVerticalOffset` / `PlantLabelContent.environmentVerticalOffset`), passed into `Trigger`. This serialized value is used only when a caller triggers without one. Raises (+) / lowers (−) every layer at once; layers default to bottom-on-floor.
 
 **Key methods:**
-- `Trigger(IReadOnlyList<EnvironmentLayer>, center, forward, AudioSource)` — start a parallax moment (skips null-texture layers; auto-sorts far→near)
-- `Trigger(Texture2D, center, forward, AudioSource)` — legacy single-painting moment (wrapped as one layer at `defaultRadius`)
+- `Trigger(IReadOnlyList<EnvironmentLayer>, center, forward, AudioSource, float? momentVerticalOffset = null)` — start a parallax moment (skips null-texture layers; auto-sorts far→near). `momentVerticalOffset` (per-plant) overrides the serialized default; null = use it.
+- `Trigger(Texture2D, center, forward, AudioSource, float? momentVerticalOffset = null)` — legacy single-painting moment (wrapped as one layer at `defaultRadius`)
 - `Interrupt()` — set interrupt flag; current coroutine checks it and bails out
+
+---
+
+## Live Tuner — `EnvironmentTuner.cs` (added 2026-06-22)
+
+A **decoupled** in-scene harness for dialling in the look with real plants around you, then copying the numbers into the data. It does **not** write back into any asset — it only previews and exports.
+
+- **Setup:** `Tools ▸ Environment ▸ Create Live Tuner` drops an `Environment Tuner` GameObject (with two starter columns) into the open scene. Or add the `EnvironmentTuner` component to any GameObject.
+- **Live preview:** `[ExecuteAlways]`. With `livePreview` ticked it builds a **reused** preview rig — one `EnvironmentCylinder` per `columns[]` entry — anchored at your head. Preview children are tagged `HideFlags.DontSave`, so they **never get saved into the scene**. Meshes/materials are only re-`Configure`d when the Inspector changes (`OnValidate` sets a dirty flag); the pool only grows (surplus columns are deactivated, never destroyed) and updates allocate nothing per frame.
+  - **Anchoring:** by default the rig is placed **once** (at the head pose at build / when you change a value) so it stays put while you look around — `followHead` is OFF. Press **Rebuild preview** (or change a value) to re-anchor. Tick `followHead` for the old re-centre-every-frame behaviour.
+  - **⚠️ Play-mode crash lesson (fixed 2026-06-22):** the first version tore the rig down and rebuilt it on every change with a `while (transform.Find(name) != null) Destroy(go)` sweep. In **play mode `Object.Destroy` is deferred**, so `Find` kept returning the not-yet-destroyed object → infinite loop → Unity hangs. The rig is now reuse-based; the only `while`-destroy loop runs in **edit mode with `DestroyImmediate`** (synchronous) plus a guard cap. Never loop on `Find` + `Destroy` in play mode.
+- **What you tune:** per-column `texture / radius / width / heightOverride / verticalOffset / hardEdges`, plus `verticalOffset` (→ `PlantData.environmentVerticalOffset`) / `baseRenderQueue`. `previewAlpha` sets how opaque the preview draws.
+- **Export:** the Inspector has **"Copy values to clipboard"** / **"Log values"** buttons (also `[ContextMenu]` items). They emit a grouped report — per-column values to paste into `PlantData.environmentLayers[i]`, and the vertical offset to paste into `PlantData.environmentVerticalOffset`.
 
 ---
 
@@ -112,5 +128,5 @@ Orchestrator. Sits on the same GameObject as `ExperienceManager` (auto-added in 
 
 ## Dependencies
 
-- **`Custom/URP/EnvironmentCylinder` shader** (`EnvironmentCylinder.shader`) — transparent, multiplies texture α × vertex α × `_BaseColor.a`
+- **`Custom/URP/EnvironmentCylinder` shader** (`EnvironmentCylinder.shader`) — transparent, multiplies texture α × vertex α × `_BaseColor.a`.
 - **`Gsplat`** — cylinder is independent; no gsplat dependencies

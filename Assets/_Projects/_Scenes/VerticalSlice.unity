@@ -4911,7 +4911,7 @@ MonoBehaviour:
   defaultHoldSeconds: 12
   audioTailSeconds: 1
   defaultRadius: 3.5
-  verticalOffset: -5
+  verticalOffset: -8.1
   baseRenderQueue: 2900
 --- !u!82 &1016392813 stripped
 AudioSource:
@@ -6682,6 +6682,10 @@ PrefabInstance:
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 1002078369}
+    - target: {fileID: 6828847771282741544, guid: f56189c2288b2eb41a4795d1ef4b66cc, type: 3}
+      propertyPath: contextHeightOffset
+      value: 0.25
+      objectReference: {fileID: 0}
     - target: {fileID: 7007755321486349860, guid: f56189c2288b2eb41a4795d1ef4b66cc, type: 3}
       propertyPath: bounds
       value: 

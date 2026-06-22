@@ -16,51 +16,62 @@ MonoBehaviour:
   audioClip: {fileID: 8300000, guid: 5e37d7fedac5bd94fa18dd4b8d0633eb, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers:
-  - texture: {fileID: 2800000, guid: 05410022ccdbfd044b146bf19230148a, type: 3}
-    radius: 14
-    width: 38
-    hardEdges: 1
-    verticalOffset: -0.5
-  - texture: {fileID: 2800000, guid: 2540f97fc9797c64ab88a3a210ab21eb, type: 3}
-    radius: 16
-    width: 38
-    hardEdges: 1
-    verticalOffset: -0.5
   - texture: {fileID: 2800000, guid: af82afe409e89c449a59b78987c8f648, type: 3}
-    radius: 18
-    width: 38
+    radius: 38
+    width: 103
+    heightOverride: 0
     hardEdges: 1
-    verticalOffset: -0.5
+    verticalOffset: 0
+  - texture: {fileID: 2800000, guid: 2540f97fc9797c64ab88a3a210ab21eb, type: 3}
+    radius: 28
+    width: 74
+    heightOverride: 0
+    hardEdges: 1
+    verticalOffset: 0.76
+  - texture: {fileID: 2800000, guid: 05410022ccdbfd044b146bf19230148a, type: 3}
+    radius: 12
+    width: 30
+    heightOverride: 0
+    hardEdges: 1
+    verticalOffset: 10.8
+  environmentVerticalOffset: -16.7
   poem:
     text: "Youth came to me, \r\nA lamentation of musk that  \r\nCould not be purchased
       even at a high price, \r\nAnd the scent of lavender \r\nIn the valleys of a
       meadow, \r\nAfter the pouring rain \n\nunnamed, Ubaid ibn al Abras "
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0
   contextInfos:
   - text: Lavender doesn't lose its scent. Even when cut or dried, the oil holds
       for years.
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0
   - text: Lavender oil is also used in many aromatheraphies, especially to calm nerves,
       and in medical anxiety Treatment
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0
   - text: already in acient times it was know that lavender wine helpts to ease "pains
       of the side and the nerves, and extreme cold." (De Matedia medica - Dioscorides)
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0
   - text: the Name stems fron Latin "lavare" - washing. Romains laid it in Baths,
       beds and linen.
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0
   - text: To "lay up in lavender" is to fold a thing away wrapped in the herb, safe
       from moths and time.
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0
   - text: "Lavender - Alfred Noyes (excerpt)\nLavender, lavender, \nFrom where the
       bee hums, \nTo the loud roar of London,\nWith purple dreams he comes, \nFrom
       ragged lanes of wild-Flowers\nTo ragged London slums, \nWith a basket full
       of lavender \nAnd purple dreams he comes."
     environmentPainting: {fileID: 0}
     environmentLayers: []
+    environmentVerticalOffset: 0

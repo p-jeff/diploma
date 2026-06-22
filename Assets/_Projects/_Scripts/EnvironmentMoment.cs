@@ -31,9 +31,11 @@ namespace Plants
         [SerializeField] private float defaultRadius = 3.5f;
 
         [Header("Placement")]
-        [Tooltip("Raise (+) or lower (−) the whole diorama in metres. Layers normally sit with their " +
-                 "bottom edge on the floor; nudge this to line the visible art up with the ground when " +
-                 "the texture has empty space at its bottom. Applies to every layer at once.")]
+        [Tooltip("DEFAULT vertical offset in metres, used only as a fallback when a moment is triggered " +
+                 "without a per-plant value. Each plant now carries its own " +
+                 "PlantData.environmentVerticalOffset (and per-context PlantLabelContent." +
+                 "environmentVerticalOffset), which overrides this. Raise (+) / lower (−) the whole " +
+                 "diorama so the visible art lines up with the ground.")]
         [SerializeField] private float verticalOffset = 0f;
 
         [Header("Rendering")]
@@ -50,6 +52,9 @@ namespace Plants
         private Coroutine m_momentRoutine;
         private bool m_interrupted;
         private int m_activeCount;
+        // Vertical offset for the CURRENT moment: the per-plant value passed to Trigger, or the
+        // serialized `verticalOffset` default when the caller doesn't specify one.
+        private float m_momentVerticalOffset;
 
         /// <summary>Cylinder is currently showing a moment.</summary>
         public bool IsActive => m_momentRoutine != null;
@@ -81,9 +86,10 @@ namespace Plants
 
         /// <summary>
         /// Trigger a single-painting environment moment (legacy path). Wraps the texture in a
-        /// one-layer diorama at <see cref="defaultRadius"/>.
+        /// one-layer diorama at <see cref="defaultRadius"/>. <paramref name="momentVerticalOffset"/>
+        /// (per-plant) overrides the serialized default; null = use the default.
         /// </summary>
-        public void Trigger(Texture2D texture, Vector3 worldCenter, Vector3 forwardDir, AudioSource audioSource = null)
+        public void Trigger(Texture2D texture, Vector3 worldCenter, Vector3 forwardDir, AudioSource audioSource = null, float? momentVerticalOffset = null)
         {
             if (texture == null)
             {
@@ -94,25 +100,26 @@ namespace Plants
             m_sorted.Clear();
             // width = 0 → the cylinder wraps a full 180° at defaultRadius (legacy look).
             m_sorted.Add(new EnvironmentLayer { texture = texture, radius = defaultRadius });
-            TriggerLayers(m_sorted, worldCenter, forwardDir, audioSource);
+            TriggerLayers(m_sorted, worldCenter, forwardDir, audioSource, momentVerticalOffset);
         }
 
         /// <summary>
         /// Trigger a parallax environment moment from a list of layers. Layers with a null texture
         /// are skipped; the rest are sorted far→near (largest radius first) so transparent blending
-        /// is deterministic regardless of author order.
+        /// is deterministic regardless of author order. <paramref name="momentVerticalOffset"/>
+        /// (per-plant) overrides the serialized default; null = use the default.
         /// </summary>
-        public void Trigger(IReadOnlyList<EnvironmentLayer> layers, Vector3 worldCenter, Vector3 forwardDir, AudioSource audioSource = null)
+        public void Trigger(IReadOnlyList<EnvironmentLayer> layers, Vector3 worldCenter, Vector3 forwardDir, AudioSource audioSource = null, float? momentVerticalOffset = null)
         {
             if (layers == null || layers.Count == 0)
             {
                 Debug.LogWarning("[EnvironmentMoment] layer list is empty, cannot trigger!", this);
                 return;
             }
-            TriggerLayers(layers, worldCenter, forwardDir, audioSource);
+            TriggerLayers(layers, worldCenter, forwardDir, audioSource, momentVerticalOffset);
         }
 
-        private void TriggerLayers(IReadOnlyList<EnvironmentLayer> layers, Vector3 worldCenter, Vector3 forwardDir, AudioSource audioSource)
+        private void TriggerLayers(IReadOnlyList<EnvironmentLayer> layers, Vector3 worldCenter, Vector3 forwardDir, AudioSource audioSource, float? momentVerticalOffset)
         {
             // Collect valid layers into the scratch buffer and sort far→near.
             // (If the caller passed m_sorted itself, the contents are already what we want.)
@@ -135,6 +142,9 @@ namespace Plants
 
             Debug.Log("[EnvironmentMoment] Trigger — " + m_sorted.Count + " layer(s), center="
                       + worldCenter + " forward=" + forwardDir, this);
+
+            // Per-plant vertical offset (or the serialized default) for this moment.
+            m_momentVerticalOffset = momentVerticalOffset ?? verticalOffset;
 
             // Interrupt any running moment and snap everything hidden so the new one starts fresh.
             if (m_momentRoutine != null)
@@ -167,8 +177,9 @@ namespace Plants
                 var cyl = m_pool[i];
                 cyl.gameObject.SetActive(true);
                 int q = (baseRenderQueue > 0 ? baseRenderQueue : 2900) + i;
-                cyl.Configure(m_sorted[i].texture, m_sorted[i].radius, m_sorted[i].width, m_sorted[i].hardEdges, q);
-                cyl.PositionAt(center, forward, verticalOffset + m_sorted[i].verticalOffset);
+                cyl.Configure(m_sorted[i].texture, m_sorted[i].radius, m_sorted[i].width,
+                              m_sorted[i].heightOverride, m_sorted[i].hardEdges, q);
+                cyl.PositionAt(center, forward, m_momentVerticalOffset + m_sorted[i].verticalOffset);
                 cyl.SetAlpha(0f);
             }
             for (int i = m_sorted.Count; i < m_pool.Count; i++)
