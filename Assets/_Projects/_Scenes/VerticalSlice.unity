@@ -3097,7 +3097,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3505633492554178441, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: progress
-      value: 0
+      value: 0.000411375
       objectReference: {fileID: 0}
     - target: {fileID: 3505633492554178441, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: bandFraction
@@ -3226,6 +3226,14 @@ PrefabInstance:
     - target: {fileID: 8322552382383294357, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: Brightness
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8322552382383294357, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
+      propertyPath: GsplatAsset
+      value: 
+      objectReference: {fileID: 4599839170941234424, guid: 1dfafdb3c0690fb4ebef401a97b2ca50, type: 3}
+    - target: {fileID: 8322552382383294357, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
+      propertyPath: m_assetGuid
+      value: 1dfafdb3c0690fb4ebef401a97b2ca50
       objectReference: {fileID: 0}
     - target: {fileID: 8322552382383294357, guid: 067ccc6f6693c534ba039cc43f83db97, type: 3}
       propertyPath: GammaToLinear

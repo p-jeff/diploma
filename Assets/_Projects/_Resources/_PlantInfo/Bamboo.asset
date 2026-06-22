@@ -32,7 +32,7 @@ MonoBehaviour:
     environmentLayers: []
     environmentVerticalOffset: 0
   contextInfos:
-  - text: 'In Chinese literati tradition, bamboo is held as a model of a gentleman.
+  - text: 'In Chinese literari tradition, bamboo is held as a model of a gentleman.
       The stem grows straight and does not break under pressure, signaling tenacity. '
     contextImage: {fileID: 0}
     imageWidth: 0.5
