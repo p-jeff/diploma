@@ -15,28 +15,51 @@ MonoBehaviour:
   displayName: Rhododendron
   audioClip: {fileID: 8300000, guid: b06c161177653f64ab049d58b9a61b06, type: 3}
   environmentPainting: {fileID: 0}
+  environmentLayers:
+  - texture: {fileID: 2800000, guid: c8a23be656c96374c8275a8b97967300, type: 3}
+    radius: 14
+    width: 38
+    hardEdges: 1
+    verticalOffset: -0.5
+  - texture: {fileID: 2800000, guid: 455e4530b04edaf4e9a3857a6246acaf, type: 3}
+    radius: 16
+    width: 38
+    hardEdges: 1
+    verticalOffset: -0.5
+  - texture: {fileID: 2800000, guid: 1de67e3efcbc98d4fab3efc98c185a7b, type: 3}
+    radius: 18
+    width: 38
+    hardEdges: 1
+    verticalOffset: -0.5
   poem:
     text: "Cuckoo Flower\n\nThe cuckoo and the cuckoo flower,\nThe one as sad as
       the other is splendid\nIt must be the blood from the birds mouth\nWhich has
       dripped to become the flower on the branches.\n\n\u2014 Cheng Yanxiong"
     environmentPainting: {fileID: 0}
+    environmentLayers: []
   contextInfos:
   - text: "In Chinese the cuckoo and the rhododendron share one name, d\xF9ju\u0101n
       (\u675C\u9E43), tracing back to Duyu, an early and half-mythical emperor of
       Shu."
     environmentPainting: {fileID: 0}
+    environmentLayers: []
   - text: On his death he became the cuckoo, whose cry each spring calls the farmers
       back to their fields. It is said the bird sings until its mouth bleeds.
     environmentPainting: {fileID: 0}
+    environmentLayers: []
   - text: This blood stains the flower petals, giving them their deep reds and purples.
     environmentPainting: {fileID: 0}
+    environmentLayers: []
   - text: Cuckoos sing tirelessly. Compared to other birds who have a specific song,
       or sing at certain times of day, cuckoos never stop, going all day and night.
     environmentPainting: {fileID: 0}
+    environmentLayers: []
   - text: Honey produced by bees turns into so called "mad honey", it's psychoactive
       due to the grayanotixins found in the flowers nectar.
     environmentPainting: {fileID: 0}
+    environmentLayers: []
   - text: Rhododendron honey is used by the Gurung People of the Himalayas as Medicine
       and a narcotic, but is known all over Eurasia, famous for incapacitating Xenophon's
       Greek army
     environmentPainting: {fileID: 0}
+    environmentLayers: []

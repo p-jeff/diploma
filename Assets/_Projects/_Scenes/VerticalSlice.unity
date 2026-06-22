@@ -4911,7 +4911,7 @@ MonoBehaviour:
   defaultHoldSeconds: 12
   audioTailSeconds: 1
   defaultRadius: 3.5
-  verticalOffset: -10
+  verticalOffset: -5
   baseRenderQueue: 2900
 --- !u!82 &1016392813 stripped
 AudioSource:
