@@ -57,6 +57,21 @@ namespace Plants
         [TextArea(2, 8)]
         public string text;
 
+        [Header("Image (alternative to text)")]
+        [Tooltip("Optional image shown INSTEAD of the text, with softly feathered edges. When set, " +
+                 "this block renders the sprite (not the text) — e.g. a hand-drawn context card. " +
+                 "Use a standalone, Full-Rect (non-tight, non-atlased) sprite so the feather maps " +
+                 "evenly to the image edges. Leave empty for a normal text block.")]
+        public Sprite contextImage;
+
+        [Tooltip("Displayed width of the context image in METRES. Height follows the sprite's aspect " +
+                 "ratio so it never distorts. (Only used when Context Image is set.)")]
+        public float imageWidth = 0.5f;
+
+        [Tooltip("Edge feather for the context image, in UV units (0 = hard edges, ~0.12 = soft). " +
+                 "−1 = use the PlantLabel's default feather. (Only used when Context Image is set.)")]
+        public float imageFeather = -1f;
+
         [Tooltip("Legacy single 180° painting for this context. Superseded by environmentLayers " +
                  "below — used only as a fallback when that list is empty.")]
         public Texture2D environmentPainting;

@@ -15,6 +15,8 @@ MonoBehaviour:
   displayName: Bamboo
   audioClip: {fileID: 8300000, guid: 288a39f1324be4843988867d2449a118, type: 3}
   environmentPainting: {fileID: 0}
+  environmentLayers: []
+  environmentVerticalOffset: 0
   poem:
     text: "In Wuqian, Visit a Buddhist Monk's Green Bamboo Pavillion\n\nOne may do
       without meat in one\u2019s diet, \nBut one cannot live without bamboo. \nWithout
@@ -22,21 +24,29 @@ MonoBehaviour:
       regain his weight, \nBut a vulgar man cannot be cured. \nOthers may laugh at
       these words, \nFinding them both lofty and foolish. \nIf, in the presence of
       this gentleman, one still feasts heartily, \nHow could there ever be a Yangzhou
-      Crane in this world?\n\n\u2014 Su Dongpo"
+      Crane in this world?\n\nSu Dongpo"
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   contextInfos:
-  - text: '## Bamboo, The Gentleman
-
-
-      In Chinese literati tradition, bamboo
-      is held as a model of a gentleman: the stem grows straight and does not break
-      under pressure, yet the leaves hang loose, almost bowing. It does not bloom,
-      symbolising modesty, and its core is hollow, like it''s kepping an open heart.'
+  - text: 'In Chinese literati tradition, bamboo is held as a model of a gentleman.
+      The stem grows straight and does not break under pressure, signaling tenacity. '
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
-  - text: "## The Shijing (Book of Poetry)\n\u77BB\u5F7C\u6DC7\u5967\u3001\u7DA0\u7AF9\u7317\u7317\u3002\n\u6709\u532A\u541B\u5B50\u3001\u5982\u5207\u5982\u78CB\u3001\u5982\u7422\u5982\u78E8\u3002\n\u745F\u516E\u50E9\u516E\u3001\u8D6B\u516E\u54BA\u516E\u3002\n\u6709\u532A\u541B\u5B50\u3001\u7D42\u4E0D\u53EF\u8AFC\u516E\u3002\n\nLook
-      at those recesses in the banks of the Qi,\nWith their green bamboos, so fresh
-      and luxuriant!\nThere is our elegant and accomplished prince, -\nAs from the
-      knife and the file,\nAs from the chisel and the polisher!\nHow grave is he
-      and dignified!\nHow commanding and distinguished!\nOur elegant and accomplished
-      prince, -\nNever can he be forgotten!"
+    environmentLayers: []
+    environmentVerticalOffset: 0
+  - text: 'The Leaves droop, almost like their bowing and it does not bloom, symbolising
+      modesty. And its core is hollow, like it''s kepping an open heart.
+
+'
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0

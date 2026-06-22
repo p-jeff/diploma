@@ -15,22 +15,59 @@ MonoBehaviour:
   displayName: Pear Tree
   audioClip: {fileID: 8300000, guid: 297d7e4389b568d499a59c38218d9179, type: 3}
   environmentPainting: {fileID: 0}
+  environmentLayers: []
+  environmentVerticalOffset: 0
   poem:
-    text: "Birnenschmaus\n\nSo come, dear sunshine,\nMake our pears grow well!\nAnd
-      when they have turned golden,\nThen come and blow, dear wind!\nCome, wind,
-      and rustle every branch\nAnd invite us all to be your guests!\nWe will hurry
-      out of the house\nAnd hold a pear feast.\n\n\u2014 August Heinrich Hoffmann
-      von Fallersleben"
+    text: 'Birnenschmaus
+
+
+      So come, dear sunshine,
+
+      Make our pears grow
+      well!
+
+      And when they have turned golden,
+
+      Then come and blow, dear
+      wind!
+
+      Come, wind, and rustle every branch
+
+      And invite us all to
+      be your guests!
+
+      We will hurry out of the house
+
+      And hold a pear
+      feast.
+
+
+      August Heinrich Hoffmann von Fallersleben'
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   contextInfos:
   - text: "Pear, French Cuisine\nLouis XIV named the pear a royal fruit, and his
       obsession was sincere. It was his greatest fruit love after figs \u2014 his
       gardener La Quintinie raised fifty varieties for the royal table, and Louis
       sent his favourite, the Bon Chr\xE9tien, as gifts to other heads of state.
       It entered French haute cuisine and has never left."
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: "Les Adeuineax amoreux\nTrois moines passoient\nTrois poires pendoient\nChascum
       en prist une\nEt s\u2019en demouras deux.\nL\u2019Explication: L\u2019un des
       moines avoit nom Chascun.\n\nThree monks were passing\nThree pears were hanging\nEach
       took one\nAnd two remained.\n\nExplanation: One of the monks was named Each"
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0

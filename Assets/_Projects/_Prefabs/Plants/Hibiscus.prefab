@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
   plant: {fileID: 5170023021035315110}
+  gazeOnly: 0
   handLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -208,15 +209,51 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 2078
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 843.76
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 3656.26
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2020228125542641485, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2020228125542641485, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2069229747268306994, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
@@ -280,16 +317,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 2505.4363
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 1125.01
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3140797671614650397, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 062a93611b7f9bc439c1508575acf078, type: 3}
+    - target: {fileID: 3235875077744434048, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 3235875077744434048, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
     - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
       value: 3608
@@ -300,11 +345,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1166
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 3656.26
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 4479565408557461352, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
@@ -324,18 +369,60 @@ PrefabInstance:
       objectReference: {fileID: 6325518406625321902}
     - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: "Bol Re Joba Bol (Speak, O Hibiscus, Speak)\n\nUtter, O' rose mallow
-        flower utter.\nWith which devotion at the feet of mother could you find shelter.\n\nBreaking
-        shackles of illusive fetter, you fell on feet of the mother.\nYou got salvation,
-        you bloom with joys and bewilder.\nYou teach me your devotion, O' mallow
-        flower so that my life may\nprosper.\n\nBlooms a million flower in woods,
-        hearts which wins over.\nHow could you find shelter under feet of mother,
-        O rose mallow\nflower?\nI wish to turn ruddy under feet of the mother, when
-        may I become\nflower to offer.\n\nWhen shall I turn red in color?\nO'dear,
-        with touches of feet of the mother, When shall I turn red in\ncolor?\nWhen
-        shall my heart like you shall stain with red color?\n\n\u2014 Kazu Nazrul
-        Islam"
+      value: 'Bol Re Joba Bol (Speak, O Hibiscus, Speak)
+
+
+        Utter, O'' rose
+        mallow flower utter.
+
+        With which devotion at the feet of mother could
+        you find shelter.
+
+
+        Breaking shackles of illusive fetter, you fell
+        on feet of the mother.
+
+        You got salvation, you bloom with joys and
+        bewilder.
+
+        You teach me your devotion, O'' mallow flower so that
+        my life may
+
+        prosper.
+
+
+        Blooms a million flower in woods,
+        hearts which wins over.
+
+        How could you find shelter under feet of
+        mother, O rose mallow
+
+        flower?
+
+        I wish to turn ruddy under
+        feet of the mother, when may I become
+
+        flower to offer.
+
+
+        When
+        shall I turn red in color?
+
+        O''dear, with touches of feet of the
+        mother, When shall I turn red in
+
+        color?
+
+        When shall my heart
+        like you shall stain with red color?
+
+
+        Kazu Nazrul Islam'
       objectReference: {fileID: 0}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 829c2fd0b5266314690f981fd2d1825e, type: 2}
     - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
@@ -344,24 +431,77 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 42c3eae3c06c40543a175c183ea5e699, type: 3}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
       value: 8ac0f1ee-8908-4287-ae50-ac49efb2a4ea
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: 'Hibiscus, Bengal
-
-        The red hibiscus is the flower of Maa Kali,
-        goddess of time, death, and transformation. Time is her dance, the universe
-        unfolds and collapses in her steps. In Bengal she is approached as a mother:
-        fierce and absolute, but one who protects and offers liberation to those
-        who come to her as a child would. The hibiscus is offered to her in worship.
-        https://en.wikipedia.org/wiki/File:Kali_by_Raja_Ravi_Varma.jpg'
+      value: 'Hibiscus flowers are offered to her in worship. '
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
@@ -377,8 +517,28 @@ PrefabInstance:
         a lovely sunset'
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: GsplatAsset
@@ -388,68 +548,116 @@ PrefabInstance:
       propertyPath: m_assetGuid
       value: 08ea0d37b37e7f842b627ed6c265d6a7
       objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: e37270d7c8a1ea04b8e28d1f660d74fd, type: 3}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: 'The red hibiscus is the flower of Maa Kali, the Hindu goddess of death
-        and transformation. In Bengali art she appears wreathed in them, garlanded
-        in red, goddess and flower merging in form. It is offered to her in worship.
+      value: 'The red hibiscus is the flower of Maa Kali, goddess of time, death,
+        and transformation. Time is her dance, the universe unfolds and collapses
+        in her steps.
 
-
-        ![[Kali_by_Raja_Ravi_Varma.jpg]]https://en.wikipedia.org/wiki/File:Kali_by_Raja_Ravi_Varma.jpg'
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
     - target: {fileID: 7417057368276200879, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 89d08ad1347c8e8428c1d8bd850a613e, type: 3}
+    - target: {fileID: 7432510427208812232, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7432510427208812232, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
     - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 20a4c9931f4a4734e89df1a6c86011cb, type: 3}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: 'Kazi Nazrul Islam - To the poets of the future
+      value: 'In Bengal she is approached as a mother: fierce and absolute, but one
+        who protects and offers liberation to those who come to her as a child would.
 
-        To the Poets
-        of the Future
-
-        [Na-Asha-Diner Kabir Proti]
-
-
-        O poets of the
-        future, may you arise
-
-        Like the morning sun,
-
-        Bright and
-        red like hibiscus blossoms.
-
-        In the golden dawn for which we long
-
-        May
-        you wake up like countless flocks of birds.
-
-        I sing in the hope that
-        you will come
-
-        To soar in the blue sky that I create.
-
-        I
-        leave behind the memory of my greetings to you:
-
-        Play on my veena
-        the song of the new day.'
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

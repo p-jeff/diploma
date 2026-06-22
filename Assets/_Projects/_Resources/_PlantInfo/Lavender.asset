@@ -38,33 +38,51 @@ MonoBehaviour:
   poem:
     text: "Youth came to me, \r\nA lamentation of musk that  \r\nCould not be purchased
       even at a high price, \r\nAnd the scent of lavender \r\nIn the valleys of a
-      meadow, \r\nAfter the pouring rain \n\nunnamed, Ubaid ibn al Abras "
+      meadow, \r\nAfter the pouring rain \n\nUbaid ibn al Abras "
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0
   contextInfos:
   - text: Lavender doesn't lose its scent. Even when cut or dried, the oil holds
       for years.
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0
   - text: Lavender oil is also used in many aromatheraphies, especially to calm nerves,
       and in medical anxiety Treatment
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0
   - text: already in acient times it was know that lavender wine helpts to ease "pains
       of the side and the nerves, and extreme cold." (De Matedia medica - Dioscorides)
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0
   - text: the Name stems fron Latin "lavare" - washing. Romains laid it in Baths,
       beds and linen.
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0
   - text: To "lay up in lavender" is to fold a thing away wrapped in the herb, safe
       from moths and time.
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0
@@ -72,6 +90,9 @@ MonoBehaviour:
       bee hums, \nTo the loud roar of London,\nWith purple dreams he comes, \nFrom
       ragged lanes of wild-Flowers\nTo ragged London slums, \nWith a basket full
       of lavender \nAnd purple dreams he comes."
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
     environmentLayers: []
     environmentVerticalOffset: 0

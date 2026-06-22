@@ -146,3 +146,35 @@ accents (ī) all resolve.
 - Component-type swap on the prefab is done in-editor via unity-mcp (not raw YAML — a TMP component
   block is too field-heavy to hand-write safely). Pace MCP calls sequentially (Unity RAM).
 - Changing the serialized field types marks the affected `PlantData` assets + the prefab dirty.
+
+---
+
+## Image contexts (sprite instead of text, feathered edges)  *(2026-06-22)*
+
+A context block can now render an **image** in place of its text, with **softly feathered edges**
+(the same smoothstep edge-fade `EnvironmentCylinder` uses, in 2D). Authored per block, so a plant can
+mix text and image contexts.
+
+**Authoring (per `PlantLabelContent`, on the `PlantData` asset):**
+- `contextImage` (`Sprite`) — set it and the block shows the image instead of the text. Leave empty
+  for a normal text block. Poem blocks accept an image too (same field), though it's meant for contexts.
+- `imageWidth` (metres, default 0.5) — displayed width; height follows the sprite aspect (never distorts).
+- `imageFeather` (UV, default `-1` = use the label's default) — `0` = hard edges, `~0.12` = soft.
+- Use a **standalone, Full-Rect** sprite (Mesh Type = Full Rect, not tight; not atlased) so UVs span
+  0..1 and the feather lands evenly on the image edges. A tight/atlased sprite feathers the atlas rect.
+
+**How it works (no prefab surgery):**
+- `PlantLabel.SetContent` branches on `contextImage`. For an image it **lazily creates a `ContextImage`
+  child** (`Image` + `CanvasRenderer`) at the label-root origin, inheriting the Text child's px→metre
+  scale, and **hides the Text GameObject**. Text-only labels never spawn it (zero cost). Created **play-mode
+  only** — edit mode skips it, so no stray objects get serialized. This sidesteps `PlantInfos.prefab`
+  being a mix of `Label.prefab` instances and baked label GOs (a prefab edit wouldn't reach all of them).
+- The child uses a per-label instance of **`Custom/UI/FeatheredImage`** (`_Scripts/Shaders/FeatheredImage.shader`),
+  a UGUI shader that multiplies alpha by a smoothstep edge ramp (`_Feather`) and by the Image tint alpha.
+  `PlantLabel.SetAlpha` drives the tint alpha, so image contexts fade in/out with the group exactly like text.
+  `preserveAspect = true` guards against distortion. Material is freed in `PlantLabel.OnDestroy`.
+- `PlantInfo` is **unchanged** — it still only calls `SetContent` / `SetAlpha`; it doesn't care how a
+  label renders.
+
+**Files:** `PlantLabelContent` (`PlantData.cs`) — 3 new fields · `PlantLabel.cs` — `EnsureImage`/`SizeImage`
++ `SetContent`/`SetAlpha` branches + `OnDestroy` · `FeatheredImage.shader` (new). Not yet headset-verified.

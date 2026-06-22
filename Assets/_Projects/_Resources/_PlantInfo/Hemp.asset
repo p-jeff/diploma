@@ -15,6 +15,8 @@ MonoBehaviour:
   displayName: Hemp
   audioClip: {fileID: 8300000, guid: f85388ca033d8ea4ab6796caec7b6074, type: 3}
   environmentPainting: {fileID: 0}
+  environmentLayers: []
+  environmentVerticalOffset: 0
   poem:
     text: "Rangstreit of Hashish and Wine\n\nMay all be well with you! Do not listen
       to the word of the old censor And do not let not following tradition shape
@@ -29,8 +31,13 @@ MonoBehaviour:
       its excellent medical qualities is that it is good for digestion.\nHow impossible
       it is to enumerate all its manifold virtues!\n\nDo not listen to what critics
       may say with respect to it. They want to keep you away from it. Disobey any
-      old censor!\n\n\u2014 Al-Is\u02BFird\u012B"
+      old censor!\n\nAl-Is\u02BFird\u012B"
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   contextInfos:
   - text: "# Arabic poem agains hashish\nO you who are similar to dumb beasts, having
       become like an ox grazing on cannabis hashish!\n\nIndeed, you are more similar
@@ -41,7 +48,12 @@ MonoBehaviour:
       it please you, hapless man, to be seen among mankind blind and deaf, using
       sign language like a deaf person?\n\nQuite often has it been eaten in a privy
       out of fear of an observer and vileness in the souls."
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: '#The Travels of Marco Polo, Book 1, Chapter XXIII XXIV, The Complete Yule
       Cordier Edition
 
@@ -64,7 +76,12 @@ MonoBehaviour:
       and when thou returnest my Angels shall bear thee into Paradise. [...]'' [...]
       and thus there was no order of his that they would not affront any peril to
       execute, for the great desire they had to get back into that Paradise of his."'
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: "Igziabeher (Let Jah be Praised) \u2013 Peter Tosh\nVerse 1:\n\nHe watereth
       the hills from his chambers\nAnd the Earth is satisfied, so satisfied\nHe maketh
       the grass to grow for animals\nJah made the herb for man\nHe made the herb
@@ -75,4 +92,9 @@ MonoBehaviour:
       104:13-14\n\n13 He watereth the hills from His chambers; the earth is satisfied
       with the fruit of Thy works.\n\n14 He causeth the grass to grow for the cattle
       and herbs for the service of man, that he may bring forth food out of the earth,"
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0

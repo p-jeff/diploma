@@ -98,6 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantTouchTrigger
   plant: {fileID: 6821090301495877547}
+  gazeOnly: 0
   handLayers:
     serializedVersion: 2
     m_Bits: 1
@@ -228,11 +229,53 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 2194.5474
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 1784291360901642756, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 3093.76
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784291360901642782, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2020228125542641485, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2020228125542641485, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "The Minoans were a Bronze Age civilization centered on Crete (c. 2000\u20131400
+        BCE), known for their palace complexes, vivid frescoes, and far-reaching
+        Aegean trade. Among their art, the crocus held notable cultural relevance.\r\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
@@ -288,16 +331,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 2211.2239
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3018671147212551828, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 1125.01
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3140797671614650397, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: a6c764b035107bc4f893620e627d42ef, type: 3}
+    - target: {fileID: 3235875077744434048, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 3235875077744434048, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 3543956613794748753, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3551845647876168986, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
       value: 2222
@@ -332,11 +387,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 1961.9999
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 3840582011207638430, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 3375.01
+      value: 1200
       objectReference: {fileID: 0}
     - target: {fileID: 4479565408557461352, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
@@ -366,6 +421,10 @@ PrefabInstance:
         Flagg Gould"
       objectReference: {fileID: 0}
     - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 829c2fd0b5266314690f981fd2d1825e, type: 2}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
@@ -373,24 +432,115 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 7d1a11bb9dbdf454f8f737e009c4bdaa, type: 3}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: "The Minoans were a Bronze Age civilization centered on Crete (c. 2000\u20131400
+        BCE), known for their palace complexes, vivid frescoes, and far-reaching
+        Aegean trade. Among their art, the crocus held notable cultural relevance.\r\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 5514064619223439339, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
       value: a8485130-377b-48db-ab26-a191b6c3a0c1
       objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_text
+      value: 'Each plant yields only 3 stigmata, which make up the spice. It needs
+        over 150.000 Flowers for 1kg
+
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: "## Frances Allen Harper \u2014 The Crocuses (excerpt)\n\nNot a daffodil
-        nor daisy\nHad dared to raise its head;\nNot a fairhaired dandelion\nPeeped
-        timid from its bed;\n\nThough a tremor of the winter\nDid shivering through
-        them run;\nYet they lifted up their foreheads\nTo greet the vernal sun.\n\nAnd
-        the sunbeams gave them welcome,\nAs did the morning air\u2014\nAnd scattered
-        o\u2019er their simple robes\nRich tints of beauty rare.\n\nSoon a host of
-        lovely flowers\nFrom vales and woodland burst;\nBut in all that fair procession\nThe
-        crocuses were first."
+      value: "Saffron \"Red Gold\" the worlds costliest spice, is harvested from
+        the crocus sativus. \r\n"
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: GsplatAsset
@@ -400,27 +550,87 @@ PrefabInstance:
       propertyPath: m_assetGuid
       value: aeb8cb6e35704c046904a722b0511c05
       objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 4b185898bdecf7a4f93c56d71cddf77d, type: 3}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: '## Crocus, Greek Mythology
+      value: 'Crocus was a young mortal, who was in love with the Nymph Smilax. Either
+        the love was not returned, or no love was possible between mortal and nymph,
+        leading to the gods taking pity upon Crocus, turning him into the saffron
+        flower as a relief for his grief."
 
-        Crocus was a young mortal, who
-        was in love with the Nymph Smilax. Either the love was not returned, or no
-        love was possible between mortal and nymph, leading to the gods taking pity
-        upon Crocus, turning him into the saffron flower as a relief for his grief.'
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
       objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
     - target: {fileID: 7417057368276200879, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 580d7a2aafce14e4995172aa5ad52cf3, type: 3}
+    - target: {fileID: 7432510427208812232, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7432510427208812232, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7738546565168674952, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7764549551351612197, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -445,24 +655,44 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.x
       value: 180
       objectReference: {fileID: 0}
+    - target: {fileID: 8582845393027873350, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8810918796485297829, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: 1c62a68419e689246a23444a793c1761, type: 3}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: "## Crocus, Minoans\nThe Minoans were a Bronze Age civilization centered
-        on Crete and the Cyclades (c. 2000\u20131400 BCE), known for their palace
-        complexes, vivid frescoes, and far-reaching Aegean trade. Among their art,
-        the crocus held notable cultural relevance, likely due to the many-layered
-        value of saffron, used as dye, medicine, colorant, and possibly a ritual
-        substance, and its consistent links to women, animals, and a likely deity,
-        suggesting it was woven deep into Minoan myth and identity. Today it survives
-        mainly in their frescoes and pottery.\n\n![[_Die_Fresken_von_Akrotiri_z\xE4hlen_zu_den_spektakul\xE4rsten_Zeugen_der_Bronzezeit.__11.jpg]]\nhttps://commons.wikimedia.org/wiki/Category:Saffron_gatherers_(Akrotiri)"
+      value: 'Crocuses are the first flowers that grow in spring in many parts of
+        the world
+
+'
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

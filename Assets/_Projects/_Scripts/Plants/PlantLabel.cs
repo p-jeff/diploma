@@ -39,6 +39,18 @@ namespace Plants
                  "prefab/instance state. Flip on to bring the panel back.")]
         [SerializeField] private bool showBackground = false;
 
+        [Header("Image contexts")]
+        [Tooltip("Default edge feather (UV units) for image contexts: 0 = hard edges, ~0.12 = soft. " +
+                 "A PlantLabelContent with imageFeather >= 0 overrides this per image.")]
+        [SerializeField, Range(0f, 0.5f)] private float featherAmount = 0.12f;
+
+        // Lazily-created child that renders an image context (a sprite with feathered edges) in place
+        // of the text. Created on first image SetContent (play mode only); null for text-only labels.
+        private UnityEngine.UI.Image m_image;
+        private Material m_imageMat;     // per-label instance of the feather shader (owned; freed in OnDestroy)
+        private float m_alpha = 1f;      // last alpha pushed via SetAlpha, so SetContent can match the fade
+        static readonly int s_featherId = Shader.PropertyToID("_Feather");
+
         // Authored outline/underlay alphas read once from the style's material preset, so SetAlpha can
         // fade the outline + soft halo together with the text. <0 means "no such property / no preset".
         private bool alphasCached;
@@ -57,9 +69,94 @@ namespace Plants
         {
             if (content == null) return;
             ApplyStyle();
-            if (text != null) text.text = content.text ?? string.Empty;
+
+            // An image context renders a feathered sprite in place of the text. The image child is
+            // created lazily (play mode only) so text-only labels stay zero-cost and no prefab needs
+            // an authored image slot.
+            bool hasImage = content.contextImage != null;
+            var img = hasImage ? EnsureImage() : m_image;
+            if (img != null)
+            {
+                if (hasImage)
+                {
+                    img.sprite = content.contextImage;
+                    SizeImage(img, content);
+                    float feather = content.imageFeather >= 0f ? content.imageFeather : featherAmount;
+                    if (m_imageMat != null) m_imageMat.SetFloat(s_featherId, Mathf.Clamp(feather, 0f, 0.5f));
+                    img.color = new Color(1f, 1f, 1f, m_alpha);
+                    if (!img.gameObject.activeSelf) img.gameObject.SetActive(true);
+                }
+                else if (img.gameObject.activeSelf)
+                {
+                    img.gameObject.SetActive(false);
+                }
+            }
+
+            if (text != null)
+            {
+                // Hide the text GameObject for image contexts so it can't render behind the sprite.
+                if (text.gameObject.activeSelf == hasImage) text.gameObject.SetActive(!hasImage);
+                if (!hasImage) text.text = content.text ?? string.Empty;
+            }
+
             ApplyBackgroundVisibility();
-            if (showBackground) FitBackground();
+            if (showBackground && !hasImage) FitBackground();
+        }
+
+        /// <summary>Lazily create the image child (a UI <see cref="UnityEngine.UI.Image"/> with a
+        /// feather-shader material) used to render image contexts. Sits at the label root's origin and
+        /// inherits the text's px→metre scale so <see cref="SizeImage"/> can size it in real metres.
+        /// Play mode only — returns null in edit mode so editor previews never spawn stray objects.</summary>
+        private UnityEngine.UI.Image EnsureImage()
+        {
+            if (m_image != null) return m_image;
+            if (!Application.isPlaying) return null;
+
+            var go = new GameObject("ContextImage",
+                typeof(RectTransform), typeof(CanvasRenderer), typeof(UnityEngine.UI.Image));
+            var rt = go.GetComponent<RectTransform>();
+            rt.SetParent(transform, false);
+            rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.localPosition = Vector3.zero;
+            rt.localRotation = Quaternion.identity;
+            float s = (text != null) ? text.rectTransform.localScale.x : 0.005f;
+            if (s <= 0.0001f) s = 0.005f;
+            rt.localScale = new Vector3(s, s, s);
+
+            m_image = go.GetComponent<UnityEngine.UI.Image>();
+            m_image.raycastTarget = false;
+            m_image.preserveAspect = true;
+            m_image.color = new Color(1f, 1f, 1f, m_alpha);
+
+            var sh = Shader.Find("Custom/UI/FeatheredImage");
+            if (sh != null)
+            {
+                m_imageMat = new Material(sh) { name = "FeatheredImage (instance)" };
+                m_image.material = m_imageMat;
+            }
+            else
+            {
+                Debug.LogError("[PlantLabel] Custom/UI/FeatheredImage shader not found — image " +
+                               "contexts will render with hard edges.", this);
+            }
+
+            return m_image;
+        }
+
+        /// <summary>Size the image rect (in canvas units) so it spans <c>content.imageWidth</c> metres,
+        /// with the height following the sprite's aspect ratio (preserveAspect guards against any
+        /// rounding so the image never distorts).</summary>
+        private void SizeImage(UnityEngine.UI.Image img, PlantLabelContent content)
+        {
+            var sprite = content.contextImage;
+            float aspect = (sprite != null && sprite.rect.height > 0.0001f)
+                ? sprite.rect.width / sprite.rect.height : 1f;
+            float scale = img.rectTransform.localScale.x;
+            if (scale <= 0.0001f) scale = 0.005f;
+            float wUnits = Mathf.Max(0.01f, content.imageWidth) / scale;
+            float hUnits = wUnits / Mathf.Max(0.0001f, aspect);
+            img.rectTransform.sizeDelta = new Vector2(wUnits, hUnits);
         }
 
         /// <summary>Override this label's style (e.g. PlantInfo assigning a poem vs context style) and
@@ -116,10 +213,17 @@ namespace Plants
         /// never leaves a stray halo behind.</summary>
         public void SetAlpha(float a)
         {
-            if (text != null)
+            m_alpha = a;
+            if (text != null && text.gameObject.activeSelf)
             {
                 text.alpha = a;
                 FadeMaterialEffects(a);
+            }
+            if (m_image != null && m_image.gameObject.activeSelf)
+            {
+                var c = m_image.color;
+                c.a = a;
+                m_image.color = c;   // multiplied by the per-pixel feather in the shader
             }
             if (showBackground && background != null)
             {
@@ -127,6 +231,13 @@ namespace Plants
                 c.a = backgroundOpacity * a;
                 background.color = c;
             }
+        }
+
+        void OnDestroy()
+        {
+            if (m_imageMat == null) return;
+            if (Application.isPlaying) Destroy(m_imageMat);
+            else DestroyImmediate(m_imageMat);
         }
 
         /// <summary>Scale the TMP outline + underlay colour alphas by <paramref name="a"/> so they fade
