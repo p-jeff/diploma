@@ -690,11 +690,11 @@ namespace Plants
             // Place the poem canvas relative to the selection collider bounds (see PlacePoem).
             PlacePoem();
 
-            if (audioSource != null)
-            {
-                AssignAudioClip();
-                audioSource.Play();
-            }
+            // Ready the poem clip now, but DON'T play it yet: the VO starts after the reveal
+            // animation finishes (see ShowAfterAnimation) so the narration doesn't talk over the
+            // grow SFX. The 180° painting still fades in immediately (triggered by the manager) — only
+            // its fade-out references the poem (EnvironmentMoment holds until the VO ends).
+            if (audioSource != null) AssignAudioClip();
 
             if (info != null) info.SetData(ResolveData());
 
@@ -823,6 +823,10 @@ namespace Plants
             // Re-aim a cylinder-placed poem at the viewer now (it was positioned at Show(),
             // before the reveal), then fade it in so it appears facing them and holds still.
             if (info != null) info.ResnapPoemCylinder();
+
+            // Start the poem VO now — AFTER the reveal animation and its grow SFX — so the narration
+            // no longer overlaps the grow. The poem text fades in together with the voice.
+            if (audioSource != null && audioSource.clip != null) audioSource.Play();
 
             if (info != null) info.FadePoem(1f);
 

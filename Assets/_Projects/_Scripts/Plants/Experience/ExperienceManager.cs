@@ -697,6 +697,10 @@ namespace Plants
             if (touchPrompt != null) touchPrompt.Hide();
             SetSelectorsActive(false);
 
+            // Crossfade the ambient score back to the "empty garden" bed for the restart — the title
+            // sequence replays under it before BeginGarden re-opens the garden.
+            GardenAmbience.Instance?.PlayEmpty();
+
             // Restore every roster plant to pristine, then deactivate it (BeginGarden re-opens batch 0).
             foreach (var p in AllRosterPlants())
             {
@@ -736,6 +740,11 @@ namespace Plants
         {
             m_flourished = true;
             m_gardenOpen = false;   // explore phase over; the chair won't re-trigger
+
+            // Swell the ambient score from the "empty garden" bed to the "blooming garden" bed the
+            // instant the user sits — the crossfade runs under the whole bloom cascade. No-ops in a
+            // scene without a GardenAmbience.
+            GardenAmbience.Instance?.PlayBloom();
 
             // Staged garden only: hide the active, un-liked plants so the finale shows just the
             // kept ones. When blooming the whole roster (vertical slice) we KEEP them — they bloom.

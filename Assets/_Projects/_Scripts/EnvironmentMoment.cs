@@ -197,33 +197,48 @@ namespace Plants
 
             Debug.Log("[EnvironmentMoment] Fade-in complete. Entering hold phase.", this);
 
-            // --- Hold ---
-            float holdSeconds = defaultHoldSeconds;
-            if (audioSource != null && audioSource.isPlaying)
+            // --- Hold: the painting fades in independently (at select, during the plant's reveal),
+            // but its FADE-OUT references the poem — it stays up until the poem finishes. The poem VO
+            // starts only AFTER the reveal, so it may not be playing yet here: wait (bounded) for it
+            // to begin, hold while it narrates, then a short tail. With no audio (silent context
+            // moments) fall back to a fixed hold. ---
+            if (audioSource != null)
             {
-                float remaining = audioSource.clip != null
-                    ? audioSource.clip.length - audioSource.time
-                    : 0f;
-                if (remaining > 0f)
-                    holdSeconds = remaining + audioTailSeconds;
-                Debug.Log("[EnvironmentMoment] Hold will last " + holdSeconds + "s (audio-based).", this);
+                // Wait for the poem to begin. Bounded by defaultHoldSeconds so a moment that never
+                // gets audio (a silent context painting) just holds that long instead of stalling.
+                float waitStart = 0f;
+                while (!audioSource.isPlaying && waitStart < defaultHoldSeconds && !m_interrupted)
+                {
+                    waitStart += Time.deltaTime;
+                    yield return null;
+                }
+
+                // Hold while the poem narrates...
+                while (audioSource.isPlaying && !m_interrupted)
+                    yield return null;
+
+                // ...then a short tail after the voice ends before fading out.
+                float tail = 0f;
+                while (tail < audioTailSeconds && !m_interrupted)
+                {
+                    tail += Time.deltaTime;
+                    yield return null;
+                }
             }
             else
             {
-                Debug.Log("[EnvironmentMoment] Hold will last " + holdSeconds + "s (default).", this);
-            }
-
-            float holdElapsed = 0f;
-            while (holdElapsed < holdSeconds && !m_interrupted)
-            {
-                holdElapsed += Time.deltaTime;
-                yield return null;
+                float holdElapsed = 0f;
+                while (holdElapsed < defaultHoldSeconds && !m_interrupted)
+                {
+                    holdElapsed += Time.deltaTime;
+                    yield return null;
+                }
             }
 
             if (m_interrupted)
                 Debug.Log("[EnvironmentMoment] Interrupted during hold phase.", this);
             else
-                Debug.Log("[EnvironmentMoment] Hold complete. Starting fade-out.", this);
+                Debug.Log("[EnvironmentMoment] Hold complete (poem ended). Starting fade-out.", this);
 
             yield return FadeOutAndFinish();
         }

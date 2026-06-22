@@ -16,18 +16,18 @@ MonoBehaviour:
   audioClip: {fileID: 8300000, guid: a0803542ce5f65c40a77c237ec557cb1, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers:
-  - texture: {fileID: 2800000, guid: ae1ac84ac09c7cd42ac09041bb719c53, type: 3}
-    radius: 8
+  - texture: {fileID: 2800000, guid: 05410022ccdbfd044b146bf19230148a, type: 3}
+    radius: 14
     width: 38
     hardEdges: 1
     verticalOffset: -0.5
-  - texture: {fileID: 2800000, guid: 0d632a93b505f9f45b888e81f3a0529d, type: 3}
-    radius: 10
+  - texture: {fileID: 2800000, guid: 2540f97fc9797c64ab88a3a210ab21eb, type: 3}
+    radius: 16
     width: 38
     hardEdges: 1
     verticalOffset: -0.5
-  - texture: {fileID: 2800000, guid: 64a995672e362a046a8c2bbb96343baf, type: 3}
-    radius: 12
+  - texture: {fileID: 2800000, guid: af82afe409e89c449a59b78987c8f648, type: 3}
+    radius: 18
     width: 38
     hardEdges: 1
     verticalOffset: -0.5

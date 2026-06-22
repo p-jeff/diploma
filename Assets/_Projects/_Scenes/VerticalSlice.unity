@@ -4911,7 +4911,7 @@ MonoBehaviour:
   defaultHoldSeconds: 12
   audioTailSeconds: 1
   defaultRadius: 3.5
-  verticalOffset: -8
+  verticalOffset: -10
   baseRenderQueue: 2900
 --- !u!82 &1016392813 stripped
 AudioSource:
@@ -6922,6 +6922,56 @@ AudioSource:
   m_CorrespondingSourceObject: {fileID: 2978793032612021943, guid: 513392a7fb312f740abc997ee58eec3b, type: 3}
   m_PrefabInstance: {fileID: 466183298}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1392837989
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1392837990}
+  - component: {fileID: 1392837991}
+  m_Layer: 0
+  m_Name: '[Garden Ambience]'
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1392837990
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392837989}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1554794617}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1392837991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1392837989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4930de65c15f89846ad6d439a6f483e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plants.GardenAmbience
+  emptyClip: {fileID: 8300000, guid: 734bdbd184e929d4d9dbe776d844387a, type: 3}
+  bloomClip: {fileID: 8300000, guid: b3081981f2182a44195cd5f8d5415b2f, type: 3}
+  emptyVolume: 0.165
+  bloomVolume: 0.369
+  crossfadeDuration: 2.5
+  playEmptyOnStart: 1
 --- !u!1 &1427172635
 GameObject:
   m_ObjectHideFlags: 0
@@ -14268,6 +14318,7 @@ Transform:
   - {fileID: 1336258692}
   - {fileID: 1015637057}
   - {fileID: 4278882559347271651}
+  - {fileID: 1392837990}
   m_Father: {fileID: 404635121}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1559929442
@@ -16715,6 +16766,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4539559824797950445, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: ca21df5bac14d9348ad56539b5b62466, type: 3}
     - target: {fileID: 5113375251586768915, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_OverridePixelPerfect
       value: 0

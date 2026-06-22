@@ -69,6 +69,9 @@ namespace Plants
         [SerializeField] private GsplatRevealAnimator titleRoseReveal;
         [Tooltip("Pause after the mesh settles before the rose Gaussian begins its reveal.")]
         [SerializeField, Min(0f)] private float gapMeshToRose = 0.35f;
+        [Tooltip("Optional SFX played when the title card animates in (mesh fade-in + rose bloom) — a 2D " +
+                 "one-shot, e.g. a plant-grow sound. Leave unset for a silent title card.")]
+        [SerializeField] private AudioSource titleSfx;
 
         [Header("Poem")]
         [Tooltip("Wünschelrute poem text. Alpha-faded in alongside the VO.")]
@@ -293,6 +296,10 @@ namespace Plants
         private IEnumerator ShowTitleCard()
         {
             if (titleCardRoot != null && !titleCardRoot.activeSelf) titleCardRoot.SetActive(true);
+
+            // Sound the title card's reveal (a 2D one-shot, e.g. a plant-grow SFX). Lives on a source
+            // that stays active for the sequence, so a long clip isn't cut when the card hides.
+            if (titleSfx != null && titleSfx.clip != null) titleSfx.Play();
 
             // Mesh fades in (alpha 0 -> 1) — no scale animation.
             yield return FadeMesh(0f, 1f, titleMeshFadeDuration);

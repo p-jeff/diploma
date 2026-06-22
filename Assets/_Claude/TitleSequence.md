@@ -45,9 +45,13 @@ The old TMP text card ("An ode to curiosity") was replaced by a 3D mesh + a rose
 - **Rose reveal**: after the mesh fades in (and a `gapMeshToRose` pause), `titleRoseReveal.Play()` blooms
   the rose while its `_GsplatOpacityMul` fades off the hidden floor; the coroutine **waits for the bloom to
   finish** (`IsDone`) before the `titleHoldDuration` hold, so the rose is fully formed before the poem.
+- **Title-card SFX** (added 2026-06-22): `ShowTitleCard` plays an optional `titleSfx` AudioSource the
+  moment the card animates in (under the mesh fade + rose bloom). Wired in the prefab to a `TitleCardSfx`
+  2D source (`spatialBlend 0`, playOnAwake off, child of the title root so a long clip isn't cut when
+  `3D_TitleCard` hides). Currently `SFX_Plant Grow_03.wav`. Leave `titleSfx` unset for a silent card.
 - **Controller fields** (all wired IN THE PREFAB — internal refs, travel with it): `titleCardRoot`
   (`3D_TitleCard`), `titleMesh` (`AOTC_v1`), `titleRoseReveal` (the rose `Gaussian`'s animator),
-  `titleMeshFadeDuration` (1.1), `gapMeshToRose` (0.35). `ArmTitle` parks the card hidden: mesh alpha 0 +
+  `titleMeshFadeDuration` (1.1), `gapMeshToRose` (0.35), `titleSfx` (`TitleCardSfx`). `ArmTitle` parks the card hidden: mesh alpha 0 +
   rose `ResetToStart()` + `_GsplatOpacityMul` floored to 0.002. The opacity floor matters because the
   rose's `startAt=0.1` is **not** geometrically hidden — without it the rose would flash before its reveal.
 - The old `titleCard` `TMP_Text` field was **fully removed** from the controller.
@@ -100,6 +104,8 @@ of flowers (poppy → lavender → daffodil → …) so there's gentle life. Bui
   `LookAtTarget.Snap()` on each label right before it fades in, so it faces wherever the user is at
   reveal time (LookAtTarget itself only snaps on enable, not per-frame).
 - `WuenschelruteVO` — 2D AudioSource (spatialize off), clip = Wünschelrute.wav, playOnAwake off.
+- `TitleCardSfx` — 2D AudioSource (spatialBlend 0, playOnAwake off), clip = `SFX_Plant Grow_03.wav`,
+  played by `ShowTitleCard` when the title card animates in (wired to the controller's `titleSfx`).
 
 ## Reusing in Experience.unity
 Drag the prefab under `SceneRoot/Content`. The internal wiring (poppy, labels, VO, controller→those) is
