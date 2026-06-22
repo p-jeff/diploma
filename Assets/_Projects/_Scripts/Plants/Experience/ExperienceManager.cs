@@ -60,9 +60,6 @@ namespace Plants
         [Tooltip("Head/centre-eye transform used for proximity reveal. Falls back to Camera.main if unset.")]
         [SerializeField] private Transform head;
 
-        [Header("UI")]
-        [SerializeField] private TouchPrompt touchPrompt;
-
         [Header("Like Gesture")]
         [Tooltip("SelectorUnityEventWrapper objects that trigger LikeSelected. Enabled/disabled by the manager.")]
         [SerializeField] private List<SelectorUnityEventWrapper> likeGestureWrappers = new List<SelectorUnityEventWrapper>();
@@ -192,6 +189,15 @@ namespace Plants
         private readonly List<float> m_gazeBrightnessOrig = new List<float>();
         private ContextFruit m_gazeFruit;                  // canopy orb under gaze (no GsplatRenderer)
 
+        // Hand-cue arbitration. m_likeOffered tracks "the like/keep gesture is currently offered" — set
+        // when the like selectors unlock, AFTER the poem VO completes. It both drives the green keep cue
+        // and GATES the pre-flourish fruit gaze, so fruits only become gazeable/highlightable once the
+        // poem is done (same timing as the like gesture). Pre-flourish, gazing one of the selected
+        // tree's fruits swaps the cue to the yellow "ask" colour (m_fruitCueActive); on look-away it
+        // restores the green "keep" cue iff m_likeOffered. See ShowKeepCue/HideKeepCue/ReleaseFruitCue.
+        private bool m_likeOffered;
+        private bool m_fruitCueActive;
+
         private Coroutine m_enableSelectorsRoutine;
 
         // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -246,13 +252,6 @@ namespace Plants
             m_unlockedBatches = 0;
             ActivateBatch(0);
             m_unlockedBatches = 1;
-
-            // Show touch prompt above first plant of batch 0.
-            if (touchPrompt != null && unlockBatches.Count > 0 && unlockBatches[0]?.plants?.Count > 0)
-            {
-                var firstPlant = unlockBatches[0].plants[0];
-                if (firstPlant != null) touchPrompt.Show(firstPlant.transform);
-            }
 
             // Both selector lists start disabled.
             SetSelectorsActive(false);
@@ -340,8 +339,6 @@ namespace Plants
             if (p.IsLiked) return;
             if (p == m_selected) return;
             if (m_flourished) return;
-
-            if (touchPrompt != null) touchPrompt.Hide();
 
             // Interrupt any environment moment.
             var moment = GetMoment();
@@ -476,8 +473,7 @@ namespace Plants
         private GameObject GazedFruitOf(Plant tree)
         {
             if (tree == null) return null;
-            if (gazeTargeter != null && gazeTargeter.TryGetTarget(out var p, out var go)
-                && p == tree && go != null && go.GetComponent<ContextFruit>() != null)
+            if (gazeTargeter != null && gazeTargeter.TryGetGazedFruit(tree, out var go) && go != null)
                 return go;
             // Sticky fallback: the last orb the per-frame fruit gaze highlighted (only ever set to
             // one of the selected tree's own fruits).
@@ -555,20 +551,50 @@ namespace Plants
         /// </summary>
         private void UpdateFruitGaze()
         {
-            if (m_selected == null || !m_selected.IsFruitMode) { SetGazeHighlight(null); return; }
+            if (m_selected == null || !m_selected.IsFruitMode) { SetGazeHighlight(null); ReleaseFruitCue(); return; }
 
+            // Gate on the poem having finished — same timing as the like gesture (m_likeOffered is set
+            // when the like selectors unlock, after the poem VO). The fruits don't highlight or cue
+            // during the reveal animation + poem; they become gazeable only once the poem is done.
+            if (!m_likeOffered) { SetGazeHighlight(null); ReleaseFruitCue(); return; }
+
+            // Find the nearest of THIS tree's own canopy fruits under the gaze, skipping the tree's
+            // body selection collider (still enabled pre-flourish): being convex and wrapping the
+            // canopy, it sits in front of the high fruits and would otherwise win the cast, so the
+            // gaze never resolved to a fruit and nothing highlighted (see TryGetGazedFruit).
             GameObject instance = null;
-            Plant plant = null;
-            if (gazeTargeter != null) gazeTargeter.TryGetTarget(out plant, out instance);
+            if (gazeTargeter != null) gazeTargeter.TryGetGazedFruit(m_selected, out instance);
 
-            // Accept only this tree's own canopy orbs (ignore hero bodies / other plants).
-            if (plant != m_selected || instance == null || instance.GetComponent<ContextFruit>() == null)
+            if (instance == null)
             {
                 SetGazeHighlight(null);
+                ReleaseFruitCue();
                 return;
             }
 
             SetGazeHighlight(instance);
+
+            // Show BOTH hand signifiers while gazing one of the selected tree's fruits: the green "keep"
+            // ring (the like gesture is offered — we only get here once m_likeOffered) AND the yellow
+            // "ask" ring, as two concentric rings, so neither affordance is lost. Idempotent (recolours
+            // live if already up); ReleaseFruitCue drops back to the green keep ring on look-away.
+            if (HandReadyCue.Instance != null)
+            {
+                HandReadyCue.Instance.ShowBoth();
+                m_fruitCueActive = true;
+            }
+        }
+
+        /// <summary>Hand the cue back after the pre-flourish fruit gaze swapped it to the yellow "ask"
+        /// colour: restore the green "keep" cue if the like gesture is currently being offered, else
+        /// hide it. No-op unless the fruit gaze had taken the cue over.</summary>
+        private void ReleaseFruitCue()
+        {
+            if (!m_fruitCueActive) return;
+            m_fruitCueActive = false;
+            if (HandReadyCue.Instance == null) return;
+            if (m_likeOffered) HandReadyCue.Instance.Show();
+            else HandReadyCue.Instance.Hide();
         }
 
         /// <summary>
@@ -583,6 +609,19 @@ namespace Plants
             ClearGazeHighlight();
             if (instance == null) return;
 
+            // A canopy fruit owns its own highlight (orb glow, or a fruit-splat Brightness boost via
+            // ContextFruit). Route it there ONLY — don't also run the generic renderer boost below, or
+            // a fruit-splat's Brightness would be written by both (the generic ×multiplier then the
+            // hover level), which clobbered the intended highlight.
+            m_gazeFruit = instance.GetComponent<ContextFruit>();
+            if (m_gazeFruit != null)
+            {
+                m_gazeFruit.SetHover(true);
+                m_gazeInstance = instance;
+                return;
+            }
+
+            // Regular splat instance: brighten every GsplatRenderer under it.
             var renderers = instance.GetComponentsInChildren<GsplatRenderer>(true);
             foreach (var r in renderers)
             {
@@ -591,11 +630,6 @@ namespace Plants
                 m_gazeBrightnessOrig.Add(r.Brightness);
                 r.Brightness *= gazeHighlightMultiplier;
             }
-
-            // Canopy fruit orbs carry no GsplatRenderer; boost the orb's own glow instead so a
-            // gazed orb gives the same "this is the one" feedback as a brightened splat instance.
-            m_gazeFruit = instance.GetComponent<ContextFruit>();
-            if (m_gazeFruit != null) m_gazeFruit.SetHover(true);
 
             m_gazeInstance = instance;
         }
@@ -623,8 +657,9 @@ namespace Plants
             if (m_selected.IsLiked) return;
             if (m_flourished) return;
 
-            // Keep is being used: drop the hand cue immediately.
-            HandReadyCue.Instance?.Hide();
+            // Keep is being used: drop the hand cue immediately (incl. any yellow fruit-gaze cue).
+            m_fruitCueActive = false;
+            HideKeepCue();
 
             m_selected.LikeCommit();
             m_selected.PlaySfx(likedSfx, sfxVolume);   // emitted from the liked plant
@@ -695,8 +730,8 @@ namespace Plants
             var moment = GetMoment();
             if (moment != null) moment.Interrupt();
 
-            HandReadyCue.Instance?.Hide();
-            if (touchPrompt != null) touchPrompt.Hide();
+            m_fruitCueActive = false;
+            HideKeepCue();
             SetSelectorsActive(false);
 
             // Crossfade the ambient score back to the "empty garden" bed for the restart — the title
@@ -742,6 +777,7 @@ namespace Plants
         {
             m_flourished = true;
             m_gardenOpen = false;   // explore phase over; the chair won't re-trigger
+            m_fruitCueActive = false;   // post-flourish UpdateGazeHighlight owns the hand cue directly
 
             // Swell the ambient score from the "empty garden" bed to the "blooming garden" bed the
             // instant the user sits — the crossfade runs under the whole bloom cascade. No-ops in a
@@ -767,8 +803,6 @@ namespace Plants
                     }
                 }
             }
-
-            if (touchPrompt != null) touchPrompt.Hide();
 
             StartCoroutine(FlourishRoutine());
         }
@@ -847,8 +881,9 @@ namespace Plants
                 yield return new WaitWhile(() => plant != null && plant.AudioSource != null && plant.AudioSource.isPlaying);
 
             SetLikeSelectorsActive(true);
-            // Keep is now available: cue both hands so the user knows the gesture is live.
-            HandReadyCue.Instance?.Show();
+            // Keep is now available: cue both hands so the user knows the gesture is live (the
+            // pre-flourish fruit gaze may swap this to the yellow "ask" cue while a fruit is gazed).
+            ShowKeepCue();
             m_enableSelectorsRoutine = null;
         }
 
@@ -860,8 +895,27 @@ namespace Plants
                 m_enableSelectorsRoutine = null;
             }
             SetSelectorsActive(false);
-            // Keep is no longer available (new selection / re-gate / deselect): drop the hand cue.
-            HandReadyCue.Instance?.Hide();
+            // Keep is no longer available (new selection / re-gate / deselect): drop the hand cue
+            // (incl. any yellow fruit-gaze cue).
+            m_fruitCueActive = false;
+            HideKeepCue();
+        }
+
+        /// <summary>Show the green "keep" hand cue (the like gesture is now offered). While the
+        /// pre-flourish fruit gaze owns the cue (yellow "ask"), this only records the intent so it
+        /// can be restored on look-away (see <see cref="ReleaseFruitCue"/>).</summary>
+        private void ShowKeepCue()
+        {
+            m_likeOffered = true;
+            if (!m_fruitCueActive) HandReadyCue.Instance?.Show();
+        }
+
+        /// <summary>Hide the green "keep" hand cue (like no longer offered). Deferred while the fruit
+        /// gaze owns the cue — <see cref="ReleaseFruitCue"/> then hides it instead of restoring green.</summary>
+        private void HideKeepCue()
+        {
+            m_likeOffered = false;
+            if (!m_fruitCueActive) HandReadyCue.Instance?.Hide();
         }
 
         private void SetSelectorsActive(bool active)

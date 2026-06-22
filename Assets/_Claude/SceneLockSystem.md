@@ -20,8 +20,7 @@ SceneRoot                       ← the one "main Transform"; SceneLockControlle
 ├─ Content                      ← disabled until lock; enabling it starts the experience
 │   ├─ Poppy … Pear_Tree (12 plants)
 │   ├─ SpreadCollider           (garden boundary)
-│   ├─ Experience Manager       (+ EnvironmentMoment — its Start() == the lock moment)
-│   └─ TouchPrompt
+│   └─ Experience Manager       (+ EnvironmentMoment — its Start() == the lock moment)
 └─ CalibrationBox               ← shown while calibrating; disabled on lock
     ├─ Edge ×12                 (cyan wireframe ~7.5×8.5×2.5 m, CalibrationWire.mat)
     ├─ GrabHandle               (Grabbable → target = SceneRoot; kinematic RB; ISDK_HandGrabInteraction)

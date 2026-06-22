@@ -135,4 +135,15 @@ In `Experience.unity` play mode:
   is one submesh, so it outlines the whole hand. A multi-submesh hand would only outline the last.
 - `HandReadyCue` builds lazily on the first `Show()`; if the hand renderers aren't resolvable yet
   (hands not tracked) it silently retries next `Show()`.
-- Scope is intentionally the **keep-available** moment only. Context-available is uncued.
+
+## Colours / modes
+
+The same outline renders in three modes (driven by `ExperienceManager`):
+- **`Show()`** — green "keep" line (like available). Single inner ring.
+- **`ShowContext()`** — yellow "ask" line (post-flourish gaze). Single inner ring.
+- **`ShowBoth()`** — green "keep" **inner** ring + yellow "ask" **outer** ring, TWO concentric lines per
+  hand. Used pre-flourish while the like gesture is offered **and** the gaze is on a canopy-fruit
+  tree's date fruit, so neither affordance is lost. Each ring is its own (mask + outline) pair; the
+  outer ring's standoff is `dualOuterOffset` (≈0.013 m) and **must keep a few-mm gap from the inner
+  band** (`[outlineOffset, outlineOffset+outlineWidth]`) or the two depth masks cross-cull. The fruit
+  gaze (`UpdateFruitGaze`) calls `ShowBoth()`; looking away drops back to green-only `Show()`.

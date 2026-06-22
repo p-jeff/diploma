@@ -15,6 +15,26 @@ MonoBehaviour:
   displayName: Date Palm
   audioClip: {fileID: 8300000, guid: 20c35e3758508c64294a328186a132ba, type: 3}
   environmentPainting: {fileID: 0}
+  environmentLayers:
+  - texture: {fileID: 2800000, guid: eb0af0e34ed7a074fbcc285684362862, type: 3}
+    radius: 30
+    width: 103
+    heightOverride: 0
+    hardEdges: 1
+    verticalOffset: 0
+  - texture: {fileID: 2800000, guid: ebbbc3e9236c8814bad247dc5b0cb66b, type: 3}
+    radius: 28
+    width: 74
+    heightOverride: 0
+    hardEdges: 1
+    verticalOffset: 0.76
+  - texture: {fileID: 2800000, guid: a500b0bbcfce13a4f837580ea6cc25ae, type: 3}
+    radius: 12
+    width: 30
+    heightOverride: 0
+    hardEdges: 1
+    verticalOffset: 10
+  environmentVerticalOffset: -16
   poem:
     text: "Draxt \u012B \u0100s\u016Br\u012Bg ( \"The Babylonian Tree\")\n\nIn X'anirala
       land \nthere is no tree of my stature. \nBecause the kings eat of me \nwhen
@@ -28,27 +48,62 @@ MonoBehaviour:
       noblemen. \nam a nest for little birds \nshade for travellers. \nEven those
       persons \nwho have neither wine nor bread \neat fruit from me \nuntil they
       become full"
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   contextInfos:
   - text: In the Poem, a date Palm and a goat argue About who is worth more to humans
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: Cultivated there since at least 4000 BCE, it was considered the tree of
       life across the ancient Persia
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: Across the near east and mediterranean it spread, withstanding the harsh
       desert Climate and dry nature
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: 'Plutarch Table Talk:
 
       But the palm-tree, which sheds none of the
       leaves that grow on it, is truly always in leaf, and it is this strength that
       it has which people particularly associate with the vigour that brings victory.'
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: "\"Psalm 92-12\n12 The righteous will flourish like a palm tree,\nthey
       will grow like a cedar of Lebanon;\n13 planted in the house of the Lord,\nthey
       will flourish in the courts of our God.\n14 They will still bear fruit in old
       age,\nthey will stay fresh and green,\n15 proclaiming, \u201CThe Lord is upright;\nhe
       is my Rock, and there is no wickedness in him.\u201D\""
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0
   - text: in southern Iran, Palms are to this day counted not in Units but in persons.
+    contextImage: {fileID: 0}
+    imageWidth: 0.5
+    imageFeather: -1
     environmentPainting: {fileID: 0}
+    environmentLayers: []
+    environmentVerticalOffset: 0

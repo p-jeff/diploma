@@ -179,20 +179,28 @@ namespace Plants
                 SetIntensity(v);
                 yield return null;
             }
-            SetIntensity(m_hover ? m_ripeIntensity * k_hoverBoost : m_ripeIntensity);
+            SetIntensity(m_hover ? HoverIntensity : m_ripeIntensity);
             m_fade = null;
         }
 
-        /// <summary>Brighten while the post-flourish gaze is on this orb (the orb-mode equivalent of
-        /// the splat-instance Brightness boost). Boosts relative to the current dormant/ripe base.</summary>
+        /// <summary>Brighten while the gaze is on this fruit — the "you're looking at this one"
+        /// feedback. The hover lifts the fruit to a single bright level (<see cref="HoverIntensity"/>)
+        /// regardless of whether it is still dormant (pre-reveal) or already ripe, so a DORMANT fruit
+        /// visibly lights up under the gaze instead of barely brightening off its dim base (the old
+        /// dormant×boost — e.g. 0.4×1.8 on a date splat — was nearly imperceptible high in the canopy,
+        /// which is why the pre-flourish highlight read as missing). On leave it falls back to its
+        /// current dormant/ripe base.</summary>
         public void SetHover(bool on)
         {
             if (m_hover == on) return;
             m_hover = on;
             if (m_fade != null) return;   // mid-ripen pulse will settle respecting m_hover
-            float baseI = m_ripe ? m_ripeIntensity : m_dormantIntensity;
-            SetIntensity(on ? baseI * k_hoverBoost : baseI);
+            SetIntensity(on ? HoverIntensity : (m_ripe ? m_ripeIntensity : m_dormantIntensity));
         }
+
+        /// <summary>The bright level a gazed fruit is lifted to (dormant or ripe alike) so the gaze
+        /// highlight always clearly reads as "this is the one".</summary>
+        private float HoverIntensity => m_ripeIntensity * k_hoverBoost;
 
         private void OnDestroy()
         {

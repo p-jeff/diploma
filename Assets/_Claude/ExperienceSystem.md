@@ -37,7 +37,7 @@ Interaction polish layered on top of that core loop:
 | `HandReadyCue.cs` | Scene singleton. Shows a "you can keep this now" cue on **both hands** the moment the keep gesture unlocks (poem audio done). Per hand: a thin green **silhouette line** standing off the hand edge, built from **two** extra materials added on the hand's `Custom/HandDepthOccluder` SkinnedMeshRenderer — `Custom/URP/HandOutlineMask` (inverted hull extruded by `_EdgeOffset`, depth-only, queue `Transparent-1`) writes a standoff depth wall, then `Custom/URP/HandOutline` (inverted hull extruded by `_EdgeOffset + _Width`, `Cull Front`, additive, queue `Transparent`) survives only in the thin `[offset, offset+width]` band beyond it. So thickness (`_Width`) and standoff gap (`_EdgeOffset`) are **decoupled**, and the green lives in passthrough air, never on the skin. Plus an optional authored `motesPrefab` ParticleSystem. `Show()` attaches + fades in + breathes + starts motes; `Hide()` fades out + detaches + stops emission. `EnsureAttached()` re-adds the materials if OVRHand's system-gesture swap clears them. Auto-resolves hand renderers by their occluder material (or a serialized `handRenderers` list). API: `Show()` (green keep cue) / **`ShowContext()` (yellow "ask for context" cue, post-flourish gaze)** / `Hide()`. Green and yellow reuse the same outline materials — only the colour switches (`m_activeColor`), and they never overlap in time (keep is pre-flourish, context is post-flourish). **This replaced the old additive disc that tinted the passthrough hand green. Motes prefab is currently unassigned (line-only) — see `LikeAvailableCue.md`.** |
 | `EnvironmentMoment.cs` | 180° cylindrical painting trigger. Wraps a painting texture around a world-space cylinder centred on the head, oriented to face forward. `Trigger(tex, center, forward, audioSrc)` / `Interrupt()`. |
 | `GsplatInstanceFader.cs` | Fire-and-forget fade component. Lerps `_GsplatOpacityMul` from 1 → 0.002 over duration, then destroys the instance. |
-| `TouchPrompt.cs` | 3D TMP floating prompt. Fades in/out, positioned above an anchor with billboard. API: `Show(anchor)` / `Hide()`. |
+| `TouchMePrompt.cs` | Proximity **hand-sprite** "touch me" cue (no text), billboarded above a hero plant when the viewer's head is near. Authored as the `Touch Me Prompt` child on the base `Plant.prefab`; armed in `Plant.ShowGlow` / disarmed in `HideGlow`. **Replaced the old `TouchPrompt.cs` 3D-TMP *text* prompt, which was removed 2026-06-22 along with the `ExperienceManager.touchPrompt` field and its scene GOs in VerticalSlice/Experience.** |
 | `HandPoseAnimation.cs` + `FollowTransform.cs` | **Hand-pose cue sprites** (`Like`/`Context` gesture hints). Per-hand floating Canvas icon that follows the index fingertip, floats above it, Y-only billboards to the viewer, and pops on pose recognition. Four GOs: `ContextLeft/Right` (scene) + `LikeLeft/Right` (`Like.prefab`). Orientation/placement design + the "wonky/sideways" fix is in **`HandPoseCueSprites.md`**. `FollowTransform.worldSpaceOffset` (new) lifts the cue straight up regardless of finger tilt. |
 | `Plant.cs` (experience members) | **`GrowInstance(go)`** — plays reveal on one preview instance, marks it grown, floats THIS plant's own context label for that slot (`PlantData.contextInfos` by spawn index). Each plant tells its own self-contained, ordered narrative — there is **no** global story. **`LikeCommit()`** — sets liked, stops audio defensively, fades poem but keeps info active (grown labels remain visible). **`CompleteSpecies()`** — fades out ungrown instances (available but NOT called by ExperienceManager in the current flow). **`Flourish(count)`** / **`BloomForGarden(count)`** — colour the previews, spawn+reveal extra instances (re-enable each clone's collider for the gaze ray); `BloomForGarden` scatters **one instance per context** (`Mathf.Max(instanceCount, OwnContextCount())`) so every context is gaze-reachable. No context text shown at flourish. **`GetUngrownInstances()`** → list of not-yet-grown instances. **`SpawnedInstances`** → read-only list of all spawned copies. **`SproutIn()`** (private, from `OnEnable`) — grow-in animation for a newly unlocked plant. **`Replay(gazedInstance)` / `EndReplay()` / `IsReplaying`** — post-flourish revisit: fade in the poem **text** + float the **single** context bound to the gazed instance (spawn index mod context count), liked-only, **no audio**, held for `replayHoldDuration` then faded. One context per instance, not the plant's group. |
 | `PlantInfo.cs` (experience members) | **`PlaceContextAt(int, Transform, float)`** — positions single context label above an instance (in Above placement, above the instance's collider top via `SetContextTopLift`, not its base) + snaps billboard + fades label in. **`SetContextTopLift(float)`** — set by `Plant` to the collider top above the instance origin so Above labels clear the body (cylinder placement ignores it). **`SetFruitContext(bool)`** — Canopy Fruit mode: place the label a small clearance above its orb (no top-lift). **`FadeContextLabel(int, float)`** — fade one label independently. |
@@ -154,7 +154,6 @@ Garden Flourish (after flourishAfterLikes likes):
   └─ StartFlourish:
        ├─ if !bloomWholeRosterOnFlourish → Hide()+SetActive(false) all un-liked active plants
        │                                   (staged finale; when ON they're kept — they bloom)
-       ├─ touchPrompt.Hide()
        └─ FlourishRoutine:
             ├─ flourishing = bloomWholeRosterOnFlourish ? AllRosterPlants() : LikedPlants()
             └─ for each plant (batch order):
@@ -247,7 +246,7 @@ How the orbs reuse the existing machinery (no new spawn/gaze/replay plumbing):
 
 **Head**: Optional `Transform`. Falls back to `Camera.main` if unset.
 
-**UI**: Assign `TouchPrompt` GameObject (TMP + LookAtTarget billboarding).
+**UI**: none. The old `TouchPrompt` GameObject field was removed (2026-06-22) — the "touch me" cue is now the per-plant `TouchMePrompt` hand sprite authored on `Plant.prefab`, so there is nothing to wire here.
 
 **Like Gesture**:
 - `likeGestureWrappers` → RightSmallHeart + LeftSmallHeart `SelectorUnityEventWrapper.WhenSelected`
@@ -310,13 +309,6 @@ gazing at a plant post-flourish, `Hide` when the gaze leaves**) — no per-plant
 - Assign `plant` reference
 - Set `handLayers` and `handTag` as needed
 
-### TouchPrompt (scene GO)
-
-- TMP text component
-- `offset` default (0, 0.8, 0) — 80 cm above anchor
-- `fadeDuration` default 0.4s
-- LookAtTarget billboarding to CenterEyeAnchor
-
 ### ScatterBounds
 
 Each plant prefab has a `PlantInstanceScatterer`. Two modes:
@@ -365,8 +357,6 @@ Verify bounds are set (not null) for all plants so scatter is non-degenerate.
 | `PlantInstanceScatterer.spacing` | 0.6 | Minimum distance between scatter copies (metres). |
 | `PlantInstanceScatterer.spacingVariance` | 0.2 | Random ± applied to spacing so layout never looks regular. |
 | `PlantInstanceScatterer.boundsColliderMargin` | 0.5 | Outward margin when using `boundsCollider` mode. |
-| `TouchPrompt.fadeDuration` | 0.4 | Prompt fade in/out time. |
-| `TouchPrompt.offset` | (0, 0.8, 0) | Position relative to first plant's transform when shown. |
 
 ## Audio & Events
 

@@ -34,6 +34,12 @@ namespace Plants.Net
                  "whole GameObject — e.g. ExperienceManager / GardenPlacer / TitleSequenceController.")]
         public List<Behaviour> componentsToDisable = new List<Behaviour>();
 
+        [Header("Enabled only on the spectator client")]
+        [Tooltip("GameObjects activated ONLY on the spectator client. Keep these inactive by default " +
+                 "in the scene so the host/headset never shows them — e.g. a spectator-only environment " +
+                 "splat backdrop that replaces the headset's passthrough room.")]
+        public List<GameObject> objectsToEnable = new List<GameObject>();
+
         [Header("Spectator camera")]
         [Tooltip("Camera used for the spectator view. If unset, the scene's SpectatorCamera is used.")]
         public Camera spectatorCamera;
@@ -53,7 +59,13 @@ namespace Plants.Net
             foreach (var c in componentsToDisable)
                 if (c != null) { c.enabled = false; comps++; }
 
-            Debug.Log($"[SpectatorMode] Disabled {objs} objects + {comps} components (spectator).", this);
+            // Bring up spectator-only objects (e.g. the environment splat backdrop) that are kept
+            // inactive by default so the host/headset never renders them.
+            int en = 0;
+            foreach (var go in objectsToEnable)
+                if (go != null) { go.SetActive(true); en++; }
+
+            Debug.Log($"[SpectatorMode] Disabled {objs} objects + {comps} components, enabled {en} objects (spectator).", this);
         }
 
         void Start()

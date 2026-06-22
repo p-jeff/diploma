@@ -122,6 +122,14 @@ automatically.
   `ContextLeft`, `ContextRight`, `HandProximity`, `[Hand Ready Cue]`.
 - **`componentsToDisable`** — `List<Behaviour>`, `enabled = false` (use when you can't
   deactivate the whole object). Currently: `ExperienceManager`, `TitleSequenceController`.
+- **`objectsToEnable`** — `List<GameObject>`, `SetActive(true)` on the spectator (the inverse
+  of `objectsToDisable`). For objects kept **inactive by default** in the scene so the
+  host/headset never renders them, but that the Mac needs. Currently: `SpectatorRoomSplat`
+  (a Gaussian-splat copy of the environment at `SceneRoot/SpectatorRoomSplat`) — gives the
+  spectator a rendered backdrop in place of the headset's passthrough room. Because it's a
+  plain active-state toggle, it shows **only** on the spectator client and nowhere else
+  (not even the host's display-1 projector cam); if you ever need it on the host projector
+  too, switch to a layer + camera culling-mask approach instead.
 
 > **Limitation — `componentsToDisable` cannot stop a destructive `Awake`.** Setting
 > `enabled = false` only suppresses `OnEnable`/`Start`/`Update`/coroutines; `Awake` still

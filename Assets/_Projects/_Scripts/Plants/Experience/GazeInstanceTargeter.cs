@@ -38,6 +38,12 @@ namespace Plants
         GameObject m_lastInstance;
         float m_lastHitTime = -999f;
 
+        // Same idea for the pre-flourish per-fruit query (TryGetGazedFruit), kept separate so it can't
+        // corrupt the general TryGetTarget sticky state above.
+        Plant m_lastFruitTree;
+        GameObject m_lastFruit;
+        float m_lastFruitTime = -999f;
+
         /// <summary>The head transform used, or Camera.main if none is wired.</summary>
         public Transform Head => head != null ? head : (Camera.main != null ? Camera.main.transform : null);
 
@@ -55,24 +61,8 @@ namespace Plants
             plant = null;
             instance = null;
 
-            Transform h = Head;
+            int n = CastGaze(out Transform h);
             if (h == null) return false;
-
-            // Guard against the serialized fields deserialising to 0 when this component was
-            // upgraded in-place from the old cone version: a 0 ("Nothing") mask or 0 distance
-            // would silently make the gaze hit nothing.
-            float dist = maxRayDistance > 0f ? maxRayDistance : 12f;
-            int mask = layerMask.value != 0 ? layerMask.value : ~0;
-            float radius = Mathf.Max(0f, gazeRadius);
-
-            // A sphere-cast (fat ray) is far more forgiving than the old thin ray: it catches the
-            // fitted convex colliders even when the gaze isn't dead-centre or the splat is wispy.
-            // radius 0 degrades to an ordinary thin ray.
-            int n = radius > 0f
-                ? Physics.SphereCastNonAlloc(h.position, radius, h.forward, m_hits, dist,
-                                             mask, QueryTriggerInteraction.Collide)
-                : Physics.RaycastNonAlloc(h.position, h.forward, m_hits, dist,
-                                          mask, QueryTriggerInteraction.Collide);
 
             float bestDist = float.MaxValue;
             for (int i = 0; i < n; i++)
@@ -107,6 +97,84 @@ namespace Plants
             {
                 plant = m_lastPlant;
                 instance = m_lastInstance;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// The cast shared by both gaze queries: a forgiving sphere-cast (or thin ray, when
+        /// <see cref="gazeRadius"/> is 0) from the head forward, filling <see cref="m_hits"/>.
+        /// Returns the hit count and outputs the head transform used (null — and count 0 — when no
+        /// head/camera is available). Mask/distance are guarded against deserialising to 0.
+        /// </summary>
+        private int CastGaze(out Transform h)
+        {
+            h = Head;
+            if (h == null) return 0;
+
+            float dist = maxRayDistance > 0f ? maxRayDistance : 12f;
+            int mask = layerMask.value != 0 ? layerMask.value : ~0;
+            float radius = Mathf.Max(0f, gazeRadius);
+
+            return radius > 0f
+                ? Physics.SphereCastNonAlloc(h.position, radius, h.forward, m_hits, dist,
+                                             mask, QueryTriggerInteraction.Collide)
+                : Physics.RaycastNonAlloc(h.position, h.forward, m_hits, dist,
+                                          mask, QueryTriggerInteraction.Collide);
+        }
+
+        /// <summary>
+        /// Pre-flourish helper for canopy-fruit trees: return the nearest gazed CANOPY FRUIT belonging
+        /// to <paramref name="tree"/>, skipping the tree's own body selection collider. That body
+        /// collider is convex and wraps the whole canopy, so it sits in front of the high-hanging
+        /// fruits and otherwise wins the plain <see cref="TryGetTarget"/> cast — shadowing every fruit
+        /// so none ever highlight pre-flourish. Here we walk ALL hits and keep only this tree's
+        /// colliders whose resolved instance carries a <see cref="ContextFruit"/> (the body collider
+        /// has none). Has its own short sticky grace so the highlight doesn't flicker as the gaze
+        /// wobbles off a small fruit collider.
+        /// </summary>
+        public bool TryGetGazedFruit(Plant tree, out GameObject fruit)
+        {
+            fruit = null;
+            if (tree == null) return false;
+
+            int n = CastGaze(out Transform h);
+            if (h == null) return false;
+
+            float bestDist = float.MaxValue;
+            for (int i = 0; i < n; i++)
+            {
+                var c = m_hits[i].collider;
+                if (c == null) continue;
+                if (m_hits[i].distance >= bestDist) continue;
+
+                var trigger = c.GetComponentInParent<PlantTouchTrigger>();
+                if (trigger == null || trigger.Plant != tree) continue;   // only this tree's colliders
+
+                var renderer = c.GetComponentInParent<GsplatRenderer>();
+                var go = renderer != null ? renderer.gameObject
+                                          : (c.transform.parent != null ? c.transform.parent.gameObject : c.gameObject);
+                if (go == null || go.GetComponent<ContextFruit>() == null) continue;   // skip the body collider
+
+                fruit = go;
+                bestDist = m_hits[i].distance;
+            }
+
+            if (fruit != null)
+            {
+                m_lastFruit = fruit;
+                m_lastFruitTree = tree;
+                m_lastFruitTime = Time.time;
+                return true;
+            }
+
+            // Brief miss: hold the last fruit for the grace window so the highlight doesn't flicker.
+            if (Time.time - m_lastFruitTime <= stickyGrace &&
+                m_lastFruitTree == tree && m_lastFruit != null && m_lastFruit.activeInHierarchy)
+            {
+                fruit = m_lastFruit;
                 return true;
             }
 

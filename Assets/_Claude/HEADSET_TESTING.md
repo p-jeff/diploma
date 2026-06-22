@@ -14,7 +14,7 @@ Complete flow verification for the Experience System. Run through sequentially; 
 
 - [ ] **1.1** Launch. Poppy is visible and idle-shimmering (half-grey with faint sparkle). No other plants visible.
 - [ ] **1.2** Hold hand over Poppy. Sparkle intensity increases (hand proximity); dismiss hand. Sparkle fades back.
-- [ ] **1.3** "Touch Me" prompt visible above Poppy, floating 0.8m up. If felt too close to face, tune `TouchPrompt.offset` (try reducing Y from 0.8 to 0.5).
+- [ ] **1.3** A "touch me" cue appears above the start plant. (Intro poppy = the TitleSequence "Touch Me" label; hero plants = the `TouchMePrompt` hand sprite — tune its scale/height on the `Touch Me Prompt` child of `Plant.prefab`. The old `TouchPrompt` text prompt was removed 2026-06-22.)
 - [ ] **1.4** Touch Poppy's collider. Audio plays (Poppy has a poem clip), poem label fades in at plant height, Poppy splat reveals with shockwave animation. N grey preview instances (N = context block count) appear scattered around.
 - [ ] **1.5** Prompt disappears. Crocus and Narcissus unlock only after the first like (not on first touch). They remain invisible until Poppy is liked.
 
@@ -94,7 +94,7 @@ Complete flow verification for the Experience System. Run through sequentially; 
 - `ExperienceManager.likeEnableDelay` (default 0) adds an optional extra delay on top of audio-completion. Increase it only if you need to force a minimum dwell time.
 
 ### Labels Too Close / Far from Face
-- Tune `TouchPrompt.offset` Y (default 0.8m above anchor). Try 0.5–1.2m.
+- The hero "touch me" cue is the `TouchMePrompt` hand sprite on the `Touch Me Prompt` child of `Plant.prefab` — tune its scale/height/`showDistance` there. (The old `TouchPrompt.offset` field was removed 2026-06-22.)
 - Tune `Plant.contextHeightOffset` per plant (default 0.6m). Try 0.3–1.0m.
 - Context labels appear above grown instances. If none appear, confirm the grow was triggered (proximity or gesture) and `contextHeightOffset` is not 0.
 
