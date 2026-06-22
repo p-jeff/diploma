@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Plants.LabelStyle
   fontAsset: {fileID: 11400000, guid: a0219eeec3b5b6444a21bfdb19fe24d7, type: 2}
   fontStyle: 0
-  alignment: 514
+  alignment: 520
   autoSize: 1
   fontSize: 120
   fontSizeMin: 90
