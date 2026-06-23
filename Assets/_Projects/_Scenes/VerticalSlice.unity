@@ -2595,7 +2595,7 @@ MonoBehaviour:
   useMrukWorldLock: 1
   freezeAfterPlacement: 1
   freezeSettleSeconds: 1
-  persistAcrossSessions: 0
+  persistAcrossSessions: 1
   anchorPrefKey: SceneLock.AnchorUuid
   chairPosePrefKey: SceneLock.ChairPose
   anchorTimeout: 6
@@ -4713,7 +4713,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 6928089ad90781a49a8a9a026a48fbed, type: 3}
+  m_Resource: {fileID: 8300000, guid: c55406d37660fab4d9c2635682ca0db7, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -15561,10 +15561,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8807386087395870696, guid: a107eb8d8ba35774e9e4beb0aac9b977, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1726348759}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a107eb8d8ba35774e9e4beb0aac9b977, type: 3}
 --- !u!4 &1726348757 stripped
 Transform:
@@ -15582,21 +15579,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69f50596c0a69488d9bab40f59b75c8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.Plant
---- !u!114 &1726348759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 950093839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26ee2a10838e32244aa1ad64d1df3792, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Plants.Net.NetPlant
-  id: 3
-  kind: 0
-  speciesId: 0
 --- !u!1 &1755348768
 GameObject:
   m_ObjectHideFlags: 0
@@ -17232,30 +17214,6 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 166075781}
-    - target: {fileID: 5826812928211261777, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 2.389
-      objectReference: {fileID: 0}
-    - target: {fileID: 5826812928211261777, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5826812928211261777, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5826812928211261777, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5826812928211261777, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5826812928211261777, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -0.006
-      objectReference: {fileID: 0}
     - target: {fileID: 7516531525199862981, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Name
       value: TitleSequence
@@ -17271,10 +17229,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8557995974130681930, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4278882559347271654}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
 --- !u!4 &4278882559347271651 stripped
 Transform:
@@ -17292,30 +17247,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2586e8ea552d7d744b173b40f9498c72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plants.TitleSequenceController
---- !u!1 &4278882559347271653 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8557995974130681930, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
-  m_PrefabInstance: {fileID: 4278882559347271650}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &4278882559347271654
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4278882559347271653}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d16f5d980f19494c94d8e14af3562c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LookAtTarget
-  target: {fileID: 166075781}
-  rotateX: 0
-  rotateY: 1
-  rotateZ: 0
-  flipY: 1
-  snapOnEnable: 1
-  trackInUpdate: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
