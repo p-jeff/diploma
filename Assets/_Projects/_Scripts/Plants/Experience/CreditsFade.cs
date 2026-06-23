@@ -23,11 +23,21 @@ namespace Plants
 
         private Coroutine m_routine;
 
+        /// <summary>The scene's credits fader, so the soft-reset can hide it without a hard
+        /// reference (mirrors <see cref="GardenAmbience.Instance"/>).</summary>
+        public static CreditsFade Instance { get; private set; }
+
         void Awake()
         {
+            Instance = this;
             if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
             // Hidden until the finale — the object itself stays active so its coroutine can run.
             if (canvasGroup != null) canvasGroup.alpha = 0f;
+        }
+
+        void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
         }
 
         /// <summary>Hold the credits hidden for <see cref="delay"/> seconds, then fade them in. Wire

@@ -738,6 +738,9 @@ namespace Plants
             // sequence replays under it before BeginGarden re-opens the garden.
             GardenAmbience.Instance?.PlayEmpty();
 
+            // Hide the credits again — they re-fade when the next run reaches its flourish.
+            CreditsFade.Instance?.ResetCredits();
+
             // Restore every roster plant to pristine, then deactivate it (BeginGarden re-opens batch 0).
             foreach (var p in AllRosterPlants())
             {
