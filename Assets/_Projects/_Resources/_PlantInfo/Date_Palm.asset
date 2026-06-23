@@ -13,22 +13,22 @@ MonoBehaviour:
   m_Name: Date_Palm
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Date Palm
-  audioClip: {fileID: 8300000, guid: 20c35e3758508c64294a328186a132ba, type: 3}
+  audioClip: {fileID: 8300000, guid: ce1ccb7df73711b4e8d15857166eb7ae, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers:
-  - texture: {fileID: 2800000, guid: eb0af0e34ed7a074fbcc285684362862, type: 3}
+  - texture: {fileID: 2800000, guid: 66b5265651e70d9409ae7b7a51e7471e, type: 3}
     radius: 30
     width: 103
     heightOverride: 0
     hardEdges: 1
     verticalOffset: 0
-  - texture: {fileID: 2800000, guid: ebbbc3e9236c8814bad247dc5b0cb66b, type: 3}
+  - texture: {fileID: 2800000, guid: d6b449c7a7ec49e42a162ab67ad1b73e, type: 3}
     radius: 28
     width: 74
     heightOverride: 0
     hardEdges: 1
     verticalOffset: 0.76
-  - texture: {fileID: 2800000, guid: a500b0bbcfce13a4f837580ea6cc25ae, type: 3}
+  - texture: {fileID: 2800000, guid: ebb2504ae5e1ce34983d65f14765523e, type: 3}
     radius: 12
     width: 30
     heightOverride: 0
@@ -43,7 +43,7 @@ MonoBehaviour:
       me \nwhich pound barley and rice. \nI am shoes for farmers; \nI am cushions
       for the barefoot. \nThey make ropes of me \nwhich bind thy legs. \nThey make
       clubs of me \nwhich break thy neck. \nThey make pegs of me \nwhich hang thee
-      head downwards. \nI am fuel for fires \nwhich they roast thy flesh. \nIn summer 
+      head downwards. \nI am fuel for fires \nwhich they roast thy flesh. \nIn summer
       am shade \nover the head of rulers \nI am vinegar for farmers, \nhoney for
       noblemen. \nam a nest for little birds \nshade for travellers. \nEven those
       persons \nwho have neither wine nor bread \neat fruit from me \nuntil they

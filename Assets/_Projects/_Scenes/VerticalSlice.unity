@@ -2605,7 +2605,7 @@ MonoBehaviour:
   onSceneLocked:
     m_PersistentCalls:
       m_Calls: []
-  disableAnchorForTesting: 1
+  disableAnchorForTesting: 0
 --- !u!4 &404635121
 Transform:
   m_ObjectHideFlags: 0
@@ -4713,7 +4713,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 3648001bbb8fec14dbf73cda316983d5, type: 3}
+  m_Resource: {fileID: 8300000, guid: c55406d37660fab4d9c2635682ca0db7, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -17218,6 +17218,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TitleSequence
       objectReference: {fileID: 0}
+    - target: {fileID: 7757405343309971563, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: 271a696d55d7ca94c99be3f8c7750235, type: 3}
     - target: {fileID: 7884349326273628582, guid: f478651b6e7c2264999371d83ab41c17, type: 3}
       propertyPath: m_Layer
       value: 0

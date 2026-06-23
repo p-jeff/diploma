@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Crocus
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Crocus
-  audioClip: {fileID: 8300000, guid: 3648001bbb8fec14dbf73cda316983d5, type: 3}
+  audioClip: {fileID: 8300000, guid: c55406d37660fab4d9c2635682ca0db7, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

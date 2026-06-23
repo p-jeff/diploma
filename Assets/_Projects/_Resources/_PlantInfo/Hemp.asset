@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Hemp
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Hemp
-  audioClip: {fileID: 8300000, guid: f85388ca033d8ea4ab6796caec7b6074, type: 3}
+  audioClip: {fileID: 8300000, guid: 091ad06dba9375546affa9c2c1e001fe, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

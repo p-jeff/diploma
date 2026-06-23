@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Poppy
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Poppy
-  audioClip: {fileID: 8300000, guid: dc211ab563e965b4797eb21ad6794a74, type: 3}
+  audioClip: {fileID: 8300000, guid: 2181df6a44bfcdc4a804cf16a104660d, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

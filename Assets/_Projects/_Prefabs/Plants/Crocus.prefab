@@ -288,7 +288,7 @@ PrefabInstance:
     - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Resource
       value: 
-      objectReference: {fileID: 8300000, guid: 3648001bbb8fec14dbf73cda316983d5, type: 3}
+      objectReference: {fileID: 8300000, guid: c55406d37660fab4d9c2635682ca0db7, type: 3}
     - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_LocalPosition.x
       value: -1.2
@@ -417,8 +417,8 @@ PrefabInstance:
         bed, \nFrom this cold dungeon to free me \n,I will peer up with my little
         bright head; \nAll will be joyful to see me. \nMany, perhaps, from so simple
         a flower \nThis little lesson may borrow \u2014 \nPatient to-day, through
-        its gloomiest hour, \nWe come out the brighter to-morrow.\n\n\u2014 Hannah
-        Flagg Gould"
+        its gloomiest hour, \nWe come out the brighter to-morrow.\n\nHannah Flagg
+        Gould"
       objectReference: {fileID: 0}
     - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_sharedMaterial

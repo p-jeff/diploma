@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pear_Tree
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Pear Tree
-  audioClip: {fileID: 8300000, guid: 297d7e4389b568d499a59c38218d9179, type: 3}
+  audioClip: {fileID: 8300000, guid: 6928089ad90781a49a8a9a026a48fbed, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

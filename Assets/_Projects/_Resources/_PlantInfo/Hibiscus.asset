@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Hibiscus
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Hibiscus
-  audioClip: {fileID: 8300000, guid: 308fb3101233a1947a984be73794e805, type: 3}
+  audioClip: {fileID: 8300000, guid: e7808fd1113a1ca45a73eb600b256515, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

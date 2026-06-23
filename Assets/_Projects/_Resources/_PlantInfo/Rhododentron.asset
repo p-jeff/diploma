@@ -13,22 +13,22 @@ MonoBehaviour:
   m_Name: Rhododentron
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Rhododendron
-  audioClip: {fileID: 8300000, guid: b06c161177653f64ab049d58b9a61b06, type: 3}
+  audioClip: {fileID: 8300000, guid: a655113fcc665f645a893db246ff598a, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers:
-  - texture: {fileID: 2800000, guid: 1de67e3efcbc98d4fab3efc98c185a7b, type: 3}
+  - texture: {fileID: 2800000, guid: e31937589e37fc14184ff6d426502b05, type: 3}
     radius: 38
     width: 103
     heightOverride: 0
     hardEdges: 1
     verticalOffset: 2.75
-  - texture: {fileID: 2800000, guid: 455e4530b04edaf4e9a3857a6246acaf, type: 3}
+  - texture: {fileID: 2800000, guid: 4ba4a859ee8bb0c48a3869bac7622f0f, type: 3}
     radius: 28
     width: 78.2
     heightOverride: 0
     hardEdges: 1
     verticalOffset: 5.8
-  - texture: {fileID: 2800000, guid: c8a23be656c96374c8275a8b97967300, type: 3}
+  - texture: {fileID: 2800000, guid: c1658c15b94fe044db11dc9f5b8f311c, type: 3}
     radius: 12
     width: 33.2
     heightOverride: 0

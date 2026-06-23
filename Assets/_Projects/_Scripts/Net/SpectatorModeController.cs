@@ -44,7 +44,7 @@ namespace Plants.Net
         [Tooltip("Camera used for the spectator view. If unset, the scene's SpectatorCamera is used.")]
         public Camera spectatorCamera;
 
-        bool IsSpectator => SpectatorState.IsSpectator || (NetworkClient.active && !NetworkServer.active);
+        bool IsSpectator => SpectatorState.Active;
 
         void Awake()
         {

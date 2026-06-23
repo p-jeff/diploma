@@ -264,7 +264,7 @@ PrefabInstance:
     - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Resource
       value: 
-      objectReference: {fileID: 8300000, guid: 288a39f1324be4843988867d2449a118, type: 3}
+      objectReference: {fileID: 8300000, guid: b430055e661f9ac4ab3331f3e8996d53, type: 3}
     - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -508,7 +508,8 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 2affa98996e05154597a2c9146752c48, type: 3}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: In Chinese literati tradition, bamboo is held as a model of a gentleman.
+      value: 'In Chinese literari tradition, bamboo is held as a model of a gentleman.
+        The stem grows straight and does not break under pressure, signaling tenacity. '
       objectReference: {fileID: 0}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_fontSizeMax
@@ -556,8 +557,10 @@ PrefabInstance:
       objectReference: {fileID: 21300000, guid: 0de94b1bf2abbbd40989552744ea1b4d, type: 3}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: The stem grows straight and does not break under pressure, signaling
-        tenacity.
+      value: 'The Leaves droop, almost like their bowing and it does not bloom, symbolising
+        modesty. And its core is hollow, like it''s kepping an open heart.
+
+'
       objectReference: {fileID: 0}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_fontSizeMax

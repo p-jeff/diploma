@@ -120,7 +120,7 @@ public class SceneLockController : MonoBehaviour
         // Networked spectator (Mac client): no OVR, no room to calibrate, and the host owns
         // the placement. Skip calibration/anchoring entirely and just switch the garden on at
         // its default scene pose; the spectator camera frames it.
-        if (Plants.Net.SpectatorState.IsSpectator)
+        if (Plants.Net.SpectatorState.Active)
         {
             EnterSpectatorBypass();
             return;

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Narcissus
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Narcissus
-  audioClip: {fileID: 8300000, guid: 76a867b71ee24944e87fba3a06f1676c, type: 3}
+  audioClip: {fileID: 8300000, guid: 4cbbb6eda3c23754fafbd5fa73f70a92, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

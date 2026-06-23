@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Fern
   m_EditorClassIdentifier: Assembly-CSharp::Plants.PlantData
   displayName: Fern
-  audioClip: {fileID: 8300000, guid: 1ab9af716d006944aa3e7d717d78ebf9, type: 3}
+  audioClip: {fileID: 8300000, guid: 3400f78e7b4ed7c468874df0611e58d6, type: 3}
   environmentPainting: {fileID: 0}
   environmentLayers: []
   environmentVerticalOffset: 0

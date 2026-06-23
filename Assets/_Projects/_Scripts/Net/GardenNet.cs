@@ -60,6 +60,13 @@ namespace Plants.Net
     {
         public static bool IsSpectator;
 
+        /// <summary>The single source of truth for "should this instance run as a spectator?".
+        /// True if the boot flag was set (NetworkBootstrap started us as a Client) OR this is a
+        /// live Mirror client that is not also the server. Branch on THIS (not the raw flag) so
+        /// SceneLockController and SpectatorModeController can never disagree — a half-state where
+        /// the headset layer is stripped but the calibration box stays up (content hidden).</summary>
+        public static bool Active => IsSpectator || (NetworkClient.active && !NetworkServer.active);
+
         // Reset at the start of every play session, so a stale value (statics persist when the
         // editor's domain reload is disabled, or across a host<->client switch) can't make a
         // non-spectator run skip the scene lock. NetworkBootstrap re-sets it per role.

@@ -245,12 +245,20 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636065031202590820, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2663447185075202671, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
@@ -271,7 +279,7 @@ PrefabInstance:
     - target: {fileID: 2886331442720179092, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Resource
       value: 
-      objectReference: {fileID: 8300000, guid: a0803542ce5f65c40a77c237ec557cb1, type: 3}
+      objectReference: {fileID: 8300000, guid: 12e153920c2dd9b4aa69865924bd4b6c, type: 3}
     - target: {fileID: 2958618882662025605, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_LocalPosition.x
       value: -2
@@ -378,15 +386,14 @@ PrefabInstance:
       objectReference: {fileID: 2276163250400312376}
     - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
-      value: "Sweet Lavender\n\nIn cottage-maid's parterre thou'rt seen, \nIn simple
-        touching grace ; \nAnd in the garden of the queen, \n'Midst costly plants
-        and blossoms sheen, \nThou also hast a place. \nThe rose, with bright and
-        peerless bloom, \nAttracted many eyes; \nBut while her glories and perfume
-        \nExpire before brief summer's doom, \nThy fragrance never dies. \nBut thou
-        art emblem of the friend, \nWho, whatsoe'er our lot, \nThe balm of faithful
-        love will lend, \nAnd, true and constant to the end, \nMay die, but alters
-        not.\n\n\u2014 Agnes Strickland"
+      value: "Youth came to me, \r\nA lamentation of musk that  \r\nCould not be
+        purchased even at a high price, \r\nAnd the scent of lavender \r\nIn the
+        valleys of a meadow, \r\nAfter the pouring rain \n\nUbaid ibn al Abras "
       objectReference: {fileID: 0}
+    - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 829c2fd0b5266314690f981fd2d1825e, type: 2}
     - target: {fileID: 5122842465899161861, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
@@ -411,12 +418,20 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5488519469664222319, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_fontSizeMax
@@ -427,8 +442,16 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5500566260667467151, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5902464882853280731, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: instanceId
@@ -448,12 +471,20 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082410, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_text
@@ -470,12 +501,20 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 5956918439778082416, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6181259333930047258, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: GsplatAsset
@@ -502,8 +541,16 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6688893766513313653, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6835627233580907840, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_Sprite
@@ -523,12 +570,20 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 7173199714940506848, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7344869196755915139, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_SizeDelta.x
@@ -592,12 +647,20 @@ PrefabInstance:
       value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 4606bb260e9f53c4d91b89f093c4a562, type: 2}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_enableAutoSizing
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
       propertyPath: m_TextStyleHashCode
       value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 9161542878112791018, guid: ed7b740a5cf36044ab197a19d1fe05ab, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
